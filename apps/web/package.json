@@ -7,7 +7,7 @@
     "dev": "next dev --hostname 127.0.0.1 --port 43100",
     "build": "next build",
     "start": "next start --hostname 127.0.0.1 --port 43100",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@network-ai/contracts": "workspace:*",

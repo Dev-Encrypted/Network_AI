@@ -56,8 +56,15 @@ function command(program, args, options = {}) {
     );
   });
 }
-function pnpm(args) {
+async function pnpm(args) {
   // Invoke pnpm's JS entry directly on Windows, avoiding shell interpolation of workspace paths.
+  const runningEntry = process.env.npm_execpath;
+  if (
+    runningEntry &&
+    /pnpm\.(c?js)$/i.test(runningEntry) &&
+    (await exists(runningEntry))
+  )
+    return command(process.execPath, [runningEntry, ...args]);
   if (process.platform === "win32") {
     const entry = join(
       dirname(
@@ -70,7 +77,16 @@ function pnpm(args) {
       ),
       "node_modules/pnpm/bin/pnpm.cjs",
     );
-    return command(process.execPath, [entry, ...args]);
+    if (await exists(entry)) return command(process.execPath, [entry, ...args]);
+    const corepack = join(
+      dirname(dirname(dirname(dirname(entry)))),
+      "node_modules/corepack/dist/pnpm.js",
+    );
+    if (await exists(corepack))
+      return command(process.execPath, [corepack, ...args]);
+    throw new Error(
+      "Could not locate the pnpm JS entry. Run this command through pnpm lab:init or install pnpm globally.",
+    );
   }
   return command("pnpm", args);
 }
@@ -104,10 +120,34 @@ async function privateJson(path, value) {
 async function databaseUp() {
   await command("docker", [...composeArgs, "up", "-d", "--wait", "postgres"]);
 }
+export function assertFreshEnvironment() {
+  // A second checkout must not recreate the shared container with newly generated credentials.
+  const existing = execFileSync(
+    "docker",
+    [
+      "ps",
+      "--all",
+      "--filter",
+      "name=^/network-ai-private-lab-postgres$",
+      "--format",
+      "{{.ID}}",
+    ],
+    {
+      encoding: "utf8",
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "ignore"],
+    },
+  ).trim();
+  if (existing)
+    throw new Error(
+      "A private-lab database already exists on this host. Restore its matching private configuration before initializing another checkout.",
+    );
+}
 export async function init() {
   await mkdir(runtime, { recursive: true });
   await protectDirectory(runtime);
   if (!(await exists(configPath))) {
+    assertFreshEnvironment();
     const keys = generateKeyPairSync("ed25519");
     const postgres = secret();
     const app = secret();
@@ -418,6 +458,12 @@ export async function start() {
   if (!(await exists(configPath))) await init();
   else await databaseUp();
   if (!process.argv.includes("--no-build")) {
+    const active = await readProcesses();
+    for (const entry of Object.values(active))
+      if (await owned(entry))
+        throw new Error(
+          "Stop the running private services before rebuilding, or use lab:start --no-build to reuse them.",
+        );
     await pnpm(["build"]);
     await command("cargo", [
       "build",

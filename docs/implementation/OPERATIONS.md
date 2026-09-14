@@ -12,6 +12,8 @@ pnpm lab:start
 
 `lab:init` cria exclusivamente o projeto Compose `network-ai-private-lab`, seu PostgreSQL e volume. Gera senhas e chaves criptográficas, aplica migrações por checksum e cria o administrador. Repetir o comando preserva identidades e dados; não repete a concessão de bootstrap. O laboratório concede explicitamente 100 LAB_TU para os primeiros testes. Novos usuários começam com zero.
 
+O perfil admite uma instalação por computador. Se outro checkout encontrar o banco já existente sem a configuração privada correspondente, a inicialização para antes de gerar novas credenciais ou recriar o container. Restaure a configuração original; não substitua senhas sobre um volume existente.
+
 Todos os segredos ficam em `.runtime/private-lab/`, ignorado pelo Git. No Windows, a pasta recebe ACL para o usuário que executa o comando; no Linux, modo 0700. O arquivo `credentials.txt` contém o acesso inicial. Nunca publique essa pasta, dumps, logs privados ou chaves exibidas pela interface.
 
 `lab:start` compila os serviços e inicia processos em segundo plano, sem abrir janelas de terminal. Após uma compilação já validada, `pnpm lab:start --no-build` reutiliza os binários. Para atualizar código com serviços rodando, use primeiro `pnpm lab:stop`, depois compile e inicie. Compilar Next.js sobre a pasta de uma instância em execução pode deixar seus arquivos estáticos inconsistentes.
