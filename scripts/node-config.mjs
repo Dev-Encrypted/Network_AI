@@ -1,0 +1,68 @@
+// Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
+// Generate an operator profile without copying database passwords, admin credentials or signing authority.
+import { config, runtime } from "./lab.mjs";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { createRequire } from "node:module";
+const { z } = createRequire(
+  new URL("../apps/control-api/package.json", import.meta.url),
+)("zod");
+const args = Object.fromEntries(
+  process.argv
+    .slice(2)
+    .reduce(
+      (pairs, value, index, all) =>
+        index % 2 === 0 ? [...pairs, [value, all[index + 1]]] : pairs,
+      [],
+    ),
+);
+if (!args["--invite-file"] || !args["--backend-model"] || !args["--port"])
+  throw new Error(
+    "Use --invite-file PATH --backend-model MODEL --port 43104 [--backend-url http://127.0.0.1:1235] [--backend-kind lmstudio|openai]",
+  );
+const invitation = z
+  .object({ id: z.uuid(), invite: z.string().regex(/^[A-Za-z0-9_-]{43}$/) })
+  .parse(JSON.parse(await readFile(resolve(args["--invite-file"]), "utf8")));
+const port = z.coerce
+  .number()
+  .int()
+  .min(43103)
+  .max(43299)
+  .parse(args["--port"]);
+const backend = z.url().parse(args["--backend-url"] ?? "http://127.0.0.1:1235");
+const url = new URL(backend);
+if (
+  url.origin !== backend ||
+  url.hostname !== "127.0.0.1" ||
+  url.protocol !== "http:"
+)
+  throw new Error("Use a plain loopback backend origin");
+const kind = z
+  .enum(["lmstudio", "openai"])
+  .parse(args["--backend-kind"] ?? "lmstudio");
+const c = await config();
+const directory = join(runtime, "operators", invitation.id);
+await mkdir(directory, { recursive: true, mode: 0o700 });
+const value = {
+  mode: "private_lab",
+  control_port: c.control_port,
+  gateway_port: c.gateway_port,
+  capability_public_key: c.capability_public_key,
+  node_id: invitation.id,
+  node_invite: invitation.invite,
+  node_name: "Operador convidado",
+  node_port: port,
+  backend_url: backend,
+  backend_model: args["--backend-model"],
+  backend_kind: kind,
+  state_dir: directory,
+  web_origin: c.web_origin,
+};
+const path = join(directory, "config.json");
+await writeFile(path, JSON.stringify(value, null, 2) + "\n", {
+  flag: "wx",
+  mode: 0o600,
+});
+console.log(
+  `Perfil privado do operador: ${path}\nDefina NETWORK_AI_CONFIG para este arquivo e execute network-ai-node. O endereço e o modelo devem coincidir com o convite.`,
+);

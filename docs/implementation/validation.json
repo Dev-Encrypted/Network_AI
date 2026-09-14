@@ -1,0 +1,89 @@
+{
+  "version": "0.2.0-private-preview",
+  "observed_at": "2026-09-14T18:11:26.247Z",
+  "scope": "Private application, single physical Windows host and local LM Studio. Not WAN or economic qualification.",
+  "tests": {
+    "postgres_integration": 18,
+    "rust_runtime": 4,
+    "rust_f0": 2,
+    "python_f0": 21,
+    "browser": 4,
+    "browser_failed": 0
+  },
+  "live_checks": [
+    {
+      "name": "catalog_requires_actual_ready_node",
+      "passed": true
+    },
+    {
+      "name": "anonymous_wallet_denied",
+      "passed": true
+    },
+    {
+      "name": "cross_origin_cookie_mutation_denied",
+      "passed": true
+    },
+    {
+      "name": "real_model_inference_and_signed_settlement",
+      "passed": true
+    },
+    {
+      "name": "retry_does_not_execute_or_charge_again",
+      "passed": true
+    },
+    {
+      "name": "browser_proxy_disconnect_cancels_and_refunds",
+      "passed": true
+    },
+    {
+      "name": "live_ledger_remains_balanced",
+      "passed": true
+    }
+  ],
+  "real_inference": [
+    {
+      "state": "COMPLETED",
+      "elapsed_ms": 1249,
+      "input_tokens": 64,
+      "output_tokens": 31,
+      "charged_microtu": "157000"
+    }
+  ],
+  "node_restart": {
+    "recovery_ms": 1503,
+    "epoch_increased": true,
+    "state": "INTERRUPTED",
+    "billing_state": "REFUNDED",
+    "charged_microtu": "0"
+  },
+  "control_outbox": {
+    "downtime_ms": 4000,
+    "stream_completed_while_receipt_pending": true,
+    "state": "COMPLETED",
+    "billing_state": "SETTLED"
+  },
+  "multi_agent_same_host": {
+    "agents": 2,
+    "physical_hosts": 1,
+    "domain_slots": 1,
+    "concurrent_requests": 2,
+    "completed": 2,
+    "overlapping_executions": 0,
+    "operator_profile_contains_authority_secrets": false
+  },
+  "backup": {
+    "journal_entries": 21,
+    "balance_sum": "0",
+    "projection_mismatches": 0,
+    "runtime_balance_write_denied": true
+  },
+  "accessibility": {
+    "scope": "Authenticated chat; Chromium desktop; automated WCAG rules only",
+    "violations": 0,
+    "passed_rules": 26
+  },
+  "economic_policy_approved": false,
+  "public_network_approved": false,
+  "cash_payments_enabled": false,
+  "unit": "LAB_TU"
+}

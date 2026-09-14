@@ -4,6 +4,8 @@
 **Versão:** 14/09/2026 · pesquisa e primeiros experimentos F0  
 **Licença do texto original:** [CC BY 4.0](../LICENSES/CC-BY-4.0.txt)
 
+**Atualização de implementação:** após o corte F0 deste artigo, foi construída a [aplicação privada v0.2](implementation/README.md), com inferência integrada, interface e contabilidade de laboratório. Os resultados econômicos abaixo continuam válidos como registro da configuração reprovada; a implementação não os converte em aprovação de uma rede pública.
+
 ## Resumo
 
 NETWORK AI investiga uma rede em que participantes oferecem capacidade de inferência, hospedam modelos compatíveis e recebem tokens de uso pela disponibilidade útil contratada e verificada. O objetivo é permitir cooperação mesmo sem compradores em dinheiro. Uma API comercial poderá coexistir com essa rede, em uma contabilidade separada.

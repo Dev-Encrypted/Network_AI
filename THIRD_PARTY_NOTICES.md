@@ -12,6 +12,12 @@ O NETWORK AI não é autor das engines, bibliotecas ou modelos abaixo. A licenç
 | BLOOM-560m | Referência Petals executada | [bigscience/bloom-560m](https://huggingface.co/bigscience/bloom-560m), licença BLOOM RAIL 1.0 na origem |
 | Kimi K3 e outros modelos pesquisados | Configurações, índices e inspeção parcial | [MoonshotAI](https://github.com/MoonshotAI/Kimi-K3), snapshots fixados com termos próprios |
 | LM Studio e modelo comunitário existente | Endpoint da primeira medição | Identificador e fingerprints nos relatórios; não distribuídos |
+| NestJS, Fastify, Next.js e React | Controle e interface do produto privado | Repositórios e licenças dos pacotes fixados em `pnpm-lock.yaml` |
+| PostgreSQL | Persistência e journal | Imagem oficial fixada por digest no Compose; licença PostgreSQL |
+| Axum, Tokio, Reqwest e ed25519-dalek | Gateway, agente e assinaturas | Versões em `Cargo.lock`; licenças próprias dos crates |
+| IBM Plex Sans / Mono | Fontes locais da interface | IBM, SIL Open Font License; pacotes Fontsource em `pnpm-lock.yaml` |
+| Lucide | Ícones da interface | Licença ISC; pacote fixado em `pnpm-lock.yaml` |
+| Playwright e axe-core | Verificação de navegador e regras de acessibilidade | Ferramentas de desenvolvimento, com seus próprios avisos e licenças |
 
 As [evidências de planejamento](docs/planning/evidence/README.md) contêm metadados, índices e configurações de APIs públicas. Os cabeçalhos safetensors em `docs/execution/evidence/kimi-k3/` são referência upstream. Esses conteúdos não são apresentados como criação de Dev-Encrypted nem recebem uma licença substituta.
 

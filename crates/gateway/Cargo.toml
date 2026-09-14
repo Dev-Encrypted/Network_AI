@@ -1,0 +1,16 @@
+[package]
+name = "network-ai-gateway"
+version = "0.2.0"
+edition = "2024"
+license = "Apache-2.0"
+authors = ["Dev-Encrypted"]
+
+[dependencies]
+network-ai-runtime = { path = "../runtime-core" }
+axum = "0.8.9"
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+futures-util = "0.3"
+uuid = { version = "1", features = ["v4"] }
+anyhow = "1"

@@ -1,11 +1,11 @@
 cff-version: 1.2.0
 message: "Ao citar o NETWORK AI, atribua Dev-Encrypted e informe a versão ou o commit consultado."
 type: software
-title: "NETWORK AI: pesquisa e bancada de inferência cooperativa descentralizada"
+title: "NETWORK AI: pesquisa e aplicação privada de inferência cooperativa"
 authors:
   - family-names: "Dev-Encrypted"
     website: "https://github.com/Dev-Encrypted"
-version: "0.1.0-f0"
+version: "0.2.0-private-preview"
 date-released: "2026-09-14"
 url: "https://github.com/Dev-Encrypted/Network_AI"
 repository-code: "https://github.com/Dev-Encrypted/Network_AI"
@@ -17,6 +17,7 @@ keywords:
   - heterogeneous GPUs
   - token economy
 abstract: >-
-  Pesquisa, especificações e bancada F0 para uma rede de inferência com GPUs
-  heterogêneas e tokens de uso. Inclui evidências locais e um estudo econômico
-  que rejeitou os parâmetros fictícios testados. Não é uma rede pública operacional.
+  Pesquisa, bancada F0 e aplicação privada com gateway, nós e contabilidade
+  de laboratório para inferência com GPUs heterogêneas. Inclui evidências locais
+  e um estudo econômico que rejeitou os parâmetros fictícios testados.
+  Não é uma rede pública operacional.

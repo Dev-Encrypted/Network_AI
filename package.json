@@ -1,0 +1,39 @@
+{
+  "name": "network-ai",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "build": "pnpm --filter @network-ai/contracts build && pnpm --filter @network-ai/control-api build && pnpm --filter @network-ai/web build",
+    "typecheck": "pnpm --filter @network-ai/contracts build && pnpm --filter @network-ai/control-api typecheck && pnpm --filter @network-ai/web typecheck",
+    "lab:init": "node scripts/lab.mjs init",
+    "lab:start": "node scripts/lab.mjs start",
+    "lab:stop": "node scripts/lab.mjs stop",
+    "lab:status": "node scripts/lab.mjs status",
+    "test:integration": "tsx --test tests/integration/*.test.ts",
+    "test:e2e": "playwright test",
+    "verify": "pnpm typecheck && pnpm test:integration",
+    "lab:backup": "node scripts/lab.mjs backup",
+    "lab:node-config": "node scripts/node-config.mjs",
+    "test:live": "node scripts/acceptance.mjs",
+    "test:faults": "node scripts/fault-acceptance.mjs",
+    "test:outbox": "node scripts/outbox-acceptance.mjs",
+    "test:backup": "node scripts/verify-backup.mjs",
+    "test:a11y": "node scripts/axe-check.mjs",
+    "test:multi-node": "node scripts/multi-node-acceptance.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "26.5.1",
+    "prettier": "3.9.6",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2"
+  },
+  "author": "Dev-Encrypted",
+  "license": "Apache-2.0"
+}

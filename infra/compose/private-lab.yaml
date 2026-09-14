@@ -1,0 +1,24 @@
+# Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
+name: network-ai-private-lab
+services:
+  postgres:
+    image: postgres@sha256:67f41722b7a8cbdb868a44a4995c846eddfdc2973bccb291ce937dce88ad5675
+    container_name: network-ai-private-lab-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: network_ai
+      POSTGRES_USER: network_ai_owner
+      POSTGRES_PASSWORD: ${NETWORK_AI_POSTGRES_PASSWORD:?Run pnpm lab:init}
+    ports:
+      - "127.0.0.1:54329:5432"
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U network_ai_owner -d network_ai"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  database:

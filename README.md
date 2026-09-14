@@ -4,9 +4,23 @@
 
 Concepção e direção: [Dev-Encrypted](https://github.com/Dev-Encrypted).
 
-[Artigo completo](docs/ARTICLE.md) · [Documentação](docs/README.md) · [Resultados F0](docs/execution/README.md) · [Reprodução](docs/execution/REPRODUCE.md) · [Releases](https://github.com/Dev-Encrypted/Network_AI/releases)
+[Aplicação privada](docs/implementation/README.md) · [Artigo completo](docs/ARTICLE.md) · [Documentação](docs/README.md) · [Resultados F0](docs/execution/README.md) · [Releases](https://github.com/Dev-Encrypted/Network_AI/releases)
 
-> **Estado: pesquisa e bancada F0 parcialmente executada.** Há inferência real e testes locais, mas ainda não há rede pública operacional. A configuração econômica ensaiada foi reprovada. Esta publicação não aprova emissão de créditos, pagamentos ou promessas de capacidade.
+> **Estado: aplicação privada v0.2 executável e pesquisa F0.** Interface, controle, PostgreSQL, gateway e nó já executam inferência real com créditos de laboratório. A rede pública e a economia cooperativa não estão aprovadas. A configuração econômica F0 foi reprovada; LAB_TU não é dinheiro nem promessa de capacidade.
+
+## Abrir a aplicação
+
+Com Node.js 24, pnpm 10.33.0, Rust 1.93.1 e Docker/Compose:
+
+```powershell
+pnpm install --frozen-lockfile
+pnpm lab:init
+pnpm lab:start
+```
+
+Acesse `http://127.0.0.1:43100`. O inicializador informa onde encontrar as credenciais privadas. O perfil de inferência inicial espera o modelo LM Studio já usado nesta bancada; o sistema não baixa pesos nem descarrega modelos. Para configurar outro servidor, consulte [Instalação e operação](docs/implementation/OPERATIONS.md).
+
+A interface em PT-BR oferece chat com streaming, catálogo, sessões, saldos, chaves de API, usuários e gestão de nós. O gateway e o agente são escritos em Rust; o NestJS controla metadados e o PostgreSQL registra reservas e liquidações. Há idempotência, cancelamento, época de nó, recibos assinados e restauração de backup verificável. Veja [API](docs/implementation/API.md), [contabilidade](docs/implementation/ACCOUNTING.md) e [cobertura real](docs/implementation/STATUS.md).
 
 ## A proposta
 
@@ -49,9 +63,9 @@ flowchart LR
     L --> G
 ```
 
-Este é o desenho de destino. Identidade, ofertas abertas, scheduler persistente, consenso e faturamento integrado ainda exigem implementação e validação.
+Este é o desenho de destino. A v0.2 implementa identidade, catálogo e scheduler persistente em um coordenador privado. Consenso distribuído, operadores independentes, todos os modos de execução e faturamento comercial ainda exigem implementação e validação.
 
-## Começar localmente
+## Executar a bancada F0
 
 Pré-requisitos da bancada: Python 3.12 e Rust 1.93.1. Os testes abaixo não baixam modelos nem exigem GPU.
 
@@ -92,6 +106,12 @@ Os passos para engines, inferência, transporte e simulação estão em [Reprodu
 | [benchmarks/scripts/](benchmarks/scripts/) | Preparação, execução, verificação e empacotamento |
 | [benchmarks/tests/](benchmarks/tests/) | Testes da bancada Python |
 | [crates/transport-bench/](crates/transport-bench/) | Bancada Rust de transporte autenticado |
+| [apps/](apps/) | Interface Next.js e controle NestJS/Fastify |
+| [crates/gateway/](crates/gateway/) · [crates/node/](crates/node/) | Gateway de inferência e agente Rust |
+| [packages/contracts/](packages/contracts/) | Manifestos, schemas e aritmética inteira compartilhados |
+| [infra/](infra/) | PostgreSQL isolado e migrações versionadas |
+| [scripts/](scripts/) · [tests/](tests/) | Operação do produto e testes de integração / navegador |
+| [docs/implementation/](docs/implementation/) | Contratos, operação e evidências da aplicação privada |
 | [outputs/explanations/](outputs/explanations/) | Ilustrações históricas com números hipotéticos |
 
 ## Próximos critérios de avanço
@@ -99,7 +119,7 @@ Os passos para engines, inferência, transporte e simulação estão em [Reprodu
 1. Executar Qwen3-8B em GPU disponível e em um segundo host físico.
 2. Revisar cobertura, demanda financiada e circulação por grupo; validar novos parâmetros com novas sementes.
 3. Medir LAN/WAN, NAT, relay, outras GPUs e restauração de sessões.
-4. Implementar e validar persistência, verificação, operadores independentes e continuidade.
+4. Expandir a persistência e a verificação locais para operadores independentes e continuidade distribuída.
 5. Concluir os pilotos e o custeio antes de abrir a operação cooperativa ou comercial.
 
 Consulte os [gates FC01–FC06](docs/execution/GATES.md) e o [plano operacional v6](docs/planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md). TU é uma unidade de uso proposta, não uma criptomoeda lançada ou uma promessa de retorno financeiro.

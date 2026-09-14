@@ -17,3 +17,9 @@ benchmarks/runs/2026-09-14-*/*.jsonl.gz
 benchmarks/downloads/
 # Large immutable research packages are release assets.
 /NETWORK_AI_*.zip
+.next/
+dist/
+*.tsbuildinfo
+test-results/
+playwright-report/
+coverage/

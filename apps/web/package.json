@@ -1,0 +1,27 @@
+{
+  "name": "@network-ai/web",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 43100",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1 --port 43100",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@network-ai/contracts": "workspace:*",
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "lucide-react": "1.46.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
+  },
+  "author": "Dev-Encrypted",
+  "license": "Apache-2.0"
+}

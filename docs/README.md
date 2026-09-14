@@ -2,6 +2,8 @@
 
 Comece pelo [artigo](ARTICLE.md), consulte os [resultados F0](execution/README.md) e siga os [comandos de reprodução](execution/REPRODUCE.md). A regra operacional candidata é a [revisão 6](planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md); os [gates atuais](execution/GATES.md) registram evidências e lacunas.
 
+A [aplicação privada v0.2](implementation/README.md) tem interface, controle, banco e agentes integrados. Seus [contratos](implementation/API.md), [guia operacional](implementation/OPERATIONS.md), [contabilidade](implementation/ACCOUNTING.md) e [cobertura](implementation/STATUS.md) descrevem o que pode ser usado hoje.
+
 ## Cortes históricos
 
 `planning/` preserva os documentos de 13/09/2026. Frases como “não há implementação” descrevem aquele corte; o trabalho posterior está em `execution/`. Os arquivos antigos não foram reescritos para parecer que previram resultados posteriores. Seus hashes continuam conferíveis nos [pacotes históricos](publication/README.md).

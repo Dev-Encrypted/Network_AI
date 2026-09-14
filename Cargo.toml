@@ -1,7 +1,6 @@
 [workspace]
-members = ["crates/transport-bench"]
+members = ["crates/transport-bench", "crates/runtime-core", "crates/gateway", "crates/node"]
 resolver = "2"
 
 [profile.release]
 overflow-checks = true
-
