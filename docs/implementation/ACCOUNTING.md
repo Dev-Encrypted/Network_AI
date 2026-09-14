@@ -21,7 +21,7 @@ A valid charge cannot exceed the hold. The private experiment allocates 80% to t
 
 Failure, cancellation and interruption return the full reservation. Inconsistent usage creates `DISPUTED` billing, zero charge and a failed terminal outcome. A consumer can receive partial work before cancelling without paying for it under this private rule. That behavior is a laboratory subsidy requiring a different abuse and partial-delivery policy before an open market.
 
-Without completed work, there is no automatic provider income merely for remaining online. Lab grants have an explicit issuer. The candidate cooperative policy of contracted readiness and elastic limits is not implemented here. [Proposed economy](../planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md).
+There is no automatic provider income merely for remaining online. Version 0.3 adds an explicit, separately funded availability contract: a sponsor reserves existing LAB_TU, the provider accepts, and the coordinator pays observed ready intervals from that escrow. Unpaid funds return to the sponsor. Temporary admission quotas also respond to demand. These additions do not implement the candidate cooperative issuer, reserve controller or accepted market economics. See [funded availability and quotas](AVAILABILITY.md) and the separate [proposed economy](../planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md).
 
 ## Database protections
 

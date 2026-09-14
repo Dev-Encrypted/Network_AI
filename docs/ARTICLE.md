@@ -177,6 +177,8 @@ A valid node signature proves which registered key signed a message. It does not
 
 The private preview uses Ed25519 node identities, one-time invitations, timestamps, nonces, epochs, bounded capabilities, and durable receipt retries. PostgreSQL protects accounting projections and committed journals from the runtime role. The database owner remains a trusted administrator.
 
+Version 0.3 adds authenticated private QUIC links to the actual node protocol, portable operator profiles, pre-funded availability contracts and temporary 1/2/4 admission limits. A real same-host campaign completed inference, signed settlement, readiness payment and the unused-fund refund through the new link. This advances the private implementation without approving public trust or the failed candidate economic parameters. [Current implementation and evidence](implementation/STATUS.md).
+
 An open deployment must add independent operator qualification, resource and work verification, bounded exposure to new participants, dispute handling, and recovery from malicious or correlated failures. Verification also consumes resources and needs a budget.
 
 Transport encryption does not hide a prompt from the machine executing it. The current gateway, node, and engine see request content in memory; the engine's own logging policy is controlled by its operator. Confidential inference requires a separate demonstrated mechanism. Users should choose a trust profile appropriate to their data.

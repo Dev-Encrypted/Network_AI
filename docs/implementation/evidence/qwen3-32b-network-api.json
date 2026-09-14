@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "measured_at": "2026-09-14T21:30:13.932Z",
+  "physical_hosts": 1,
+  "transport": "iroh-1.2.0/direct-QUIC",
+  "relay_enabled": false,
+  "registration_over_quic": true,
+  "heartbeat_over_quic": true,
+  "inference_over_quic": true,
+  "receipt_over_quic": true,
+  "control_admin_route_rejected": true,
+  "operator_profile_has_no_coordinator_secrets": true,
+  "funded_readiness_paid": true,
+  "lease_closed_with_remaining_refund": true,
+  "session_state": "COMPLETED",
+  "billing_state": "SETTLED",
+  "prompt_tokens": 18,
+  "completion_tokens": 9,
+  "elapsed_ms": 5269,
+  "lan_wan_qualified": false,
+  "distributed_between_participants": false,
+  "backend_profile": "official-qwen3-32b-trusted-cpu-cluster"
+}

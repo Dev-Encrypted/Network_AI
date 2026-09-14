@@ -8,6 +8,7 @@ import {
   chmod,
   stat,
   readdir,
+  unlink,
 } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { createRequire } from "node:module";
@@ -101,7 +102,7 @@ async function exists(path) {
 export async function config() {
   return JSON.parse(await readFile(configPath, "utf8"));
 }
-async function protectDirectory(path) {
+export async function protectDirectory(path) {
   if (process.platform === "win32") {
     const identity = execFileSync("whoami.exe", [], {
       encoding: "utf8",
@@ -373,10 +374,16 @@ async function listening(port) {
     });
   });
 }
-async function waitHealth(url, seconds = 45) {
+async function waitHealth(url, seconds = 45, keyFile) {
   for (let i = 0; i < seconds; i++) {
     try {
-      if ((await fetch(url, { signal: AbortSignal.timeout(1500) })).ok) return;
+      const headers = keyFile
+        ? {
+            Authorization: `Bearer ${(await readFile(keyFile, "utf8")).trim()}`,
+          }
+        : {};
+      if ((await fetch(url, { headers, signal: AbortSignal.timeout(1500) })).ok)
+        return;
     } catch {}
     await delay(1000);
   }
@@ -387,15 +394,28 @@ async function readProcesses() {
     ? JSON.parse(await readFile(processesPath, "utf8"))
     : {};
 }
-async function launch(name, program, args, port, health) {
+export async function launch(name, program, args, port, health, options = {}) {
   const c = await config();
   const processes = await readProcesses();
+  if (await owned(processes[name])) {
+    await waitHealth(
+      health,
+      options.healthSeconds ?? 45,
+      options.healthKeyFile,
+    );
+    console.log(`${name}: já está em execução`);
+    return;
+  }
   if (await listening(port)) {
-    if (await owned(processes[name])) {
-      console.log(`${name}: já está em execução`);
-      return;
-    }
     throw new Error(`Port ${port} is already occupied by an untracked process`);
+  }
+  if (options.shutdownFile) {
+    const expected = join(runtime, "cpu-cluster", "engine", "stop.request");
+    if (resolve(options.shutdownFile) !== expected)
+      throw new Error("Unexpected managed shutdown path");
+    await unlink(expected).catch((e) => {
+      if (e.code !== "ENOENT") throw e;
+    });
   }
   const out = await open(join(runtime, `${name}.out.log`), "a");
   const err = await open(join(runtime, `${name}.err.log`), "a");
@@ -406,7 +426,7 @@ async function launch(name, program, args, port, health) {
     stdio: ["ignore", out.fd, err.fd],
     env: {
       ...process.env,
-      NETWORK_AI_CONFIG: configPath,
+      NETWORK_AI_CONFIG: options.configPath ?? configPath,
       NEXT_TELEMETRY_DISABLED: "1",
       NETWORK_AI_CONTROL_URL: `http://127.0.0.1:${c.control_port}`,
       NETWORK_AI_GATEWAY_URL: `http://127.0.0.1:${c.gateway_port}`,
@@ -425,9 +445,10 @@ async function launch(name, program, args, port, health) {
     args,
     port,
     started_at: new Date().toISOString(),
+    options,
   };
   await privateJson(processesPath, processes);
-  await waitHealth(health);
+  await waitHealth(health, options.healthSeconds ?? 45, options.healthKeyFile);
   console.log(`${name}: pronto em 127.0.0.1:${port}`);
 }
 async function owned(entry) {
@@ -454,10 +475,10 @@ async function owned(entry) {
     return false;
   }
 }
-export async function start() {
+export async function start(options = {}) {
   if (!(await exists(configPath))) await init();
   else await databaseUp();
-  if (!process.argv.includes("--no-build")) {
+  if (!options.noBuild && !process.argv.includes("--no-build")) {
     const active = await readProcesses();
     for (const entry of Object.values(active))
       if (await owned(entry))
@@ -507,22 +528,86 @@ export async function start() {
     43100,
     c.web_origin,
   );
+  if (await exists(join(runtime, "cpu-cluster.json"))) {
+    const cpu = JSON.parse(
+      await readFile(join(runtime, "cpu-cluster.json"), "utf8"),
+    );
+    await startCpuCluster(cpu);
+    await launch(
+      "cpu_node",
+      join(root, `target/debug/network-ai-node${suffix}`),
+      [],
+      43123,
+      "http://127.0.0.1:43123/health",
+      { configPath: cpu.node_config },
+    );
+  }
   console.log(
     `NETWORK AI disponível em ${c.web_origin}. Login no arquivo privado de credenciais.`,
   );
 }
 export async function stop() {
   const processes = await readProcesses();
-  for (const name of ["web", "gateway", "node", "control"]) {
+  for (const name of [
+    "web",
+    "gateway",
+    "cpu_node",
+    "node",
+    "cpu_cluster",
+    "control",
+  ]) {
     const entry = processes[name];
     if (await owned(entry)) {
-      process.kill(entry.pid);
+      if (name === "cpu_cluster") {
+        const expected = join(runtime, "cpu-cluster", "engine", "stop.request");
+        if (entry.options?.shutdownFile !== expected)
+          throw new Error("Missing managed cluster shutdown identity");
+        await writeFile(expected, "stop\n", { mode: 0o600 });
+        for (let i = 0; i < 20 && (await owned(entry)); i++) await delay(500);
+        if (await owned(entry))
+          throw new Error(
+            "Cluster shutdown did not finish; its tracked processes were preserved for inspection",
+          );
+      } else process.kill(entry.pid);
       console.log(`${name}: encerrado`);
     }
     delete processes[name];
   }
   await privateJson(processesPath, processes);
   // Database and volume are retained. This command affects no other Docker project.
+}
+export async function startCpuCluster(cpu) {
+  const directory = join(runtime, "cpu-cluster", "engine");
+  await launch(
+    "cpu_cluster",
+    process.execPath,
+    [
+      join(root, "scripts/cluster.mjs"),
+      "--engine-dir",
+      cpu.engine_dir,
+      "--model-dir",
+      cpu.model_dir,
+      "--manifest",
+      cpu.manifest,
+      "--directory",
+      directory,
+      "--workers",
+      "2",
+      "--port",
+      "43220",
+      "--rpc-port",
+      "43820",
+      "--threads",
+      "8",
+    ],
+    43220,
+    "http://127.0.0.1:43220/health",
+    {
+      healthSeconds: 600,
+      healthKeyFile: join(directory, "engine-api-key.txt"),
+      shutdownFile: join(directory, "stop.request"),
+    },
+  );
 }
 export async function restart(name, downtimeMs = 0) {
   if (!["web", "gateway", "node", "control"].includes(name))

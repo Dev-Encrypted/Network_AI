@@ -65,6 +65,24 @@ try {
   );
   const after = await restored.query("SELECT count(*)::int AS n FROM journal");
   assert.equal(after.rows[0].n, before.rows[0].n);
+  const leases = await restored.query(
+    "SELECT count(*)::int AS n FROM availability_leases",
+  );
+  const sourceLeases = await source.query(
+    "SELECT count(*)::int AS n FROM nai.availability_leases",
+  );
+  assert.equal(leases.rows[0].n, sourceLeases.rows[0].n);
+  const escrowMismatch =
+    await restored.query(`SELECT l.id FROM availability_leases l JOIN ledger_accounts a ON a.id=l.escrow_account
+    WHERE a.balance<>CASE WHEN l.state IN ('ACTIVE','OFFERED') THEN l.budget_microtu-l.paid_microtu ELSE 0 END`);
+  assert.equal(escrowMismatch.rowCount, 0);
+  await assert.rejects(
+    () =>
+      restored.query(
+        "UPDATE availability_leases SET rate_microtu_per_second=rate_microtu_per_second",
+      ),
+    { code: "42501" },
+  );
   await assert.rejects(
     () =>
       restored.query(
@@ -79,6 +97,9 @@ try {
     balance_sum: "0",
     projection_mismatches: 0,
     runtime_balance_write_denied: true,
+    availability_contracts: leases.rows[0].n,
+    availability_escrow_mismatches: 0,
+    runtime_contract_term_write_denied: true,
     backup_sha256: createHash("sha256")
       .update(await readFile(path))
       .digest("hex"),

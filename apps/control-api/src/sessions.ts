@@ -16,6 +16,7 @@ import { Database } from "./db.js";
 import { need } from "./errors.js";
 import { availableAccount, heldAccount, post } from "./ledger.js";
 import { canonical, capability, hash } from "./security.js";
+import { capacity } from "./capacity.js";
 
 type Row = Record<string, any>;
 const terminal = (state: string): boolean =>
@@ -122,6 +123,13 @@ export class Sessions {
         429,
         "session_limit",
         "Você já tem quatro sessões em andamento.",
+      );
+      const quota = await capacity(tx, data.model, user.id);
+      need(
+        quota.active_for_account < quota.temporary_session_limit,
+        429,
+        "elastic_session_limit",
+        `A cota temporária deste modelo é de ${quota.temporary_session_limit} sessão(ões) por conta. As sessões já aceitas continuam.`,
       );
       const id = randomUUID();
       const hold = BigInt(quote.maximum_microtu);

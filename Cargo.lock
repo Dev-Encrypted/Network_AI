@@ -2686,7 +2686,7 @@ dependencies = [
 
 [[package]]
 name = "network-ai-gateway"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -2699,8 +2699,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "network-ai-link"
+version = "0.3.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "futures-util",
+ "iroh",
+ "network-ai-runtime",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-stream",
+ "uuid",
+]
+
+[[package]]
 name = "network-ai-node"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -2719,7 +2735,7 @@ dependencies = [
 
 [[package]]
 name = "network-ai-runtime"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "axum",

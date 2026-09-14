@@ -1,0 +1,18 @@
+[package]
+name = "network-ai-link"
+version = "0.3.0"
+edition = "2024"
+license = "Apache-2.0"
+authors = ["Dev-Encrypted"]
+
+[dependencies]
+anyhow = "1"
+axum = "0.8.9"
+futures-util = "0.3"
+iroh = { version = "=1.2.0", default-features = false, features = ["tls-ring"] }
+network-ai-runtime = { path = "../runtime-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+uuid = { version = "1", features = ["v4"] }

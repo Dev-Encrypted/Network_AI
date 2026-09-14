@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "measured_at": "2026-09-14T21:30:15.977Z",
+  "physical_hosts": 1,
+  "compute": "CPU",
+  "samples_per_configuration": 3,
+  "generated_tokens_per_prompt": 8,
+  "configurations": [
+    {
+      "workers": 0,
+      "status": {
+        "schema_version": 1,
+        "physical_hosts": 1,
+        "workers": 0,
+        "transport": "local-cpu",
+        "host": "127.0.0.1",
+        "port": 43220,
+        "model": "Qwen/Qwen3-32B-GGUF",
+        "revision": "938a7432affaec9157f883a87164e2646ae17555",
+        "artifact_sha256": "efd971561896866f0e910cce52761ca77b1b138090c7f15fe284676d57d1f689",
+        "engine_sha256": "aa2e1f5c67be55f11be26ae58d643a545ca07c6de498f6f870330ac2f4dfec73",
+        "context": 2048,
+        "slots": 1,
+        "threads_per_worker": 8,
+        "cpu_repack": false,
+        "ready_ms": 5290
+      },
+      "results": [
+        {
+          "prompt_index": 0,
+          "generated_tokens": [
+            12095,
+            13,
+            1096,
+            374,
+            264,
+            1632,
+            21309,
+            2097
+          ],
+          "text_sha256": "f08033871de7d108c042b4658009b49fa69763b2e8b4c11d7a4c01dda668d90a",
+          "elapsed_ms": 3223,
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 5,
+            "prompt_ms": 602.346,
+            "prompt_per_token_ms": 120.4692,
+            "prompt_per_second": 8.300876904636205,
+            "predicted_n": 8,
+            "predicted_ms": 2600.908,
+            "predicted_per_token_ms": 371.5582857142857,
+            "predicted_per_second": 2.6913677838662498
+          }
+        },
+        {
+          "prompt_index": 1,
+          "generated_tokens": [
+            220,
+            19,
+            198,
+            59,
+            2533,
+            4416,
+            279,
+            1590
+          ],
+          "text_sha256": "1edc9afb00dd841a63a88433649ca6cc02ca51ad553cfb6aa7a61c9e4b125f56",
+          "elapsed_ms": 3256,
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 5,
+            "prompt_ms": 599.128,
+            "prompt_per_token_ms": 119.82560000000001,
+            "prompt_per_second": 8.345462071543977,
+            "predicted_n": 8,
+            "predicted_ms": 2653.444,
+            "predicted_per_token_ms": 379.0634285714286,
+            "predicted_per_second": 2.6380809242629577
+          }
+        },
+        {
+          "prompt_index": 2,
+          "generated_tokens": [
+            387,
+            2952,
+            311,
+            49034,
+            279,
+            7901,
+            315,
+            894
+          ],
+          "text_sha256": "3742556c7ee9286faeea0e722955127d5c29aa8719d0f89bbc11d1bb782a1ec7",
+          "elapsed_ms": 3329,
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 5,
+            "prompt_ms": 611.871,
+            "prompt_per_token_ms": 122.3742,
+            "prompt_per_second": 8.171657097656205,
+            "predicted_n": 8,
+            "predicted_ms": 2713.609,
+            "predicted_per_token_ms": 387.65842857142854,
+            "predicted_per_second": 2.579590501063344
+          }
+        }
+      ],
+      "buffers": [
+        "0.01.419.723 I load_tensors: offloaded 0/65 layers to GPU",
+        "0.01.419.726 I load_tensors:   CPU_Mapped model buffer size = 18840.96 MiB",
+        "0.01.424.775 I llama_kv_cache:        CPU KV buffer size =   512.00 MiB"
+      ]
+    },
+    {
+      "workers": 2,
+      "status": {
+        "schema_version": 1,
+        "physical_hosts": 1,
+        "workers": 2,
+        "transport": "loopback-ggml-rpc",
+        "host": "127.0.0.1",
+        "port": 43220,
+        "model": "Qwen/Qwen3-32B-GGUF",
+        "revision": "938a7432affaec9157f883a87164e2646ae17555",
+        "artifact_sha256": "efd971561896866f0e910cce52761ca77b1b138090c7f15fe284676d57d1f689",
+        "engine_sha256": "aa2e1f5c67be55f11be26ae58d643a545ca07c6de498f6f870330ac2f4dfec73",
+        "context": 2048,
+        "slots": 1,
+        "threads_per_worker": 8,
+        "cpu_repack": false,
+        "ready_ms": 53880
+      },
+      "results": [
+        {
+          "prompt_index": 0,
+          "generated_tokens": [
+            12095,
+            13,
+            1096,
+            374,
+            264,
+            1632,
+            21309,
+            2097
+          ],
+          "text_sha256": "f08033871de7d108c042b4658009b49fa69763b2e8b4c11d7a4c01dda668d90a",
+          "elapsed_ms": 3461,
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 5,
+            "prompt_ms": 611.109,
+            "prompt_per_token_ms": 122.2218,
+            "prompt_per_second": 8.181846446378632,
+            "predicted_n": 8,
+            "predicted_ms": 2847.157,
+            "predicted_per_token_ms": 406.7367142857143,
+            "predicted_per_second": 2.4585929051330853
+          }
+        },
+        {
+          "prompt_index": 1,
+          "generated_tokens": [
+            220,
+            19,
+            198,
+            59,
+            2533,
+            4416,
+            279,
+            1590
+          ],
+          "text_sha256": "1edc9afb00dd841a63a88433649ca6cc02ca51ad553cfb6aa7a61c9e4b125f56",
+          "elapsed_ms": 3650,
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 5,
+            "prompt_ms": 625.927,
+            "prompt_per_token_ms": 125.1854,
+            "prompt_per_second": 7.988151972993656,
+            "predicted_n": 8,
+            "predicted_ms": 3001.753,
+            "predicted_per_token_ms": 428.82185714285714,
+            "predicted_per_second": 2.3319706851296558
+          }
+        },
+        {
+          "prompt_index": 2,
+          "generated_tokens": [
+            387,
+            2952,
+            311,
+            49034,
+            279,
+            7901,
+            315,
+            894
+          ],
+          "text_sha256": "3742556c7ee9286faeea0e722955127d5c29aa8719d0f89bbc11d1bb782a1ec7",
+          "elapsed_ms": 3635,
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 5,
+            "prompt_ms": 715.575,
+            "prompt_per_token_ms": 143.115,
+            "prompt_per_second": 6.987387765084023,
+            "predicted_n": 8,
+            "predicted_ms": 2898.19,
+            "predicted_per_token_ms": 414.02714285714285,
+            "predicted_per_second": 2.4153005841576984
+          }
+        }
+      ],
+      "buffers": [
+        "0.00.122.062 I llama_prepare_model_devices: using device RPC0 (127.0.0.1:43820) (unknown id) - 55096 MiB free",
+        "0.00.122.765 I llama_prepare_model_devices: using device RPC1 (127.0.0.1:43821) (unknown id) - 55096 MiB free",
+        "0.01.463.245 I load_tensors: offloaded 65/65 layers to GPU",
+        "0.01.463.248 I load_tensors:   CPU_Mapped model buffer size =   417.30 MiB",
+        "0.01.463.249 I load_tensors: RPC0[127.0.0.1:43820] model buffer size =  9169.13 MiB",
+        "0.01.463.249 I load_tensors: RPC0[127.0.0.1:43821] model buffer size =  9254.52 MiB",
+        "0.52.550.056 I llama_kv_cache: RPC0[127.0.0.1:43820] KV buffer size =   264.00 MiB",
+        "0.52.562.904 I llama_kv_cache: RPC0[127.0.0.1:43821] KV buffer size =   248.00 MiB"
+      ]
+    }
+  ],
+  "token_parity": [
+    true,
+    true,
+    true
+  ],
+  "equal_token_sequences": 3,
+  "all_equal": true,
+  "numerical_logits_compared": false,
+  "independent_participants": false,
+  "wan_qualified": false,
+  "production_qualified": false
+}

@@ -2,6 +2,8 @@
 
 The v0.2 implementation follows the `v0.1.0-f0` research publication. Historical snapshots and rejected economic results retain their original meaning.
 
+This document preserves the v0.2 decisions. For the later transport, funded contracts, quotas and CPU cluster additions, use the [v0.3 manual](README.md) and [current status](STATUS.md).
+
 ## Implemented boundaries
 
 The NestJS/Fastify service and dedicated PostgreSQL own identity, model metadata, authorization, quotes, holds, sessions and journals. Rust gateway and node carry request content and streaming through the inference path. The Next.js interface provides chat, catalog, sessions, laboratory credits, API keys and administration.

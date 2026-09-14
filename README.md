@@ -6,7 +6,7 @@ Created and directed by [Dev-Encrypted](https://github.com/Dev-Encrypted).
 
 [Start here](docs/GETTING_STARTED.md) · [Full article](docs/ARTICLE.md) · [Models above 27B](docs/MODEL_SCALING.md) · [Documentation](docs/README.md) · [Private application](docs/implementation/README.md) · [Releases](https://github.com/Dev-Encrypted/Network_AI/releases)
 
-> **Current release: v0.2 private preview, alongside the F0 research bench.** You can run a local application with real inference, signed nodes, an API, and transactional laboratory credits. The public decentralized network, cooperative credit issuance, and paid marketplace remain under development. See the [implementation matrix](docs/implementation/STATUS.md) for the exact boundary.
+> **Current software: v0.3 private network preview, alongside the preserved F0 research bench.** The application includes real inference, signed nodes, authenticated private QUIC links, funded availability contracts, temporary admission quotas, and verified model acquisition. Public decentralized operation, cooperative issuance, independent multi-host qualification and the paid marketplace remain under development. See the [implementation matrix](docs/implementation/STATUS.md).
 
 ## What is NETWORK AI?
 
@@ -50,7 +50,7 @@ A **route** is a complete, compatible set of resources that can finish a request
 | Mode | What happens | Intended role | Current product status |
 |---|---|---|---|
 | A: complete model on one node | One node sends the request to its configured inference engine | Models that fit one suitable host; independent replicas | Implemented in the private local profile |
-| B: a nearby GPU cluster | An operator offers a model served by a tightly connected group of GPUs | Larger models requiring several nearby GPUs | Planned qualification and integration |
+| B: a nearby GPU cluster | An operator offers a model served by a tightly connected group of GPUs | Larger models requiring several nearby GPUs | Trusted two-process CPU prototype executed; multi-GPU qualification remains |
 | C: model split across participants | Different nodes execute successive parts of the same model | Models requiring capacity from several participants | Research objective; separate small CPU experiment only |
 
 ```mermaid
@@ -84,7 +84,7 @@ In the proposed cooperative economy, compensation comes from **useful capacity t
 
 When compatible capacity is idle, temporary usage allowances may increase. These allowances should contract when demand returns, preserve accepted sessions, and stay within funded capacity. They do not create permanent balances or a promise that every model will always be available.
 
-The private preview uses a simpler laboratory mechanism: an explicit initial grant, charges for completed inference, an experimental 80/20 provider/working-account split, and refunds on failure. It does **not** implement cooperative readiness payments or elastic allowances. Its [accounting guide](docs/implementation/ACCOUNTING.md) explains the distinction.
+The private preview retains an explicit initial grant, charges for completed inference, the experimental 80/20 provider/working-account split, and refunds on failure. It now also supports **fully funded readiness contracts** using existing LAB_TU: a sponsor reserves the maximum cost, the provider accepts, observed ready intervals earn payments, and unused funds return to the sponsor. Temporary admission quotas adjust between 1, 2 and 4 requests according to available capacity and competing demand. These are private executable rules, not approval of the candidate cooperative issuer or its economic parameters. [Contracts and quotas](docs/implementation/AVAILABILITY.md).
 
 The optional paid API market would have its own payments, liabilities, refunds, and provider payouts. Cheaper API access is an objective to validate against complete operating costs, not an established price advantage. Purchases and payouts have not been activated.
 
@@ -120,11 +120,13 @@ Evidence recorded on September 14, 2026:
 | Existing local model | 30/30 visible answers correct; first visible token p50 1.09 s, p95 1.87 s | Community `Qwen3.8-27B / Q4` in LM Studio on a shared RTX 4090 |
 | Split-model reference | BLOOM-560m across two CPU processes; 30 matching-logit comparisons and recovery after failure | Same host, separate harness; not a large-model WAN deployment |
 | Authenticated transport | libp2p/QUIC and Iroh/QUIC negative controls | Loopback, separate F0 harness |
+| Private QUIC integration | Real enrollment, inference, signed settlement and availability payment through two authenticated peers | One physical host; direct transport; relay disabled |
+| Official Qwen3-32B Q4_K_M | Full inference locally and on two CPU RPC workers; 3/3 token sequences equal with repacking disabled; completed through the Network AI API | 32.8B, one physical host, 2,048 context, three short prompts; initial default-repacking comparison was 2/3 |
 | Official Qwen3-8B | Artifacts verified and exact-token workloads prepared | BF16 inference not executed in the recorded campaign |
 | Kimi K3 inspection | Six expert tensors loaded into CPU memory | No expert computation or complete model inference |
 | Economy | 5,600 event simulations with preserved accounting invariants | Tested parameters rejected; no real market validation |
 
-The 27B local model is a development reference. It does not demonstrate distributed execution of models above 27B. Larger-model qualification remains explicit work in the [roadmap](docs/planning/12_ROADMAP_AND_BACKLOG.md).
+The 27B profile remains a development reference. The later official 32B experiment demonstrates a complete larger model and a trusted CPU partition on one host. It does not qualify a public multi-participant network. [32B results and numerical limits](docs/implementation/MODEL_ARTIFACTS.md); [remaining roadmap](docs/planning/12_ROADMAP_AND_BACKLOG.md).
 
 See [private-preview validation](docs/implementation/STATUS.md), [F0 evidence](docs/execution/README.md), and [open launch gates](docs/execution/GATES.md). Local automated checks and public GitHub CI do not certify a public inference network.
 

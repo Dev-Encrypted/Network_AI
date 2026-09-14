@@ -1,5 +1,19 @@
 # Private-preview implementation and validation status
 
+## Version 0.3 additions
+
+The current increment adds an authenticated Iroh/QUIC bridge for the actual private node protocol, portable operator invitations, fully funded availability contracts, temporary 1/2/4 admission quotas, verified artifact acquisition and a trusted local CPU cluster adapter. The [link guide](PRIVATE_LINK.md), [availability guide](AVAILABILITY.md) and [model guide](MODEL_ARTIFACTS.md) explain their executable boundaries.
+
+The September 14 private QUIC campaign completed registration, heartbeat, inference, signed settlement, readiness payment and unused-fund refund through two real peers on one physical computer. The model request used 62 input and 53 output tokens and completed in 1,997 ms. These measurements refer to the existing GPU-backed local model, not the 32B CPU experiment or a WAN link.
+
+Current automated coverage includes 22 real-PostgreSQL tests, three artifact acquisition tests, three private-link tests and five browser journeys, alongside the preserved Rust/Python F0 checks. Browser validation covers the contract lifecycle at desktop and mobile widths. A fresh isolated restore also preserved the balanced journal projection. See the [v0.3 evidence summary](validation-v0.3.json).
+
+No public launch gate is closed merely by these local tests. Cooperative treasury/issuance, a successful mature economic study, independent model-stage admission and metering, adversarial verification, distributed consensus, real payments and an actual funded pilot still require work.
+
+The official Qwen3-32B Q4_K_M artifact was fully acquired and hash-verified. The trusted two-worker CPU experiment allocated model and KV buffers to both workers. A default-repacking comparison matched 2/3 sequences; disabling repacking on both paths matched 3/3. The 32B cluster then completed a real API request through the QUIC link and settled it. [Exact results and limitations](MODEL_ARTIFACTS.md).
+
+## Preserved version 0.2 campaign
+
 This matrix records v0.2 behavior and the local campaign of September 14, 2026. The environment was one physical computer with a shared RTX 4090 and the previously loaded LM Studio model. The project targets models above 27B; this campaign does not qualify their distributed execution.
 
 ## Delivered behavior

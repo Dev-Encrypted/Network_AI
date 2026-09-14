@@ -17,6 +17,10 @@ Login verifies a scrypt password hash and creates a 12-hour HttpOnly, SameSite=S
 | GET / POST | `/models` | Catalog and availability / submit immutable candidate |
 | POST | `/quotes` | Maximum cost quote, valid for 60 seconds |
 | GET | `/wallet` | Own balances and up to 100 recent entries |
+| GET | `/capacity/:model` | Temporary model/account request allowance and aggregate slot state |
+| GET / POST | `/availability/leases` | Inspect own contracts / reserve an offer's complete funding |
+| POST | `/availability/leases/:id/accept` | Only the provider accepts a ready-capacity contract |
+| POST | `/availability/leases/:id/cancel` | Counterparty/admin closes and refunds unused funding |
 | GET | `/sessions`, `/sessions/:id` | Up to 100 own sessions / details and events |
 | POST | `/sessions/:id/cancel` | Cancel an owned session |
 | GET / POST | `/keys` | List/create own personal keys |

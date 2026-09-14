@@ -21,6 +21,7 @@ import { Auth } from "./auth.js";
 import { Market } from "./market.js";
 import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
+import { Availability } from "./availability.js";
 import { ApiController } from "./controller.js";
 import { AppError } from "./errors.js";
 
@@ -28,6 +29,7 @@ const config = readConfig();
 const db = new Database(config.database_url);
 const auth = new Auth(db, config);
 const sessions = new Sessions(db, config);
+const availability = new Availability(db);
 @Module({
   controllers: [ApiController],
   providers: [
@@ -35,6 +37,7 @@ const sessions = new Sessions(db, config);
     { provide: Market, useValue: new Market(db, auth) },
     { provide: Nodes, useValue: new Nodes(db) },
     { provide: Sessions, useValue: sessions },
+    { provide: Availability, useValue: availability },
   ],
 })
 class AppModule {}
@@ -79,14 +82,12 @@ class Filter implements ExceptionFilter {
       });
     const statusCode = (error as { statusCode?: number }).statusCode;
     if (statusCode && [400, 413, 415, 429].includes(statusCode))
-      return reply
-        .status(statusCode)
-        .send({
-          error: {
-            code: "invalid_request",
-            message: "Solicitação inválida ou acima do limite permitido.",
-          },
-        });
+      return reply.status(statusCode).send({
+        error: {
+          code: "invalid_request",
+          message: "Solicitação inválida ou acima do limite permitido.",
+        },
+      });
     process.stderr.write(
       `Control failure: ${(error as { code?: string }).code ?? "internal_error"}\n`,
     );
@@ -140,12 +141,14 @@ server.addHook("onSend", async (_req, reply, payload) => {
 app.useGlobalFilters(new Filter());
 await db.pool.query("SELECT 1 FROM schema_migrations WHERE version=1");
 await sessions.reap();
+await availability.reconcile();
 let reaping = false;
 const timer = setInterval(() => {
   if (reaping) return;
   reaping = true;
   void sessions
     .reap()
+    .then(() => availability.reconcile())
     .catch(() => process.stderr.write("Reconciliation retry pending\n"))
     .finally(() => {
       reaping = false;

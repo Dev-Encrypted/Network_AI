@@ -1,6 +1,7 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AvailabilityPanel } from "./availability";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -192,6 +193,7 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState("");
+  const [temporaryLimit, setTemporaryLimit] = useState<number | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [prompt, setPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -204,6 +206,27 @@ export default function Home() {
   const abort = useRef<AbortController | null>(null);
   const authEpoch = useRef(0);
   const bottom = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    let live = true;
+    setTemporaryLimit(null);
+    if (!user || !selected) return;
+    const load = async () => {
+      try {
+        const value = await api<{ temporary_session_limit: number }>(
+          `/capacity/${selected}`,
+        );
+        if (live) setTemporaryLimit(value.temporary_session_limit);
+      } catch {
+        if (live) setTemporaryLimit(null);
+      }
+    };
+    void load();
+    const timer = setInterval(() => void load(), 5000);
+    return () => {
+      live = false;
+      clearInterval(timer);
+    };
+  }, [user, selected]);
   const refresh = useCallback(async () => {
     const epoch = authEpoch.current;
     try {
@@ -251,8 +274,10 @@ export default function Home() {
   }, [messages, generating]);
   const available =
     wallet.accounts.find((item) => item.kind === "AVAILABLE")?.balance ?? "0";
-  const held =
-    wallet.accounts.find((item) => item.kind === "HELD")?.balance ?? "0";
+  const held = wallet.accounts
+    .filter((item) => ["HELD", "LEASE_ESCROW"].includes(item.kind))
+    .reduce((sum, item) => sum + BigInt(item.balance), 0n)
+    .toString();
   const model = models.find((item) => item.id === selected);
   const maximumReservation = model
     ? formatTU(
@@ -487,7 +512,7 @@ export default function Home() {
           </div>
           <footer>
             Um projeto de <strong>Dev-Encrypted</strong>
-            <span>v0.2 · Ambiente privado</span>
+            <span>v0.3 · Ambiente privado</span>
           </footer>
         </section>
         <section className="login-side">
@@ -730,6 +755,13 @@ export default function Home() {
                       />
                     </label>
                   </details>
+                  {temporaryLimit !== null && (
+                    <p className="section-footnote quota-note">
+                      Até {temporaryLimit} solicitações abertas neste modelo por
+                      conta, conforme a demanda. Execuções já aceitas são
+                      preservadas.
+                    </p>
+                  )}
                   <div
                     className="messages"
                     aria-live="polite"
@@ -1107,6 +1139,12 @@ export default function Home() {
                 andamento termine. O inventário de GPU é uma declaração local,
                 não uma prova independente.
               </p>
+              <AvailabilityPanel
+                user={user}
+                nodes={nodes}
+                request={api}
+                onChange={refresh}
+              />
             </>
           )}
           {view === "sessions" && (
@@ -1261,7 +1299,7 @@ export default function Home() {
                     {formatTU(held)}
                     <small>LAB_TU</small>
                   </strong>
-                  <p>Liquidação após o resultado da execução</p>
+                  <p>Reservas de sessões e contratos de disponibilidade</p>
                 </section>
                 <section className="balance-note">
                   <ShieldCheck size={25} />
@@ -1298,14 +1336,20 @@ export default function Home() {
                               RESERVE: "Reserva de sessão",
                               SETTLE: "Liquidação",
                               REFUND: "Devolução",
+                              AVAILABILITY_RESERVE:
+                                "Reserva de disponibilidade",
+                              AVAILABILITY_PAYMENT: "Disponibilidade observada",
+                              AVAILABILITY_REFUND: "Devolução do contrato",
                             }[row.kind] ?? row.kind}
                           </span>
                         </td>
                         <td>{time(row.created_at)}</td>
                         <td>
-                          {row.account_id.endsWith(":held")
-                            ? "Reservada"
-                            : "Disponível"}
+                          {row.account_id.endsWith(":escrow")
+                            ? "Contrato reservado"
+                            : row.account_id.endsWith(":held")
+                              ? "Reservada"
+                              : "Disponível"}
                         </td>
                         <td
                           className={`mono ${BigInt(row.amount) > 0n ? "positive" : ""}`}
@@ -1457,7 +1501,7 @@ export default function Home() {
           <span>
             NETWORK AI <i>by Dev-Encrypted</i>
           </span>
-          <span>Ambiente privado · v0.2 · Sem oferta comercial</span>
+          <span>Ambiente privado · v0.3 · Sem oferta comercial</span>
         </footer>
       </div>
     </div>

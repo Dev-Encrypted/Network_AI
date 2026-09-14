@@ -5,6 +5,54 @@ import { randomUUID } from "node:crypto";
 const config = JSON.parse(
   await readFile(".runtime/private-lab/config.json", "utf8"),
 );
+test("availability funding, operator acceptance and closure work in the browser", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
+  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await page.getByRole("button", { name: "Meus nós", exact: true }).click();
+  const section = page.locator(".availability-section");
+  await expect(
+    section.getByRole("heading", { name: "Contratos de disponibilidade" }),
+  ).toBeVisible();
+  await section.getByLabel("Nó beneficiado").fill(config.node_id);
+  await section.getByLabel("Duração (segundos)").fill("30");
+  await section.getByRole("button", { name: "Financiar oferta" }).click();
+  const row = section
+    .getByRole("row")
+    .filter({ hasText: "Operador local" })
+    .first();
+  await expect(row).toContainText("Aguardando operador");
+  try {
+    await row.getByRole("button", { name: "Aceitar", exact: true }).click();
+    await expect(row).toContainText("Ativo");
+    await expect
+      .poll(async () => (await row.textContent())?.includes("0.0 s"), {
+        timeout: 12000,
+      })
+      .toBe(false);
+    await mkdir(".runtime/private-lab/screenshots", { recursive: true });
+    await page.screenshot({
+      path: ".runtime/private-lab/screenshots/availability-desktop.png",
+      fullPage: true,
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    const dimensions = await page.evaluate(() => ({
+      width: innerWidth,
+      scroll: document.documentElement.scrollWidth,
+    }));
+    expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.width);
+    await page.screenshot({
+      path: ".runtime/private-lab/screenshots/availability-mobile.png",
+      fullPage: true,
+    });
+  } finally {
+    await row.getByRole("button", { name: "Encerrar", exact: true }).click();
+    await expect(row).toContainText("Encerrado");
+  }
+});
 test("login, real streamed chat, session, wallet, API key and node controls", async ({
   page,
 }) => {

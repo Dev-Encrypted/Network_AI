@@ -76,7 +76,7 @@ The application retains session metadata but does not store conversation text in
 | Receipt pending | Streaming ended before the control service accepted settlement | Check the original session after control recovery |
 | Interrupted or cancelled | The attempt ended without a completed charge | Inspect the reason and refund before making a new attempt |
 
-Do not expose this loopback profile on the public Internet to connect friends. Multi-host transport, admission, trust, and operation need a separate qualified deployment.
+Use the [private node-link guide](implementation/PRIVATE_LINK.md) for the new authenticated QUIC transport. It keeps application listeners on loopback and pins each peer. Independent hosts, relays/CGNAT, public admission, trust and operational performance still need qualification; changing application bind addresses is not a deployment procedure.
 
 ## Stop, back up, and continue development
 

@@ -15,6 +15,8 @@ import { Auth } from "./auth.js";
 import { Market } from "./market.js";
 import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
+import { Availability } from "./availability.js";
+import { capacity } from "./capacity.js";
 import { need } from "./errors.js";
 import { same } from "./security.js";
 
@@ -25,6 +27,7 @@ export class ApiController {
     @Inject(Market) readonly market: Market,
     @Inject(Nodes) readonly nodes: Nodes,
     @Inject(Sessions) readonly sessions: Sessions,
+    @Inject(Availability) readonly availability: Availability,
   ) {}
   internal(req: FastifyRequest) {
     need(
@@ -73,6 +76,36 @@ export class ApiController {
   @Get("models") async models(@Req() req: FastifyRequest) {
     await this.auth.authenticate(req);
     return { data: await this.market.models() };
+  }
+  @Get("capacity/:model") async capacity(
+    @Req() req: FastifyRequest,
+    @Param("model") model: string,
+  ) {
+    const user = await this.auth.authenticate(req);
+    return capacity(this.auth.db.pool, model, user.id);
+  }
+  @Get("availability/leases") async leases(@Req() req: FastifyRequest) {
+    return {
+      data: await this.availability.list(await this.auth.authenticate(req)),
+    };
+  }
+  @Post("availability/leases") async offerLease(
+    @Req() req: FastifyRequest,
+    @Body() body: unknown,
+  ) {
+    return this.availability.offer(await this.auth.authenticate(req), body);
+  }
+  @Post("availability/leases/:id/accept") async acceptLease(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.availability.accept(await this.auth.authenticate(req), id);
+  }
+  @Post("availability/leases/:id/cancel") async cancelLease(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.availability.cancel(await this.auth.authenticate(req), id);
   }
   @Post("models") async publish(
     @Req() req: FastifyRequest,

@@ -1,6 +1,6 @@
 {
   "name": "network-ai",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -15,8 +15,9 @@
     "lab:stop": "node scripts/lab.mjs stop",
     "lab:status": "node scripts/lab.mjs status",
     "test:integration": "tsx --test tests/integration/*.test.ts",
+    "test:unit": "node --test tests/unit/*.test.mjs",
     "test:e2e": "playwright test",
-    "verify": "pnpm typecheck && pnpm test:integration",
+    "verify": "pnpm typecheck && pnpm test:unit && pnpm test:integration",
     "lab:backup": "node scripts/lab.mjs backup",
     "lab:node-config": "node scripts/node-config.mjs",
     "test:live": "node scripts/acceptance.mjs",
@@ -24,7 +25,12 @@
     "test:outbox": "node scripts/outbox-acceptance.mjs",
     "test:backup": "node scripts/verify-backup.mjs",
     "test:a11y": "node scripts/axe-check.mjs",
-    "test:multi-node": "node scripts/multi-node-acceptance.mjs"
+    "test:multi-node": "node scripts/multi-node-acceptance.mjs",
+    "test:link": "node scripts/link-acceptance.mjs",
+    "lab:link-config": "node scripts/link-config.mjs",
+    "model:acquire": "node scripts/artifacts.mjs",
+    "model:cluster": "node scripts/cluster.mjs",
+    "lab:install-cpu-cluster": "node scripts/install-cpu-cluster.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

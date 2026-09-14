@@ -11,6 +11,8 @@ import { Database } from "../../apps/control-api/src/db.js";
 import { Market } from "../../apps/control-api/src/market.js";
 import { Nodes } from "../../apps/control-api/src/nodes.js";
 import { Sessions } from "../../apps/control-api/src/sessions.js";
+import { Availability } from "../../apps/control-api/src/availability.js";
+import { capacity } from "../../apps/control-api/src/capacity.js";
 import {
   createAccounts,
   availableAccount,
@@ -175,12 +177,247 @@ async function job(
     message_count: 1,
   });
 }
+test("funded availability reserves once, requires provider acceptance and refunds exactly", async () => {
+  const f = await fixture();
+  const sponsor = await member();
+  await fund(sponsor);
+  const service = new Availability(db);
+  const data = {
+    node_id: f.nodeId,
+    duration_seconds: 30,
+    rate_microtu_per_second: "1000",
+    idempotency_key: randomUUID(),
+  };
+  const before = BigInt(
+    (await market.wallet(sponsor)).accounts.find(
+      (r: any) => r.kind === "AVAILABLE",
+    ).balance,
+  );
+  const a = await service.offer(sponsor, data);
+  await assert.rejects(
+    () =>
+      db.pool.query(
+        "UPDATE availability_leases SET rate_microtu_per_second=1 WHERE id=$1",
+        [a.id],
+      ),
+    { code: "42501" },
+  );
+  assert.equal((await service.offer(sponsor, data)).id, a.id);
+  await assert.rejects(
+    () => service.offer(sponsor, { ...data, duration_seconds: 31 }),
+    { code: "idempotency_conflict" },
+  );
+  await assert.rejects(() => service.accept(sponsor, a.id), {
+    code: "lease_missing",
+  });
+  await assert.rejects(
+    () => service.cancel({ ...f.user, id: randomUUID() }, a.id),
+    { code: "lease_missing" },
+  );
+  assert.equal((await service.accept(f.user, a.id)).state, "ACTIVE");
+  // Database-clock fixture advances one observation. This tests accounting, not GPU work.
+  await owner.query(
+    "UPDATE availability_leases SET sample_ms=sample_ms-1000 WHERE id=$1",
+    [a.id],
+  );
+  await service.reconcile();
+  const paid = (
+    await db.pool.query(
+      "SELECT paid_microtu FROM availability_leases WHERE id=$1",
+      [a.id],
+    )
+  ).rows[0].paid_microtu;
+  assert.ok(BigInt(paid) >= 1000n);
+  const cancelled = await service.cancel(sponsor, a.id);
+  assert.equal(cancelled.state, "CANCELLED");
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        a.escrow_account,
+      ])
+    ).rows[0].balance,
+    "0",
+  );
+  const after = BigInt(
+    (await market.wallet(sponsor)).accounts.find(
+      (r: any) => r.kind === "AVAILABLE",
+    ).balance,
+  );
+  assert.equal(before - after, BigInt(cancelled.paid_microtu));
+  await service.cancel(sponsor, a.id);
+  assert.equal(
+    BigInt(
+      (await market.wallet(sponsor)).accounts.find(
+        (r: any) => r.kind === "AVAILABLE",
+      ).balance,
+    ),
+    after,
+  );
+});
+
+test("availability cannot fund insufficient balances or double-pay a physical domain", async () => {
+  const f = await fixture();
+  const poor = await member();
+  const service = new Availability(db);
+  const data = {
+    node_id: f.nodeId,
+    duration_seconds: 30,
+    rate_microtu_per_second: "1000",
+    idempotency_key: randomUUID(),
+  };
+  await assert.rejects(() => service.offer(poor, data), {
+    code: "insufficient_credits",
+  });
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM availability_leases WHERE sponsor_id=$1",
+        [poor.id],
+      )
+    ).rows[0].n,
+    0,
+  );
+  const a = await service.offer(f.user, data);
+  const b = await service.offer(f.user, {
+    ...data,
+    idempotency_key: randomUUID(),
+  });
+  const accepted = await Promise.allSettled([
+    service.accept(f.user, a.id),
+    service.accept(f.user, b.id),
+  ]);
+  assert.equal(accepted.filter((r) => r.status === "fulfilled").length, 1);
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM availability_leases WHERE resource_domain_id=$1 AND state='ACTIVE'",
+        [f.domainId],
+      )
+    ).rows[0].n,
+    1,
+  );
+  await service.cancel(f.user, a.id);
+  await service.cancel(f.user, b.id);
+});
+
+test("availability does not extrapolate outages, fenced epochs or expired offers", async () => {
+  const f = await fixture();
+  const service = new Availability(db);
+  const data = {
+    node_id: f.nodeId,
+    duration_seconds: 30,
+    rate_microtu_per_second: "1000",
+    idempotency_key: randomUUID(),
+  };
+  const a = await service.offer(f.user, data);
+  await service.accept(f.user, a.id);
+  await owner.query(
+    "UPDATE availability_leases SET sample_ms=sample_ms-10000 WHERE id=$1",
+    [a.id],
+  );
+  await service.reconcile();
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT paid_microtu FROM availability_leases WHERE id=$1",
+        [a.id],
+      )
+    ).rows[0].paid_microtu,
+    "0",
+  );
+  await owner.query(
+    "UPDATE availability_leases SET sample_ms=sample_ms-1000 WHERE id=$1",
+    [a.id],
+  );
+  await owner.query(
+    "UPDATE nodes SET epoch=epoch+1,last_seen=now() WHERE id=$1",
+    [f.nodeId],
+  );
+  await service.reconcile();
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT paid_microtu FROM availability_leases WHERE id=$1",
+        [a.id],
+      )
+    ).rows[0].paid_microtu,
+    "0",
+  );
+  await owner.query("UPDATE nodes SET state='PAUSED' WHERE id=$1", [f.nodeId]);
+  assert.equal((await service.cancel(f.user, a.id)).paid_microtu, "0");
+  const b = await service.offer(f.user, {
+    ...data,
+    idempotency_key: randomUUID(),
+  });
+  await owner.query(
+    "UPDATE availability_leases SET offer_expires_at=now()-interval '1 second' WHERE id=$1",
+    [b.id],
+  );
+  await assert.rejects(() => service.accept(f.user, b.id), {
+    code: "offer_expired",
+  });
+  await service.reconcile();
+  const expired = (await service.list(f.user)).find((r) => r.id === b.id);
+  assert.equal(expired.state, "EXPIRED");
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        b.escrow_account,
+      ])
+    ).rows[0].balance,
+    "0",
+  );
+  await assert.rejects(
+    () =>
+      db.pool.query(
+        "UPDATE availability_events SET kind='forged' WHERE lease_id=$1",
+        [a.id],
+      ),
+    { code: "42501" },
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT coalesce(sum(balance),0)::text AS total FROM ledger_accounts",
+      )
+    ).rows[0].total,
+    "0",
+  );
+});
 test("new members have zero initial balance", async () => {
   const user = await member();
   const wallet = await market.wallet(user);
   assert.deepEqual(
     wallet.accounts.map((row) => row.balance),
     ["0", "0"],
+  );
+});
+test("elastic quotas contract under shared demand, preserve accepted work, and expand after demand clears", async () => {
+  const f = await fixture();
+  const other = await member();
+  await fund(other);
+  assert.equal(
+    (await capacity(db.pool, f.modelId, f.user.id)).temporary_session_limit,
+    4,
+  );
+  const first = await job(f);
+  await sessions.admit(first.id);
+  assert.equal(
+    (await capacity(db.pool, f.modelId, f.user.id)).temporary_session_limit,
+    2,
+  );
+  const waiting = await job(f, other);
+  assert.equal(
+    (await capacity(db.pool, f.modelId, f.user.id)).temporary_session_limit,
+    1,
+  );
+  await assert.rejects(() => job(f), { code: "elastic_session_limit" });
+  assert.equal((await sessions.get(f.user, first.id)).state, "PREPARING");
+  await sessions.cancel(other, waiting.id);
+  await sessions.cancel(f.user, first.id);
+  assert.equal(
+    (await capacity(db.pool, f.modelId, f.user.id)).temporary_session_limit,
+    4,
   );
 });
 test("member cannot grant or qualify", async () => {

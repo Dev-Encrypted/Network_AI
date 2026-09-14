@@ -111,9 +111,15 @@ impl App {
         } else {
             "/v1/models"
         };
-        let data: Value = self
+        let request = self
             .http
-            .get(format!("{}{endpoint}", self.config.backend_url))
+            .get(format!("{}{endpoint}", self.config.backend_url));
+        let request = if self.config.backend_api_key.is_empty() {
+            request
+        } else {
+            request.bearer_auth(&self.config.backend_api_key)
+        };
+        let data: Value = request
             .timeout(Duration::from_secs(4))
             .send()
             .await?
@@ -306,9 +312,15 @@ async fn engine(
     if app.config.backend_kind == "lmstudio" {
         request["chat_template_kwargs"] = json!({"enable_thinking":false});
     }
-    let response = app
+    let backend_request = app
         .http
-        .post(format!("{}/v1/chat/completions", app.config.backend_url))
+        .post(format!("{}/v1/chat/completions", app.config.backend_url));
+    let backend_request = if app.config.backend_api_key.is_empty() {
+        backend_request
+    } else {
+        backend_request.bearer_auth(&app.config.backend_api_key)
+    };
+    let response = backend_request
         .json(&request)
         .send()
         .await?

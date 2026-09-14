@@ -5,7 +5,7 @@ title: "NETWORK AI: cooperative inference for models beyond one computer"
 authors:
   - family-names: "Dev-Encrypted"
     website: "https://github.com/Dev-Encrypted"
-version: "0.2.0-private-preview"
+version: "0.3.0-private-network-preview"
 date-released: "2026-09-14"
 url: "https://github.com/Dev-Encrypted/Network_AI"
 repository-code: "https://github.com/Dev-Encrypted/Network_AI"

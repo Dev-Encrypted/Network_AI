@@ -14,12 +14,12 @@ The original 58-item backlog and its detailed historical decomposition remain in
 | R04: transactional accounting | Integer holds, balanced journal, idempotent settlement and protected projections | Implemented for LAB_TU |
 | R05: shared capacity | Two real agents sharing one domain cannot overlap its single slot | Demonstrated on one physical host |
 | R06: private recovery | Node restart fences stale work; receipts survive brief control outage; backup restores consistently | Local campaign passed |
-| R07: model above 27B | Complete inference on a pinned, licensed larger-model configuration with measured memory and quality | Required; current 27B reference does not satisfy it |
-| R08: nearby multi-device route | Supported partition, per-device budget, parity and concurrency evidence | Required |
-| R09: distinct physical hosts | LAN and WAN profiles with measured links, NAT/relay behavior and independent failure injection | Required |
-| R10: integrated distributed model | Gateway admission covers every stage; cancellation, receipts and recovery work for the whole route | Required; isolated Petals CPU bench is only a reference |
+| R07: model above 27B | Complete inference on a pinned, licensed larger-model configuration with measured memory and quality | Official 32.8B Q4_K_M executed; buffers and short token comparisons measured; broader quality/context qualification remains |
+| R08: nearby multi-device route | Supported partition, per-device budget, parity and concurrency evidence | Two CPU worker processes on one host demonstrated; distinct GPUs/devices remain |
+| R09: distinct physical hosts | LAN and WAN profiles with measured links, NAT/relay behavior and independent failure injection | Authenticated private QUIC bridge implemented and tested on one host; distinct-host and relay qualification remain |
+| R10: integrated distributed model | Gateway admission covers every stage; cancellation, receipts and recovery work for the whole route | Trusted CPU cluster completed through the API as one participant; independent-stage reservations and settlement remain |
 | R11: heterogeneous profiles | Qualified hardware classes with transparent contribution-to-consumption comparisons | Required beyond the current host |
-| R12: useful readiness contracts | Funded bounded leases, verified READY periods, no duplicate physical commitments | Candidate policy; not private runtime behavior |
+| R12: useful readiness contracts | Funded bounded leases, verified READY periods, no duplicate physical commitments | Existing LAB_TU escrow contracts implemented; independent verification and candidate cooperative treasury remain |
 | R13: full economic study | Updated parameters, fresh holdout, full elastic/recovery predicates and mature-phase/cohort acceptance | Tested F0 configuration rejected |
 | R14: public trust | Work/resource verification, bounded newcomer exposure, adversarial and collusion tests | Required |
 | R15: independent continuity | Named operators, quorum, partition, restoration, key rotation and replacement gateway | Required |

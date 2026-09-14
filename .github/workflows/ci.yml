@@ -54,6 +54,7 @@ jobs:
       - run: pnpm lab:init
       - run: pnpm build
       - run: pnpm test:integration
+      - run: pnpm test:unit
       - run: rustup toolchain install 1.93.1 --profile minimal
       - run: cargo +1.93.1 build --locked -p network-ai-node -p network-ai-gateway
       - run: pnpm lab:start --no-build

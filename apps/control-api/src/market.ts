@@ -280,7 +280,18 @@ export class Market {
         [hash(token), id],
       );
     });
-    return { id, invite: token, expires_in: 86400 };
+    return {
+      id,
+      invite: token,
+      expires_in: 86400,
+      operator: {
+        schema_version: 1,
+        capability_public_key: this.auth.config.capability_public_key,
+        control_port: this.auth.config.control_port,
+        gateway_port: this.auth.config.gateway_port,
+        web_origin: this.auth.config.web_origin,
+      },
+    };
   }
   async nodeState(user: User, id: string, body: unknown) {
     uuid.parse(id);

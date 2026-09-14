@@ -28,6 +28,8 @@ pub struct Config {
     pub node_invite: String,
     pub node_name: String,
     pub backend_url: String,
+    #[serde(default)]
+    pub backend_api_key: String,
     pub backend_model: String,
     pub backend_kind: String,
     pub state_dir: String,
