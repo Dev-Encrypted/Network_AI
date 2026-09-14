@@ -1,0 +1,26 @@
+sequenceDiagram
+  participant U as Consumidor
+  participant G as Gateway
+  participant C as Controle
+  participant L as Ledger PG
+  participant N as Nos e driver
+  U->>G: Pedido e idempotency key
+  G->>C: Validar identidade, modelo, custo e limites
+  C->>L: Criar sessao e hold atomico
+  C->>N: Prepare recursos com prazo curto
+  N-->>C: Ready ou rejeicao
+  alt Todos os recursos confirmados
+    C->>L: Persistir rota, epoch e autorizacao
+    C-->>G: Capability assinada
+    G->>N: Start com capability e contexto
+    N-->>G: Eventos sequenciados e tokens
+    G-->>U: SSE
+    N->>C: Recibo de encerramento
+    G->>C: Medicao do stream
+    C->>L: Liquidar uma vez e liberar restante
+    L-->>U: Extrato via consulta
+  else Falta de capacidade ou timeout
+    C->>N: Abort prepare
+    C->>L: Liberar hold
+    C-->>G: Erro explicito ou fila autorizada
+  end

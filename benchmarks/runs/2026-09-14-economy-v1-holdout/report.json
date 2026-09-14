@@ -1,0 +1,997 @@
+{
+  "study_id": "f0-event-economy-v1-2026-09-14",
+  "phase": "holdout",
+  "manifest_sha256": "7853701865fd848517958132c04ee0220924969ca0d121474054789db59f7598",
+  "source_sha256": {
+    "economy.py": "2f8d429329d67312f75d7a675c3abe0846e23364c24a927d49a99dca8db16163",
+    "ledger.py": "774d077b8ba0e4aa05c207fa5f90805b989f6f9552233d085d42e4a97f00913b"
+  },
+  "started_at_utc": "2026-09-14T04:01:39.128147+00:00",
+  "planned_runs": 4000,
+  "workers": 4,
+  "seeds": [
+    9001,
+    9002,
+    9003,
+    9004,
+    9005,
+    9006,
+    9007,
+    9008,
+    9009,
+    9010,
+    9011,
+    9012,
+    9013,
+    9014,
+    9015,
+    9016,
+    9017,
+    9018,
+    9019,
+    9020,
+    9021,
+    9022,
+    9023,
+    9024,
+    9025,
+    9026,
+    9027,
+    9028,
+    9029,
+    9030,
+    9031,
+    9032,
+    9033,
+    9034,
+    9035,
+    9036,
+    9037,
+    9038,
+    9039,
+    9040,
+    9041,
+    9042,
+    9043,
+    9044,
+    9045,
+    9046,
+    9047,
+    9048,
+    9049,
+    9050
+  ],
+  "evidence_type": "SYNTHETIC_EVENT_MODEL",
+  "declared_limits": [
+    "All prices, speeds, rewards, arrivals, retention and operating cash are fictional and fixed before results.",
+    "Physical compatibility, READY attestations and quorum availability are modeled inputs, not cryptographic proofs.",
+    "Demand is sampled at individual request timestamps; leases last 900 seconds and receipts remain pending for the full configured delay.",
+    "No market equilibrium, human retention prediction, taxation, real electricity cost or proof of independent operators.",
+    "Commercial opportunity cost is a synthetic resource withdrawal with a separate cash counter; no x402 adapter or real settlement is tested.",
+    "An unsupported newly requested model remains unavailable; registration alone never manufactures a compatible route.",
+    "Precommitment is local and hash-verifiable, not an independent public timestamp or blinded third-party evaluation."
+  ],
+  "completed_runs": 4000,
+  "elapsed_seconds": 872.56,
+  "groups": {
+    "steady_zero_buyers/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 63019,
+      "completed": 29843
+    },
+    "steady_zero_buyers/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 23
+      },
+      "funded": 58783,
+      "completed": 9261
+    },
+    "steady_zero_buyers/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 61949,
+      "completed": 43560
+    },
+    "steady_zero_buyers/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 18
+      },
+      "funded": 58297,
+      "completed": 23261
+    },
+    "steady_zero_buyers/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 23
+      },
+      "funded": 58783,
+      "completed": 9261
+    },
+    "idle_then_return/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 39,
+        "mature_no_cohort_free_balance_depletion": 50,
+        "mature_funded_compatible_slo": 12
+      },
+      "funded": 92984,
+      "completed": 89065
+    },
+    "idle_then_return/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 23
+      },
+      "funded": 59263,
+      "completed": 9317
+    },
+    "idle_then_return/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "mature_no_protected_spend": 39,
+        "mature_no_cohort_free_balance_depletion": 50,
+        "observed_no_economic_hibernation": 1
+      },
+      "funded": 92692,
+      "completed": 90835
+    },
+    "idle_then_return/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 15
+      },
+      "funded": 58589,
+      "completed": 23183
+    },
+    "idle_then_return/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 20,
+        "mature_no_protected_spend": 2
+      },
+      "funded": 59917,
+      "completed": 9457
+    },
+    "credit_overhang/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 74221,
+      "completed": 56623
+    },
+    "credit_overhang/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 14
+      },
+      "funded": 59822,
+      "completed": 8806
+    },
+    "credit_overhang/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 46,
+        "mature_funded_compatible_slo": 38,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 73027,
+      "completed": 67072
+    },
+    "credit_overhang/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 10
+      },
+      "funded": 56804,
+      "completed": 22503
+    },
+    "credit_overhang/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 5,
+        "mature_no_cohort_free_balance_depletion": 16
+      },
+      "funded": 58766,
+      "completed": 9467
+    },
+    "large_model_rush/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 63052,
+      "completed": 29503
+    },
+    "large_model_rush/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 21
+      },
+      "funded": 59148,
+      "completed": 9189
+    },
+    "large_model_rush/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 62029,
+      "completed": 43239
+    },
+    "large_model_rush/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 18
+      },
+      "funded": 58068,
+      "completed": 23113
+    },
+    "large_model_rush/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 48,
+        "mature_no_cohort_free_balance_depletion": 10
+      },
+      "funded": 61596,
+      "completed": 14479
+    },
+    "correlated_exit/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 62563,
+      "completed": 29391
+    },
+    "correlated_exit/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 22
+      },
+      "funded": 58962,
+      "completed": 9273
+    },
+    "correlated_exit/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 61970,
+      "completed": 43407
+    },
+    "correlated_exit/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 19
+      },
+      "funded": 58098,
+      "completed": 23129
+    },
+    "correlated_exit/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 37,
+        "mature_no_cohort_free_balance_depletion": 15
+      },
+      "funded": 59132,
+      "completed": 10860
+    },
+    "all_inference_nodes_absent/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 63076,
+      "completed": 29566
+    },
+    "all_inference_nodes_absent/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 16
+      },
+      "funded": 61493,
+      "completed": 9061
+    },
+    "all_inference_nodes_absent/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 61992,
+      "completed": 43110
+    },
+    "all_inference_nodes_absent/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 12
+      },
+      "funded": 58801,
+      "completed": 22965
+    },
+    "all_inference_nodes_absent/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 16
+      },
+      "funded": 61493,
+      "completed": 9061
+    },
+    "service_quorum_partition/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 62731,
+      "completed": 29516
+    },
+    "service_quorum_partition/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 20
+      },
+      "funded": 58508,
+      "completed": 9229
+    },
+    "service_quorum_partition/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 62081,
+      "completed": 43626
+    },
+    "service_quorum_partition/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 19
+      },
+      "funded": 58462,
+      "completed": 23206
+    },
+    "service_quorum_partition/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 20
+      },
+      "funded": 58508,
+      "completed": 9229
+    },
+    "mixed_commercial/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 57104,
+      "completed": 24966
+    },
+    "mixed_commercial/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 21
+      },
+      "funded": 59934,
+      "completed": 9239
+    },
+    "mixed_commercial/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 56912,
+      "completed": 38094
+    },
+    "mixed_commercial/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 15
+      },
+      "funded": 57744,
+      "completed": 22951
+    },
+    "mixed_commercial/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 21
+      },
+      "funded": 59934,
+      "completed": 9239
+    },
+    "operating_funding_stops/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 118317,
+      "completed": 0
+    },
+    "operating_funding_stops/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 100586,
+      "completed": 0
+    },
+    "operating_funding_stops/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 118150,
+      "completed": 0
+    },
+    "operating_funding_stops/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 104583,
+      "completed": 0
+    },
+    "operating_funding_stops/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 100586,
+      "completed": 0
+    },
+    "undetected_experimental_fraud/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50,
+        "no_undetected_bad_output_charged": 50
+      },
+      "funded": 63019,
+      "completed": 29843
+    },
+    "undetected_experimental_fraud/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 23,
+        "no_undetected_bad_output_charged": 50
+      },
+      "funded": 58783,
+      "completed": 9261
+    },
+    "undetected_experimental_fraud/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50,
+        "no_undetected_bad_output_charged": 50
+      },
+      "funded": 61949,
+      "completed": 43560
+    },
+    "undetected_experimental_fraud/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "no_undetected_bad_output_charged": 50,
+        "mature_no_cohort_free_balance_depletion": 18
+      },
+      "funded": 58297,
+      "completed": 23261
+    },
+    "undetected_experimental_fraud/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 23,
+        "no_undetected_bad_output_charged": 50
+      },
+      "funded": 58783,
+      "completed": 9261
+    },
+    "severe_combined_shock/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50,
+        "no_undetected_bad_output_charged": 50
+      },
+      "funded": 62645,
+      "completed": 28812
+    },
+    "severe_combined_shock/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "no_undetected_bad_output_charged": 50,
+        "mature_no_cohort_free_balance_depletion": 20
+      },
+      "funded": 58880,
+      "completed": 9450
+    },
+    "severe_combined_shock/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50,
+        "no_undetected_bad_output_charged": 50
+      },
+      "funded": 61211,
+      "completed": 42756
+    },
+    "severe_combined_shock/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "no_undetected_bad_output_charged": 50,
+        "mature_no_cohort_free_balance_depletion": 16
+      },
+      "funded": 58421,
+      "completed": 23093
+    },
+    "severe_combined_shock/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 48,
+        "no_undetected_bad_output_charged": 50,
+        "mature_no_cohort_free_balance_depletion": 17
+      },
+      "funded": 60772,
+      "completed": 14281
+    },
+    "zero_use/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 0,
+      "completed": 0
+    },
+    "zero_use/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 0,
+      "completed": 0
+    },
+    "zero_use/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 0,
+      "completed": 0
+    },
+    "zero_use/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 0,
+      "completed": 0
+    },
+    "zero_use/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_recycled_payout_covers_normal_cost": 50
+      },
+      "funded": 0,
+      "completed": 0
+    },
+    "new_model/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 54005,
+      "completed": 26548
+    },
+    "new_model/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 13
+      },
+      "funded": 51265,
+      "completed": 3624
+    },
+    "new_model/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 52713,
+      "completed": 35557
+    },
+    "new_model/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 5
+      },
+      "funded": 48746,
+      "completed": 12375
+    },
+    "new_model/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 13
+      },
+      "funded": 51265,
+      "completed": 3624
+    },
+    "slow_settlement/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 58246,
+      "completed": 42249
+    },
+    "slow_settlement/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 37
+      },
+      "funded": 57100,
+      "completed": 21164
+    },
+    "slow_settlement/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 57413,
+      "completed": 50306
+    },
+    "slow_settlement/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 27
+      },
+      "funded": 57113,
+      "completed": 31595
+    },
+    "slow_settlement/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 37
+      },
+      "funded": 57100,
+      "completed": 21164
+    },
+    "hoarding/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 41638,
+      "completed": 4399
+    },
+    "hoarding/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 25
+      },
+      "funded": 44050,
+      "completed": 450
+    },
+    "hoarding/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 37112,
+      "completed": 6305
+    },
+    "hoarding/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 4
+      },
+      "funded": 35694,
+      "completed": 2651
+    },
+    "hoarding/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 25
+      },
+      "funded": 44050,
+      "completed": 450
+    },
+    "late_arrival/v4_availability_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 54615,
+      "completed": 27150
+    },
+    "late_arrival/v5_demand_single": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 14
+      },
+      "funded": 57418,
+      "completed": 6557
+    },
+    "late_arrival/v5_availability_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      },
+      "funded": 54520,
+      "completed": 38539
+    },
+    "late_arrival/v5_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 6
+      },
+      "funded": 55815,
+      "completed": 18812
+    },
+    "late_arrival/v6_demand_split": {
+      "runs": 50,
+      "passed": 0,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 14
+      },
+      "funded": 57418,
+      "completed": 6557
+    }
+  },
+  "public_launch_approved": false,
+  "raw_sha256": "42221b5fb2df9eb96e07cc3683500fadd61c35d2b784a7e59942ea10ae0c752e"
+}

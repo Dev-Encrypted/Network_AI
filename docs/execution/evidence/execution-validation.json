@@ -1,0 +1,40 @@
+{
+  "evidence_type": "ARTIFACT_CONSISTENCY_CHECK",
+  "observed_at_utc": "2026-09-14T04:48:47.977144+00:00",
+  "checks_passed": 26,
+  "checks": [
+    "Historical archive unchanged: NETWORK_AI_PLANEJAMENTO_2026-09-13.zip",
+    "Historical archive unchanged: NETWORK_AI_PLANEJAMENTO_2026-09-13_v2_REDE_ABERTA.zip",
+    "Historical archive unchanged: NETWORK_AI_PLANEJAMENTO_2026-09-13_v3_COOPERATIVA.zip",
+    "Historical archive unchanged: NETWORK_AI_PLANEJAMENTO_2026-09-13_v4_CONTINUIDADE.zip",
+    "Historical archive unchanged: NETWORK_AI_PLANEJAMENTO_2026-09-13_v5_PROGRAMA_FECHAMENTO.zip",
+    "Historical archive unchanged: NETWORK_AI_PLANEJAMENTO_2026-09-13_v6_CONSOLIDADO.zip",
+    "91 planning files match the v6 snapshot byte for byte",
+    "E01 fixture hash matches",
+    "E01 has two profiles with 30 measured and 3 warmup fixtures each",
+    "LM Studio: 30 counted visible answers and no length cutoff",
+    "Corrected HTTP harness matches its report",
+    "HTTP qualification limits remain explicit",
+    "Both release transports are present",
+    "Transport payload cells, negative controls and physical-host scope match",
+    "Petals: 30 measured forwards have identical logits",
+    "Petals: all three token sequences match",
+    "Petals fault and recovery evidence is present",
+    "Petals CPU/private/one-host limits remain explicit",
+    "Final Petals harness matches its report",
+    "Kimi partial tensor payload matches",
+    "Kimi partial load is not promoted to inference proof",
+    "Economic calibration and holdout seeds are disjoint",
+    "Economic preregistration hash matches",
+    "Economic rejection and incomplete policy coverage are preserved",
+    "All principal run reports retain public_launch_approved=false",
+    "49 relative links in current execution documents resolve"
+  ],
+  "public_launch_approved": false,
+  "limitations": [
+    "Does not rerun hardware experiments or validate every economic lifecycle predicate",
+    "Raw economic rows were separately evaluated by summarize_economy.py; this check binds their hashes",
+    "Hashes protect this local snapshot; they are not an independent timestamp or attestation",
+    "Model files and installed runtimes are excluded from the delivery ZIP and must be prepared separately"
+  ]
+}

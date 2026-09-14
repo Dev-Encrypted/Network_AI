@@ -1,0 +1,2687 @@
+{
+  "evidence_type": "INSPECTED_PINNED_HEADERS_AND_RAW_SLICES",
+  "observed_at_utc": "2026-09-14T04:06:20.919015+00:00",
+  "repo": "moonshotai/Kimi-K3",
+  "revision": "f831ab66814297da540d832a5235f8e904f29d06",
+  "headers": [
+    {
+      "file": "model-00001-of-000096.safetensors",
+      "file_bytes": 2341216112,
+      "header_bytes": 2920,
+      "header_sha256": "bfd47268eb1556d004cc0d8a8ce63935a73e812c87333cfa56d46312b1c692c8",
+      "tensor_count": 23,
+      "payload_bytes_by_category": {
+        "attention_and_other_state_weights": 887829504,
+        "dense_mlp": 1453326336,
+        "attention_residual": 57344
+      },
+      "selected_tensor_records": [
+        {
+          "name": "language_model.model.layers.0.self_attn.A_log",
+          "dtype": "F32",
+          "shape": [
+            128
+          ],
+          "payload_bytes": 512,
+          "file_offset": 2928
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.dt_bias",
+          "dtype": "F32",
+          "shape": [
+            12288
+          ],
+          "payload_bytes": 49152,
+          "file_offset": 3440
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.k_conv1d.weight",
+          "dtype": "F32",
+          "shape": [
+            12288,
+            1,
+            4
+          ],
+          "payload_bytes": 196608,
+          "file_offset": 52592
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.o_norm.weight",
+          "dtype": "F32",
+          "shape": [
+            128
+          ],
+          "payload_bytes": 512,
+          "file_offset": 249200
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.q_conv1d.weight",
+          "dtype": "F32",
+          "shape": [
+            12288,
+            1,
+            4
+          ],
+          "payload_bytes": 196608,
+          "file_offset": 249712
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.v_conv1d.weight",
+          "dtype": "F32",
+          "shape": [
+            12288,
+            1,
+            4
+          ],
+          "payload_bytes": 196608,
+          "file_offset": 446320
+        },
+        {
+          "name": "language_model.model.layers.0.input_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 642928
+        },
+        {
+          "name": "language_model.model.layers.0.mlp.down_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            33792
+          ],
+          "payload_bytes": 484442112,
+          "file_offset": 657264
+        },
+        {
+          "name": "language_model.model.layers.0.mlp.gate_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            33792,
+            7168
+          ],
+          "payload_bytes": 484442112,
+          "file_offset": 485099376
+        },
+        {
+          "name": "language_model.model.layers.0.mlp.up_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            33792,
+            7168
+          ],
+          "payload_bytes": 484442112,
+          "file_offset": 969541488
+        },
+        {
+          "name": "language_model.model.layers.0.mlp_res_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 1453983600
+        },
+        {
+          "name": "language_model.model.layers.0.mlp_res_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1,
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 1453997936
+        },
+        {
+          "name": "language_model.model.layers.0.post_attention_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 1454012272
+        },
+        {
+          "name": "language_model.model.layers.0.self_attention_res_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 1454026608
+        },
+        {
+          "name": "language_model.model.layers.0.self_attention_res_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1,
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 1454040944
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.b_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            96,
+            7168
+          ],
+          "payload_bytes": 1376256,
+          "file_offset": 1454055280
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.f_a_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            128,
+            7168
+          ],
+          "payload_bytes": 1835008,
+          "file_offset": 1455431536
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.f_b_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            128
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 1457266544
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.g_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 1460412272
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.k_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 1636573040
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.o_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            12288
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 1812733808
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.q_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 1988894576
+        },
+        {
+          "name": "language_model.model.layers.0.self_attn.v_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 2165055344
+        }
+      ],
+      "header_only": true
+    },
+    {
+      "file": "model-00002-of-000096.safetensors",
+      "file_bytes": 16990911504,
+      "header_bytes": 818696,
+      "header_sha256": "b91d17c110908e42f20e36949c0267fa43248364201a81a6db57dace3bf29776",
+      "tensor_count": 5404,
+      "payload_bytes_by_category": {
+        "router_or_gate": 100929024,
+        "attention_and_other_state_weights": 1166757888,
+        "attention_residual": 57344,
+        "experts": 15722348544
+      },
+      "selected_tensor_records": [
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.gate.e_score_correction_bias",
+          "dtype": "F32",
+          "shape": [
+            896
+          ],
+          "payload_bytes": 3584,
+          "file_offset": 818704
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.A_log",
+          "dtype": "F32",
+          "shape": [
+            128
+          ],
+          "payload_bytes": 512,
+          "file_offset": 822288
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.dt_bias",
+          "dtype": "F32",
+          "shape": [
+            12288
+          ],
+          "payload_bytes": 49152,
+          "file_offset": 822800
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.k_conv1d.weight",
+          "dtype": "F32",
+          "shape": [
+            12288,
+            1,
+            4
+          ],
+          "payload_bytes": 196608,
+          "file_offset": 871952
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.o_norm.weight",
+          "dtype": "F32",
+          "shape": [
+            128
+          ],
+          "payload_bytes": 512,
+          "file_offset": 1068560
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.q_conv1d.weight",
+          "dtype": "F32",
+          "shape": [
+            12288,
+            1,
+            4
+          ],
+          "payload_bytes": 196608,
+          "file_offset": 1069072
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.v_conv1d.weight",
+          "dtype": "F32",
+          "shape": [
+            12288,
+            1,
+            4
+          ],
+          "payload_bytes": 196608,
+          "file_offset": 1265680
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.gate.weight",
+          "dtype": "BF16",
+          "shape": [
+            896,
+            7168
+          ],
+          "payload_bytes": 12845056,
+          "file_offset": 1462288
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.routed_expert_down_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            3584,
+            7168
+          ],
+          "payload_bytes": 51380224,
+          "file_offset": 14307344
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.routed_expert_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            3584
+          ],
+          "payload_bytes": 7168,
+          "file_offset": 65687568
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.routed_expert_up_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            3584
+          ],
+          "payload_bytes": 51380224,
+          "file_offset": 65694736
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.shared_experts.down_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            6144
+          ],
+          "payload_bytes": 88080384,
+          "file_offset": 117074960
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.shared_experts.gate_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            6144,
+            7168
+          ],
+          "payload_bytes": 88080384,
+          "file_offset": 205155344
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.shared_experts.up_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            6144,
+            7168
+          ],
+          "payload_bytes": 88080384,
+          "file_offset": 293235728
+        },
+        {
+          "name": "language_model.model.layers.1.input_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 381316112
+        },
+        {
+          "name": "language_model.model.layers.1.mlp_res_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 381330448
+        },
+        {
+          "name": "language_model.model.layers.1.mlp_res_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1,
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 381344784
+        },
+        {
+          "name": "language_model.model.layers.1.post_attention_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 381359120
+        },
+        {
+          "name": "language_model.model.layers.1.self_attention_res_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 381373456
+        },
+        {
+          "name": "language_model.model.layers.1.self_attention_res_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1,
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 381387792
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.b_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            96,
+            7168
+          ],
+          "payload_bytes": 1376256,
+          "file_offset": 381402128
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.f_a_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            128,
+            7168
+          ],
+          "payload_bytes": 1835008,
+          "file_offset": 382778384
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.f_b_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            128
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 384613392
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.g_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 387759120
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.k_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 563919888
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.o_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            12288
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 740080656
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.q_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 916241424
+        },
+        {
+          "name": "language_model.model.layers.1.self_attn.v_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 1092402192
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w1.weight_packed",
+          "dtype": "U8",
+          "shape": [
+            3072,
+            1792
+          ],
+          "payload_bytes": 5505024,
+          "file_offset": 1268562960
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w1.weight_scale",
+          "dtype": "U8",
+          "shape": [
+            3072,
+            112
+          ],
+          "payload_bytes": 344064,
+          "file_offset": 1274067984
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w2.weight_packed",
+          "dtype": "U8",
+          "shape": [
+            3584,
+            1536
+          ],
+          "payload_bytes": 5505024,
+          "file_offset": 1274412048
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w2.weight_scale",
+          "dtype": "U8",
+          "shape": [
+            3584,
+            96
+          ],
+          "payload_bytes": 344064,
+          "file_offset": 1279917072
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w3.weight_packed",
+          "dtype": "U8",
+          "shape": [
+            3072,
+            1792
+          ],
+          "payload_bytes": 5505024,
+          "file_offset": 1280261136
+        },
+        {
+          "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w3.weight_scale",
+          "dtype": "U8",
+          "shape": [
+            3072,
+            112
+          ],
+          "payload_bytes": 344064,
+          "file_offset": 1285766160
+        }
+      ],
+      "header_only": true
+    },
+    {
+      "file": "model-00004-of-000096.safetensors",
+      "file_bytes": 16567501776,
+      "header_bytes": 817608,
+      "header_sha256": "3ff389a539b7408ba7b99e9445efa1bc1e5f4bbba1e9402e2c494015add5a647",
+      "tensor_count": 5398,
+      "payload_bytes_by_category": {
+        "router_or_gate": 100929024,
+        "attention_and_other_state_weights": 743349248,
+        "attention_residual": 57344,
+        "experts": 15722348544
+      },
+      "selected_tensor_records": [
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.gate.e_score_correction_bias",
+          "dtype": "F32",
+          "shape": [
+            896
+          ],
+          "payload_bytes": 3584,
+          "file_offset": 817616
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.gate.weight",
+          "dtype": "BF16",
+          "shape": [
+            896,
+            7168
+          ],
+          "payload_bytes": 12845056,
+          "file_offset": 821200
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.routed_expert_down_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            3584,
+            7168
+          ],
+          "payload_bytes": 51380224,
+          "file_offset": 13666256
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.routed_expert_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            3584
+          ],
+          "payload_bytes": 7168,
+          "file_offset": 65046480
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.routed_expert_up_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            3584
+          ],
+          "payload_bytes": 51380224,
+          "file_offset": 65053648
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.shared_experts.down_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            6144
+          ],
+          "payload_bytes": 88080384,
+          "file_offset": 116433872
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.shared_experts.gate_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            6144,
+            7168
+          ],
+          "payload_bytes": 88080384,
+          "file_offset": 204514256
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.shared_experts.up_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            6144,
+            7168
+          ],
+          "payload_bytes": 88080384,
+          "file_offset": 292594640
+        },
+        {
+          "name": "language_model.model.layers.3.input_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 380675024
+        },
+        {
+          "name": "language_model.model.layers.3.mlp_res_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 380689360
+        },
+        {
+          "name": "language_model.model.layers.3.mlp_res_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1,
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 380703696
+        },
+        {
+          "name": "language_model.model.layers.3.post_attention_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 380718032
+        },
+        {
+          "name": "language_model.model.layers.3.self_attention_res_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 380732368
+        },
+        {
+          "name": "language_model.model.layers.3.self_attention_res_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1,
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 380746704
+        },
+        {
+          "name": "language_model.model.layers.3.self_attn.g_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            12288,
+            7168
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 380761040
+        },
+        {
+          "name": "language_model.model.layers.3.self_attn.kv_a_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            512
+          ],
+          "payload_bytes": 1024,
+          "file_offset": 556921808
+        },
+        {
+          "name": "language_model.model.layers.3.self_attn.kv_a_proj_with_mqa.weight",
+          "dtype": "BF16",
+          "shape": [
+            576,
+            7168
+          ],
+          "payload_bytes": 8257536,
+          "file_offset": 556922832
+        },
+        {
+          "name": "language_model.model.layers.3.self_attn.kv_b_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            24576,
+            512
+          ],
+          "payload_bytes": 25165824,
+          "file_offset": 565180368
+        },
+        {
+          "name": "language_model.model.layers.3.self_attn.o_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            12288
+          ],
+          "payload_bytes": 176160768,
+          "file_offset": 590346192
+        },
+        {
+          "name": "language_model.model.layers.3.self_attn.q_a_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            1536
+          ],
+          "payload_bytes": 3072,
+          "file_offset": 766506960
+        },
+        {
+          "name": "language_model.model.layers.3.self_attn.q_a_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1536,
+            7168
+          ],
+          "payload_bytes": 22020096,
+          "file_offset": 766510032
+        },
+        {
+          "name": "language_model.model.layers.3.self_attn.q_b_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            18432,
+            1536
+          ],
+          "payload_bytes": 56623104,
+          "file_offset": 788530128
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.experts.0.w1.weight_packed",
+          "dtype": "U8",
+          "shape": [
+            3072,
+            1792
+          ],
+          "payload_bytes": 5505024,
+          "file_offset": 845153232
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.experts.0.w1.weight_scale",
+          "dtype": "U8",
+          "shape": [
+            3072,
+            112
+          ],
+          "payload_bytes": 344064,
+          "file_offset": 850658256
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.experts.0.w2.weight_packed",
+          "dtype": "U8",
+          "shape": [
+            3584,
+            1536
+          ],
+          "payload_bytes": 5505024,
+          "file_offset": 851002320
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.experts.0.w2.weight_scale",
+          "dtype": "U8",
+          "shape": [
+            3584,
+            96
+          ],
+          "payload_bytes": 344064,
+          "file_offset": 856507344
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.experts.0.w3.weight_packed",
+          "dtype": "U8",
+          "shape": [
+            3072,
+            1792
+          ],
+          "payload_bytes": 5505024,
+          "file_offset": 856851408
+        },
+        {
+          "name": "language_model.model.layers.3.block_sparse_moe.experts.0.w3.weight_scale",
+          "dtype": "U8",
+          "shape": [
+            3072,
+            112
+          ],
+          "payload_bytes": 344064,
+          "file_offset": 862356432
+        }
+      ],
+      "header_only": true
+    },
+    {
+      "file": "model-00094-of-000096.safetensors",
+      "file_bytes": 4697664072,
+      "header_bytes": 576,
+      "header_sha256": "f28a4f196abb0804a3f8a5b2c125f646f598359c5b92266442761216e47dd2bf",
+      "tensor_count": 5,
+      "payload_bytes_by_category": {
+        "lm_head": 2348810240,
+        "embeddings": 2348810240,
+        "attention_and_other_state_weights": 14336,
+        "attention_residual": 28672
+      },
+      "selected_tensor_records": [
+        {
+          "name": "language_model.lm_head.weight",
+          "dtype": "BF16",
+          "shape": [
+            163840,
+            7168
+          ],
+          "payload_bytes": 2348810240,
+          "file_offset": 584
+        },
+        {
+          "name": "language_model.model.embed_tokens.weight",
+          "dtype": "BF16",
+          "shape": [
+            163840,
+            7168
+          ],
+          "payload_bytes": 2348810240,
+          "file_offset": 2348810824
+        },
+        {
+          "name": "language_model.model.norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 4697621064
+        },
+        {
+          "name": "language_model.model.output_attn_res_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 4697635400
+        },
+        {
+          "name": "language_model.model.output_attn_res_proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1,
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 4697649736
+        }
+      ],
+      "header_only": true
+    },
+    {
+      "file": "model-00095-of-000096.safetensors",
+      "file_bytes": 92289328,
+      "header_bytes": 296,
+      "header_sha256": "0d8ce3215fcf775b96f313da0878ddea7cb4c1fbcbf3774088b9568b3a9d4ed9",
+      "tensor_count": 3,
+      "payload_bytes_by_category": {
+        "attention_and_other_state_weights": 92289024
+      },
+      "selected_tensor_records": [
+        {
+          "name": "mm_projector.post_norm.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168
+          ],
+          "payload_bytes": 14336,
+          "file_offset": 304
+        },
+        {
+          "name": "mm_projector.proj.0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            4096
+          ],
+          "payload_bytes": 33554432,
+          "file_offset": 14640
+        },
+        {
+          "name": "mm_projector.proj.2.weight",
+          "dtype": "BF16",
+          "shape": [
+            7168,
+            4096
+          ],
+          "payload_bytes": 58720256,
+          "file_offset": 33569072
+        }
+      ],
+      "header_only": true
+    },
+    {
+      "file": "model-00096-of-000096.safetensors",
+      "file_bytes": 802448352,
+      "header_bytes": 19416,
+      "header_sha256": "d48df5b82c7f4dbab9b9402c30d0391d17257e04d356079f07c0900c3214312b",
+      "tensor_count": 165,
+      "payload_bytes_by_category": {
+        "vision": 802428928
+      },
+      "selected_tensor_records": [
+        {
+          "name": "vision_tower.encoder.blocks.0.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 19424
+        },
+        {
+          "name": "vision_tower.encoder.blocks.0.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 8408032
+        },
+        {
+          "name": "vision_tower.encoder.blocks.0.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 16796640
+        },
+        {
+          "name": "vision_tower.encoder.blocks.0.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 16798688
+        },
+        {
+          "name": "vision_tower.encoder.blocks.0.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 16800736
+        },
+        {
+          "name": "vision_tower.encoder.blocks.0.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 19946464
+        },
+        {
+          "name": "vision_tower.encoder.blocks.1.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 29383648
+        },
+        {
+          "name": "vision_tower.encoder.blocks.1.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 37772256
+        },
+        {
+          "name": "vision_tower.encoder.blocks.1.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 46160864
+        },
+        {
+          "name": "vision_tower.encoder.blocks.1.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 46162912
+        },
+        {
+          "name": "vision_tower.encoder.blocks.1.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 46164960
+        },
+        {
+          "name": "vision_tower.encoder.blocks.1.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 49310688
+        },
+        {
+          "name": "vision_tower.encoder.blocks.10.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 58747872
+        },
+        {
+          "name": "vision_tower.encoder.blocks.10.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 67136480
+        },
+        {
+          "name": "vision_tower.encoder.blocks.10.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 75525088
+        },
+        {
+          "name": "vision_tower.encoder.blocks.10.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 75527136
+        },
+        {
+          "name": "vision_tower.encoder.blocks.10.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 75529184
+        },
+        {
+          "name": "vision_tower.encoder.blocks.10.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 78674912
+        },
+        {
+          "name": "vision_tower.encoder.blocks.11.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 88112096
+        },
+        {
+          "name": "vision_tower.encoder.blocks.11.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 96500704
+        },
+        {
+          "name": "vision_tower.encoder.blocks.11.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 104889312
+        },
+        {
+          "name": "vision_tower.encoder.blocks.11.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 104891360
+        },
+        {
+          "name": "vision_tower.encoder.blocks.11.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 104893408
+        },
+        {
+          "name": "vision_tower.encoder.blocks.11.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 108039136
+        },
+        {
+          "name": "vision_tower.encoder.blocks.12.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 117476320
+        },
+        {
+          "name": "vision_tower.encoder.blocks.12.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 125864928
+        },
+        {
+          "name": "vision_tower.encoder.blocks.12.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 134253536
+        },
+        {
+          "name": "vision_tower.encoder.blocks.12.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 134255584
+        },
+        {
+          "name": "vision_tower.encoder.blocks.12.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 134257632
+        },
+        {
+          "name": "vision_tower.encoder.blocks.12.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 137403360
+        },
+        {
+          "name": "vision_tower.encoder.blocks.13.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 146840544
+        },
+        {
+          "name": "vision_tower.encoder.blocks.13.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 155229152
+        },
+        {
+          "name": "vision_tower.encoder.blocks.13.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 163617760
+        },
+        {
+          "name": "vision_tower.encoder.blocks.13.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 163619808
+        },
+        {
+          "name": "vision_tower.encoder.blocks.13.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 163621856
+        },
+        {
+          "name": "vision_tower.encoder.blocks.13.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 166767584
+        },
+        {
+          "name": "vision_tower.encoder.blocks.14.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 176204768
+        },
+        {
+          "name": "vision_tower.encoder.blocks.14.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 184593376
+        },
+        {
+          "name": "vision_tower.encoder.blocks.14.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 192981984
+        },
+        {
+          "name": "vision_tower.encoder.blocks.14.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 192984032
+        },
+        {
+          "name": "vision_tower.encoder.blocks.14.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 192986080
+        },
+        {
+          "name": "vision_tower.encoder.blocks.14.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 196131808
+        },
+        {
+          "name": "vision_tower.encoder.blocks.15.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 205568992
+        },
+        {
+          "name": "vision_tower.encoder.blocks.15.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 213957600
+        },
+        {
+          "name": "vision_tower.encoder.blocks.15.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 222346208
+        },
+        {
+          "name": "vision_tower.encoder.blocks.15.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 222348256
+        },
+        {
+          "name": "vision_tower.encoder.blocks.15.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 222350304
+        },
+        {
+          "name": "vision_tower.encoder.blocks.15.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 225496032
+        },
+        {
+          "name": "vision_tower.encoder.blocks.16.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 234933216
+        },
+        {
+          "name": "vision_tower.encoder.blocks.16.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 243321824
+        },
+        {
+          "name": "vision_tower.encoder.blocks.16.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 251710432
+        },
+        {
+          "name": "vision_tower.encoder.blocks.16.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 251712480
+        },
+        {
+          "name": "vision_tower.encoder.blocks.16.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 251714528
+        },
+        {
+          "name": "vision_tower.encoder.blocks.16.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 254860256
+        },
+        {
+          "name": "vision_tower.encoder.blocks.17.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 264297440
+        },
+        {
+          "name": "vision_tower.encoder.blocks.17.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 272686048
+        },
+        {
+          "name": "vision_tower.encoder.blocks.17.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 281074656
+        },
+        {
+          "name": "vision_tower.encoder.blocks.17.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 281076704
+        },
+        {
+          "name": "vision_tower.encoder.blocks.17.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 281078752
+        },
+        {
+          "name": "vision_tower.encoder.blocks.17.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 284224480
+        },
+        {
+          "name": "vision_tower.encoder.blocks.18.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 293661664
+        },
+        {
+          "name": "vision_tower.encoder.blocks.18.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 302050272
+        },
+        {
+          "name": "vision_tower.encoder.blocks.18.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 310438880
+        },
+        {
+          "name": "vision_tower.encoder.blocks.18.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 310440928
+        },
+        {
+          "name": "vision_tower.encoder.blocks.18.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 310442976
+        },
+        {
+          "name": "vision_tower.encoder.blocks.18.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 313588704
+        },
+        {
+          "name": "vision_tower.encoder.blocks.19.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 323025888
+        },
+        {
+          "name": "vision_tower.encoder.blocks.19.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 331414496
+        },
+        {
+          "name": "vision_tower.encoder.blocks.19.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 339803104
+        },
+        {
+          "name": "vision_tower.encoder.blocks.19.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 339805152
+        },
+        {
+          "name": "vision_tower.encoder.blocks.19.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 339807200
+        },
+        {
+          "name": "vision_tower.encoder.blocks.19.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 342952928
+        },
+        {
+          "name": "vision_tower.encoder.blocks.2.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 352390112
+        },
+        {
+          "name": "vision_tower.encoder.blocks.2.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 360778720
+        },
+        {
+          "name": "vision_tower.encoder.blocks.2.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 369167328
+        },
+        {
+          "name": "vision_tower.encoder.blocks.2.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 369169376
+        },
+        {
+          "name": "vision_tower.encoder.blocks.2.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 369171424
+        },
+        {
+          "name": "vision_tower.encoder.blocks.2.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 372317152
+        },
+        {
+          "name": "vision_tower.encoder.blocks.20.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 381754336
+        },
+        {
+          "name": "vision_tower.encoder.blocks.20.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 390142944
+        },
+        {
+          "name": "vision_tower.encoder.blocks.20.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 398531552
+        },
+        {
+          "name": "vision_tower.encoder.blocks.20.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 398533600
+        },
+        {
+          "name": "vision_tower.encoder.blocks.20.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 398535648
+        },
+        {
+          "name": "vision_tower.encoder.blocks.20.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 401681376
+        },
+        {
+          "name": "vision_tower.encoder.blocks.21.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 411118560
+        },
+        {
+          "name": "vision_tower.encoder.blocks.21.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 419507168
+        },
+        {
+          "name": "vision_tower.encoder.blocks.21.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 427895776
+        },
+        {
+          "name": "vision_tower.encoder.blocks.21.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 427897824
+        },
+        {
+          "name": "vision_tower.encoder.blocks.21.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 427899872
+        },
+        {
+          "name": "vision_tower.encoder.blocks.21.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 431045600
+        },
+        {
+          "name": "vision_tower.encoder.blocks.22.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 440482784
+        },
+        {
+          "name": "vision_tower.encoder.blocks.22.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 448871392
+        },
+        {
+          "name": "vision_tower.encoder.blocks.22.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 457260000
+        },
+        {
+          "name": "vision_tower.encoder.blocks.22.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 457262048
+        },
+        {
+          "name": "vision_tower.encoder.blocks.22.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 457264096
+        },
+        {
+          "name": "vision_tower.encoder.blocks.22.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 460409824
+        },
+        {
+          "name": "vision_tower.encoder.blocks.23.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 469847008
+        },
+        {
+          "name": "vision_tower.encoder.blocks.23.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 478235616
+        },
+        {
+          "name": "vision_tower.encoder.blocks.23.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 486624224
+        },
+        {
+          "name": "vision_tower.encoder.blocks.23.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 486626272
+        },
+        {
+          "name": "vision_tower.encoder.blocks.23.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 486628320
+        },
+        {
+          "name": "vision_tower.encoder.blocks.23.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 489774048
+        },
+        {
+          "name": "vision_tower.encoder.blocks.24.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 499211232
+        },
+        {
+          "name": "vision_tower.encoder.blocks.24.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 507599840
+        },
+        {
+          "name": "vision_tower.encoder.blocks.24.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 515988448
+        },
+        {
+          "name": "vision_tower.encoder.blocks.24.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 515990496
+        },
+        {
+          "name": "vision_tower.encoder.blocks.24.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 515992544
+        },
+        {
+          "name": "vision_tower.encoder.blocks.24.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 519138272
+        },
+        {
+          "name": "vision_tower.encoder.blocks.25.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 528575456
+        },
+        {
+          "name": "vision_tower.encoder.blocks.25.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 536964064
+        },
+        {
+          "name": "vision_tower.encoder.blocks.25.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 545352672
+        },
+        {
+          "name": "vision_tower.encoder.blocks.25.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 545354720
+        },
+        {
+          "name": "vision_tower.encoder.blocks.25.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 545356768
+        },
+        {
+          "name": "vision_tower.encoder.blocks.25.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 548502496
+        },
+        {
+          "name": "vision_tower.encoder.blocks.26.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 557939680
+        },
+        {
+          "name": "vision_tower.encoder.blocks.26.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 566328288
+        },
+        {
+          "name": "vision_tower.encoder.blocks.26.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 574716896
+        },
+        {
+          "name": "vision_tower.encoder.blocks.26.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 574718944
+        },
+        {
+          "name": "vision_tower.encoder.blocks.26.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 574720992
+        },
+        {
+          "name": "vision_tower.encoder.blocks.26.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 577866720
+        },
+        {
+          "name": "vision_tower.encoder.blocks.3.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 587303904
+        },
+        {
+          "name": "vision_tower.encoder.blocks.3.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 595692512
+        },
+        {
+          "name": "vision_tower.encoder.blocks.3.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 604081120
+        },
+        {
+          "name": "vision_tower.encoder.blocks.3.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 604083168
+        },
+        {
+          "name": "vision_tower.encoder.blocks.3.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 604085216
+        },
+        {
+          "name": "vision_tower.encoder.blocks.3.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 607230944
+        },
+        {
+          "name": "vision_tower.encoder.blocks.4.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 616668128
+        },
+        {
+          "name": "vision_tower.encoder.blocks.4.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 625056736
+        },
+        {
+          "name": "vision_tower.encoder.blocks.4.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 633445344
+        },
+        {
+          "name": "vision_tower.encoder.blocks.4.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 633447392
+        },
+        {
+          "name": "vision_tower.encoder.blocks.4.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 633449440
+        },
+        {
+          "name": "vision_tower.encoder.blocks.4.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 636595168
+        },
+        {
+          "name": "vision_tower.encoder.blocks.5.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 646032352
+        },
+        {
+          "name": "vision_tower.encoder.blocks.5.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 654420960
+        },
+        {
+          "name": "vision_tower.encoder.blocks.5.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 662809568
+        },
+        {
+          "name": "vision_tower.encoder.blocks.5.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 662811616
+        },
+        {
+          "name": "vision_tower.encoder.blocks.5.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 662813664
+        },
+        {
+          "name": "vision_tower.encoder.blocks.5.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 665959392
+        },
+        {
+          "name": "vision_tower.encoder.blocks.6.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 675396576
+        },
+        {
+          "name": "vision_tower.encoder.blocks.6.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 683785184
+        },
+        {
+          "name": "vision_tower.encoder.blocks.6.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 692173792
+        },
+        {
+          "name": "vision_tower.encoder.blocks.6.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 692175840
+        },
+        {
+          "name": "vision_tower.encoder.blocks.6.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 692177888
+        },
+        {
+          "name": "vision_tower.encoder.blocks.6.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 695323616
+        },
+        {
+          "name": "vision_tower.encoder.blocks.7.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 704760800
+        },
+        {
+          "name": "vision_tower.encoder.blocks.7.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 713149408
+        },
+        {
+          "name": "vision_tower.encoder.blocks.7.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 721538016
+        },
+        {
+          "name": "vision_tower.encoder.blocks.7.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 721540064
+        },
+        {
+          "name": "vision_tower.encoder.blocks.7.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 721542112
+        },
+        {
+          "name": "vision_tower.encoder.blocks.7.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 724687840
+        },
+        {
+          "name": "vision_tower.encoder.blocks.8.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 734125024
+        },
+        {
+          "name": "vision_tower.encoder.blocks.8.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 742513632
+        },
+        {
+          "name": "vision_tower.encoder.blocks.8.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 750902240
+        },
+        {
+          "name": "vision_tower.encoder.blocks.8.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 750904288
+        },
+        {
+          "name": "vision_tower.encoder.blocks.8.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 750906336
+        },
+        {
+          "name": "vision_tower.encoder.blocks.8.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 754052064
+        },
+        {
+          "name": "vision_tower.encoder.blocks.9.mlp.fc0.weight",
+          "dtype": "BF16",
+          "shape": [
+            4096,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 763489248
+        },
+        {
+          "name": "vision_tower.encoder.blocks.9.mlp.fc1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            4096
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 771877856
+        },
+        {
+          "name": "vision_tower.encoder.blocks.9.norm0.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 780266464
+        },
+        {
+          "name": "vision_tower.encoder.blocks.9.norm1.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 780268512
+        },
+        {
+          "name": "vision_tower.encoder.blocks.9.wo.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            1536
+          ],
+          "payload_bytes": 3145728,
+          "file_offset": 780270560
+        },
+        {
+          "name": "vision_tower.encoder.blocks.9.wqkv.weight",
+          "dtype": "BF16",
+          "shape": [
+            4608,
+            1024
+          ],
+          "payload_bytes": 9437184,
+          "file_offset": 783416288
+        },
+        {
+          "name": "vision_tower.encoder.final_layernorm.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024
+          ],
+          "payload_bytes": 2048,
+          "file_offset": 792853472
+        },
+        {
+          "name": "vision_tower.patch_embed.pos_emb.weight",
+          "dtype": "BF16",
+          "shape": [
+            64,
+            64,
+            1024
+          ],
+          "payload_bytes": 8388608,
+          "file_offset": 792855520
+        },
+        {
+          "name": "vision_tower.patch_embed.proj.weight",
+          "dtype": "BF16",
+          "shape": [
+            1024,
+            3,
+            14,
+            14
+          ],
+          "payload_bytes": 1204224,
+          "file_offset": 801244128
+        }
+      ],
+      "header_only": true
+    }
+  ],
+  "expert0_slices": [
+    {
+      "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w1.weight_packed",
+      "dtype": "U8",
+      "shape": [
+        3072,
+        1792
+      ],
+      "payload_bytes": 5505024,
+      "file_offset": 1268562960,
+      "local_file": "C:\\Users\\Encry\\Documents\\Projetos\\Web\\Network AI\\.models\\kimi-k3-unit-expert0\\w1.weight_packed.raw",
+      "slice_sha256": "7ce56d721eea1dbc61d9bfa03b882cd3f79495b3d12e738fa6289505e88b97cf"
+    },
+    {
+      "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w1.weight_scale",
+      "dtype": "U8",
+      "shape": [
+        3072,
+        112
+      ],
+      "payload_bytes": 344064,
+      "file_offset": 1274067984,
+      "local_file": "C:\\Users\\Encry\\Documents\\Projetos\\Web\\Network AI\\.models\\kimi-k3-unit-expert0\\w1.weight_scale.raw",
+      "slice_sha256": "2711ff31127e735bc382aa4993242eaef2f49301d3f8461c9fa9844f1701d394"
+    },
+    {
+      "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w2.weight_packed",
+      "dtype": "U8",
+      "shape": [
+        3584,
+        1536
+      ],
+      "payload_bytes": 5505024,
+      "file_offset": 1274412048,
+      "local_file": "C:\\Users\\Encry\\Documents\\Projetos\\Web\\Network AI\\.models\\kimi-k3-unit-expert0\\w2.weight_packed.raw",
+      "slice_sha256": "f4dbcdbb0f7d2d024ef7214b7b2d2a40d71de1a68072338e8488a455341180ad"
+    },
+    {
+      "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w2.weight_scale",
+      "dtype": "U8",
+      "shape": [
+        3584,
+        96
+      ],
+      "payload_bytes": 344064,
+      "file_offset": 1279917072,
+      "local_file": "C:\\Users\\Encry\\Documents\\Projetos\\Web\\Network AI\\.models\\kimi-k3-unit-expert0\\w2.weight_scale.raw",
+      "slice_sha256": "525101a1b9d83ade0916b324d83b8aa3623061af7d2f6a88f661f048d7fcb5e6"
+    },
+    {
+      "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w3.weight_packed",
+      "dtype": "U8",
+      "shape": [
+        3072,
+        1792
+      ],
+      "payload_bytes": 5505024,
+      "file_offset": 1280261136,
+      "local_file": "C:\\Users\\Encry\\Documents\\Projetos\\Web\\Network AI\\.models\\kimi-k3-unit-expert0\\w3.weight_packed.raw",
+      "slice_sha256": "405f4a03860b03a379f7a75c2c0caacbc6139437f288aa76c171393ee49e4ab8"
+    },
+    {
+      "name": "language_model.model.layers.1.block_sparse_moe.experts.0.w3.weight_scale",
+      "dtype": "U8",
+      "shape": [
+        3072,
+        112
+      ],
+      "payload_bytes": 344064,
+      "file_offset": 1285766160,
+      "local_file": "C:\\Users\\Encry\\Documents\\Projetos\\Web\\Network AI\\.models\\kimi-k3-unit-expert0\\w3.weight_scale.raw",
+      "slice_sha256": "7fdf3a03ac6cd1a289f898191beb4d9c5334f168c95507a1f569cf2c8a3f0bdb"
+    }
+  ],
+  "full_shard_digest_verified": false,
+  "partial_cpu_tensor_load_executed": false,
+  "full_inference_executed": false,
+  "limitations": [
+    "Ranges come from revision-pinned HTTPS URLs; local slice hashes do not verify the full upstream LFS digest",
+    "Packed expert weights are not a complete stage, decoder or model",
+    "Header sizes exclude allocation, activation, state, communication and kernel workspace",
+    "No K3 output parity or GPU kernel qualification is established"
+  ]
+}

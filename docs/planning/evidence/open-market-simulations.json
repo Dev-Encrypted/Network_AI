@@ -1,0 +1,145 @@
+{
+  "policy_version": "planning-commercial-payments-2026-09-13-v2",
+  "scope": "deterministic funded-market arithmetic with fictional inputs; not distributed-system validation",
+  "policy_sha256": "f1c27afb9514b7f6abbc488957291723a0f3048bd623521cdbf5548e5f34235e",
+  "simulator_sha256": "0b6c6a89b1d076f404325a6bac651b71474a65dbefd4b77b27545961ac63bded",
+  "status": "passed_arithmetic",
+  "case_count": 8,
+  "cases": [
+    {
+      "id": "M01",
+      "name": "Payment redistribution conserves funded value",
+      "inputs": {
+        "payment_payment_atomic": 100000000,
+        "split_bps": {
+          "providers": 9000,
+          "gateway": 600,
+          "operations": 200,
+          "reserve": 200
+        }
+      },
+      "outputs": {
+        "allocations_payment_atomic": {
+          "providers": 90000000,
+          "gateway": 6000000,
+          "operations": 2000000,
+          "reserve": 2000000
+        }
+      },
+      "status": "passed_arithmetic",
+      "limitation": "No real transfer, external asset or distributed ledger was executed. Cooperative TU issuance is a separate policy."
+    },
+    {
+      "id": "M02",
+      "name": "READY reward transfers from an already funded pool",
+      "inputs": {
+        "funded_pool_payment_atomic": 100000000,
+        "verified_reward_payment_atomic": 30000000
+      },
+      "outputs": {
+        "pool_after_payment_atomic": 70000000,
+        "provider_after_payment_atomic": 30000000,
+        "additional_unbacked_value_payment_atomic": 0
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Readiness and funding confirmation are assumed, not demonstrated by this arithmetic."
+    },
+    {
+      "id": "M03",
+      "name": "Two commitments cannot spend the same pool funds",
+      "inputs": {
+        "funds_payment_atomic": 100000000,
+        "first_commitment_payment_atomic": 70000000,
+        "second_requested_payment_atomic": 40000000
+      },
+      "outputs": {
+        "remaining_payment_atomic": 30000000,
+        "second_allowed": false
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Sequential constraint only; cross-operator double spending needs qualified settlement."
+    },
+    {
+      "id": "M04",
+      "name": "A grant is funded from available fees instead of new issuance",
+      "inputs": {
+        "available_fee_revenue_payment_atomic": 6000000,
+        "grant_share_bps": 200
+      },
+      "outputs": {
+        "grant_payment_atomic": 120000,
+        "fees_remaining_payment_atomic": 5880000
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Illustrative local pool rule, not a mandatory worldwide free allocation."
+    },
+    {
+      "id": "M05",
+      "name": "Unused hold releases while service payments remain funded",
+      "inputs": {
+        "initial_wallet_payment_atomic": 200000000,
+        "hold_payment_atomic": 120000000,
+        "actual_cost_payment_atomic": 80000000
+      },
+      "outputs": {
+        "release_payment_atomic": 40000000,
+        "final_wallet_payment_atomic": 120000000,
+        "recipients_payment_atomic": {
+          "providers": 72000000,
+          "gateway": 4800000,
+          "operations": 1600000,
+          "reserve": 1600000
+        }
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Does not demonstrate metering authenticity, refund disputes or transaction races."
+    },
+    {
+      "id": "M06",
+      "name": "Withdrawal cannot reuse funds already held for service",
+      "inputs": {
+        "funded_value_payment_atomic": 100000000,
+        "held_payment_atomic": 60000000,
+        "withdraw_requested_payment_atomic": 50000000
+      },
+      "outputs": {
+        "withdrawable_payment_atomic": 40000000,
+        "request_allowed": false,
+        "backing_after_maximum_withdrawal_payment_atomic": 60000000
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Unilateral withdrawal, finality and escrow behavior still need real contract tests."
+    },
+    {
+      "id": "M07",
+      "name": "An apparently cheap price may miss the provider margin target",
+      "inputs": {
+        "cost": "0.40",
+        "fee_fraction": "0.10",
+        "target_margin": "0.20",
+        "buyer_price": "0.50"
+      },
+      "outputs": {
+        "minimum_price_exact": "4/7",
+        "minimum_price_approx": "0.571429",
+        "margin_at_buyer_price_exact": "1/10"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Fictional inputs, no quotation of energy, GPU rental or third-party API prices."
+    },
+    {
+      "id": "M08",
+      "name": "Publishing alone does not manufacture financial revenue",
+      "inputs": {
+        "created_nodes": 1000,
+        "published_models": 5000,
+        "funded_counterparty_payment_atomic": 0
+      },
+      "outputs": {
+        "new_spendable_payment_atomic": 0
+      },
+      "status": "passed_arithmetic",
+      "limitation": "An accounting policy; it does not prove Sybil, spam or malicious model defenses."
+    }
+  ]
+}

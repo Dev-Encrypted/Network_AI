@@ -1,0 +1,63 @@
+{
+  "study_id": "f0-event-economy-v1-2026-09-14",
+  "registered_before_results": true,
+  "scope": "synthetic discrete-event experiment; no real credits or economic qualification",
+  "policy": "planning-operating-policy-2026-09-13-v6",
+  "calibration_seeds": [1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020],
+  "holdout_seeds": [9001,9002,9003,9004,9005,9006,9007,9008,9009,9010,9011,9012,9013,9014,9015,9016,9017,9018,9019,9020,9021,9022,9023,9024,9025,9026,9027,9028,9029,9030,9031,9032,9033,9034,9035,9036,9037,9038,9039,9040,9041,9042,9043,9044,9045,9046,9047,9048,9049,9050],
+  "variants": ["v4_availability_single", "v5_demand_single", "v5_availability_split", "v5_demand_split", "v6_demand_split"],
+  "scenarios": ["steady_zero_buyers", "idle_then_return", "credit_overhang", "large_model_rush", "correlated_exit", "all_inference_nodes_absent", "service_quorum_partition", "mixed_commercial", "operating_funding_stops", "undetected_experimental_fraud", "severe_combined_shock", "zero_use", "new_model", "slow_settlement", "hoarding", "late_arrival"],
+  "parameters": {
+    "days": 90,
+    "mature_days": 30,
+    "observation_starts_day": 30,
+    "lease_seconds": 900,
+    "queue_seconds": 120,
+    "receipt_review_seconds": 86400,
+    "requests_per_day": 96,
+    "small_nodes": 6,
+    "large_nodes": 3,
+    "nonprovider_accounts": 3,
+    "small_reward_microtu_per_lease": 250000,
+    "large_reward_microtu_per_lease": 500000,
+    "compact_price_microtu": 2000000,
+    "large_price_microtu": 8000000,
+    "compact_service_seconds": 30,
+    "large_service_seconds": 90,
+    "large_share": 0.25,
+    "cancel_probability": 0.01,
+    "failure_probability": 0.01,
+    "detected_refund_probability": 0.005,
+    "post_finalization_refund_probability": 0.002,
+    "bootstrap_max_days": 60,
+    "initial_tu": 0,
+    "operating_cash_initial_days": 37,
+    "operating_cash_regular_daily_units": 10,
+    "operating_cash_cost_daily_units": 10,
+    "operating_cash_shutdown_days": 7
+  },
+  "acceptance": {
+    "accounting_and_resource_violations": 0,
+    "minimum_funded_compatible_completion_fraction": 0.95,
+    "approved_load_economic_hibernation_seconds": 0,
+    "mature_ordinary_issuance_microtu": 0,
+    "mature_reserve_drawdown_microtu": 0,
+    "mature_recycled_payout_covers_normal_cost": true,
+    "cohort_liquidity_depletion_may_hide_deficit": false,
+    "maximum_recovery_seconds_after_all_prerequisites_return": 86400
+  },
+  "control_adaptations": [
+    "All variants start at zero TU and earn balances from contracted verified READY; the historical v4 fictional genesis is not reused.",
+    "Every variant uses the same event, queue, review, failure and maturity mechanics. These are policy decompositions, not an exact replay of the old hourly simulator.",
+    "Credit overhang is produced by retained issued rewards and a later capacity reduction, not by adding an unexplained opening balance."
+  ],
+  "declared_limits": [
+    "All prices, speeds, rewards, arrivals, retention and operating cash are fictional and fixed before results.",
+    "Physical compatibility, READY attestations and quorum availability are modeled inputs, not cryptographic proofs.",
+    "Demand is sampled at individual request timestamps; leases last 900 seconds and receipts remain pending for the full configured delay.",
+    "No market equilibrium, human retention prediction, taxation, real electricity cost or proof of independent operators.",
+    "Commercial opportunity cost is a synthetic resource withdrawal with a separate cash counter; no x402 adapter or real settlement is tested.",
+    "An unsupported newly requested model remains unavailable; registration alone never manufactures a compatible route.",
+    "Precommitment is local and hash-verifiable, not an independent public timestamp or blinded third-party evaluation."
+  ]
+}

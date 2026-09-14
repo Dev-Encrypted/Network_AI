@@ -1,0 +1,93 @@
+{
+  "policy_version": "planning-operating-policy-2026-09-13-v6",
+  "status": "candidate_specification_not_runtime_configuration",
+  "normative_document": "docs/planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md",
+  "unit": "TU",
+  "microtu_per_tu": 1000000,
+  "maximum_stored_integer": "9223372036854775807",
+  "reward_basis": "verified_contracted_useful_ready_time",
+  "paid_buyers_required_for_cooperation": false,
+  "credit_cash_conversion": false,
+  "funds": {
+    "aggregate": "COOP_CONTINUITY",
+    "working": "COOP_WORKING",
+    "protected": "COOP_CORE_RESERVE",
+    "aggregate_accepts_postings": false,
+    "targets_use": "free_balance_for_unfunded_future_commitments",
+    "working_floor_reference_hours": 6,
+    "working_target_reference_hours": 24,
+    "protected_target_reference_hours": 72,
+    "working_horizon_rule": "max(6h,conservative_cooperative_settlement_delay+max_lease)",
+    "working_target_rule": "max(working_floor,cost_of_24h_approved_normal_unfunded_commitments)",
+    "refill_order": [
+      "working_floor",
+      "protected_target",
+      "working_target",
+      "burn"
+    ],
+    "protected_can_fund_normal_expansion": false
+  },
+  "exposure": {
+    "formula": "S+L+J",
+    "issuance_reference_numerator": 35,
+    "issuance_reference_denominator": 100,
+    "reference_days": 7,
+    "treasury_new_issuance_divisor": 19,
+    "grant_new_issuance_divisor": 49,
+    "existing_holds_are": "S",
+    "future_issuance_is": "L",
+    "approved_unposted_burn_reversal_is": "J",
+    "retroactive_balance_haircut": false
+  },
+  "admission": {
+    "complete_route_required": true,
+    "demand_or_coverage_justification_required": true,
+    "known_operator_rotation": true,
+    "expansion_preserves_working_floor": true,
+    "expansion_requires_protected_target_met": true,
+    "funding_reserved_before_lease": true,
+    "accepted_contracts_preserved": true,
+    "max_lease_minutes": 15,
+    "resource_double_reservation": false
+  },
+  "validation": {
+    "integrated_simulation_executed": false,
+    "real_hardware_benchmark_executed": false,
+    "calibration_seed_count_planned": 20,
+    "holdout_seed_count_planned": 50,
+    "synthetic_days_per_run_planned": 90,
+    "mature_days_planned": 30,
+    "mature_ordinary_new_issuance_allowed": false,
+    "mature_extraordinary_support_allowed": false,
+    "mature_reserve_drawdown_may_hide_deficit": false,
+    "minimum_funded_compatible_request_slo_numerator": 95,
+    "minimum_funded_compatible_request_slo_denominator": 100,
+    "public_launch_approved": false,
+    "mature_participant_liquidity_and_access_must_not_deteriorate_continuously": true,
+    "controls_reimplemented_in_common_event_model": true
+  },
+  "commercial": {
+    "core_requires_financial_chain": false,
+    "adapter_reference": "x402_batch_settlement_evm",
+    "network_reference": "eip155:84532",
+    "asset_reference": "USDC_TEST_ONLY",
+    "counterparty_rule": "one_accountable_seller_per_complete_route",
+    "cross_chain_atomic_split_promised": false,
+    "deployed_contract_qualified": false,
+    "facilitator_qualified": false,
+    "actual_funds_transferred": false
+  },
+  "governance": {
+    "ordinary_notice_hours": 48,
+    "rights_notice_days": 7,
+    "federated_validator_count": 4,
+    "confirmation_count": 3,
+    "inference_node_admission": "open_subject_to_runtime_compatibility",
+    "validator_admission": "explicit_federated_policy"
+  },
+  "operational_cash": {
+    "opening_days": 30,
+    "shutdown_reserve_days": 7,
+    "resources_confirmed": false
+  }
+}

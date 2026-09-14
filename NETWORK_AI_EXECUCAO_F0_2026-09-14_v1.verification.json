@@ -1,0 +1,17 @@
+{
+  "archive": "NETWORK_AI_EXECUCAO_F0_2026-09-14_v1.zip",
+  "bytes": 86326026,
+  "sha256": "5d6afd3b991b9938b9f8840266f2fef7fb5c10324f11265b6f8fc7872a55eca1",
+  "files": 202,
+  "manifest_entries": 201,
+  "all_entries_readback_verified": true,
+  "public_launch_approved": false,
+  "excluded": [
+    "Model weights",
+    "Installed Python/WSL runtimes",
+    "Rust build cache and binaries",
+    "Git metadata",
+    "Environment secrets",
+    "Unrelated user outputs"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "Qwen/Qwen3-32B",
+  "architecture": [
+    "Qwen3ForCausalLM"
+  ],
+  "model_type": "qwen3",
+  "text_config": null,
+  "metadata": {
+    "total_size": 65524246528
+  },
+  "first_tensor_names": [
+    "lm_head.weight",
+    "model.embed_tokens.weight",
+    "model.layers.0.input_layernorm.weight",
+    "model.layers.0.mlp.down_proj.weight",
+    "model.layers.0.mlp.gate_proj.weight"
+  ],
+  "layers": 64,
+  "max_files_per_layer": 2.0,
+  "layer_0_files": [
+    "model-00001-of-00017.safetensors"
+  ],
+  "layer_1_files": [
+    "model-00001-of-00017.safetensors"
+  ]
+}

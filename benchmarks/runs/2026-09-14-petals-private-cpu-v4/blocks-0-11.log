@@ -1,0 +1,69 @@
+Sep 14 01:28:45.962 [INFO] Make sure you follow the BLOOM terms of use: https://bit.ly/bloom-license
+Sep 14 01:28:47.884 [INFO] Connecting to a private swarm, initial peers: ['/ip4/127.0.0.1/tcp/44665/p2p/12D3KooWFt7krdfPGLSX3sqBnwXAsk6s5AUd866bS7zushYK6hmz']
+Sep 14 01:28:47.885 [INFO] Running a server on ['/ip4/127.0.0.1/tcp/46279/p2p/12D3KooWNUrvHrRBtXS7SzfpcRvzRMCNieibEcqpLtrd4hw9fGaR']
+Sep 14 01:28:47.885 [INFO] Model weights are loaded in float32 format
+Sep 14 01:28:47.886 [INFO] Attention cache for all blocks will consume up to 0.02 GiB
+Sep 14 01:28:47.888 [INFO] Announced that blocks range(0, 12) are joining
+Sep 14 01:28:48.017 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 0
+Sep 14 01:28:48.376 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 1
+Sep 14 01:28:48.502 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 2
+Sep 14 01:28:48.652 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 3
+Sep 14 01:28:48.778 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 4
+Sep 14 01:28:48.912 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 5
+Sep 14 01:28:49.038 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 6
+Sep 14 01:28:49.171 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 7
+Sep 14 01:28:49.395 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 8
+Sep 14 01:28:49.518 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 9
+Sep 14 01:28:49.638 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 10
+Sep 14 01:28:49.768 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 11
+/root/.local/share/network-ai/f0-petals-py310/lib/python3.10/site-packages/bitsandbytes/libbitsandbytes_cpu.so: undefined symbol: cadam32bit_grad_fp32
+Sep 14 01:28:49.811 [INFO] Started
+Sep 14 01:28:58.919 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:28:59.341 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:28:59.794 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:00.259 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:00.671 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:01.133 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:01.556 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:01.970 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:02.399 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:02.819 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:03.212 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:05.327 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:05.788 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:06.210 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:06.664 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:07.116 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:07.561 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:08.018 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:08.459 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:08.876 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:09.319 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:09.756 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:10.176 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:10.625 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:11.081 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:11.515 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:12.002 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:12.441 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:12.859 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:13.297 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:13.730 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:14.148 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:14.628 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:16.032 [INFO] rpc_inference.open(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:16.034 [INFO] rpc_inference.wait_for_alloc(size=0.00 GiB), already used 0.00/0.02 GiB (0.0%)
+Sep 14 01:29:16.035 [INFO] rpc_inference.alloc_done(size=0.00 GiB)
+Sep 14 01:29:16.931 [INFO] rpc_inference.close(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:17.636 [INFO] rpc_inference.open(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:17.637 [INFO] rpc_inference.wait_for_alloc(size=0.00 GiB), already used 0.00/0.02 GiB (0.0%)
+Sep 14 01:29:17.638 [INFO] rpc_inference.alloc_done(size=0.00 GiB)
+Sep 14 01:29:18.454 [INFO] rpc_inference.close(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:19.163 [INFO] rpc_inference.open(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:19.163 [INFO] rpc_inference.wait_for_alloc(size=0.00 GiB), already used 0.00/0.02 GiB (0.0%)
+Sep 14 01:29:19.165 [INFO] rpc_inference.alloc_done(size=0.00 GiB)
+Sep 14 01:29:19.997 [INFO] rpc_inference.close(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:20.364 [INFO] rpc_forward(blocks=0:12, remote_peer=...VDpjRT)
+Sep 14 01:29:20.464 [INFO] Announced that blocks ['network-ai-f0-1be2597c845945959ddbe4f306a693f2.0', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.1', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.2', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.3', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.4', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.5', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.6', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.7', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.8', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.9', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.10', 'network-ai-f0-1be2597c845945959ddbe4f306a693f2.11'] are offline
+Sep 14 01:29:20.473 [INFO] Shutting down
+Sep 14 01:29:20.475 [INFO] Module container shut down successfully

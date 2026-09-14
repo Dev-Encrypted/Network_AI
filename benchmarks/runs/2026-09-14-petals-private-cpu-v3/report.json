@@ -1,0 +1,28 @@
+{
+  "evidence_type": "MEASURED_LOCAL_CPU_PRIVATE_SWARM",
+  "physical_hosts": 1,
+  "block_servers": 2,
+  "model": "bigscience/bloom-560m",
+  "revision": "ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971",
+  "petals_commit": "22afba627a7eb4fcfe9418c49472c6a51334b8ac",
+  "petals_version": "2.3.0.dev2",
+  "torch_version": "2.2.2+cpu",
+  "transformers_version": "4.43.1",
+  "precommitted_max_absolute_logit_error": 0.001,
+  "public_swarm_joined": false,
+  "routing_throughput_hint_is_measured": false,
+  "GPU_used": false,
+  "public_launch_approved": false,
+  "started_at_utc": "2026-09-14T04:27:03.635275+00:00",
+  "harness_sha256": "d14e0fd663caec3d225ed03c255d061a40222f44cbbfdf092b48215ec1d9caaf",
+  "limitations": [
+    "One physical computer; no LAN/WAN or independent operators",
+    "BLOOM-560m CPU is a research reference, not a Kimi proof or the Qwen service engine",
+    "The pinned upstream contains an always-true resume-position assert; resume metadata is not qualified",
+    "Private loopback and synthetic inputs only; no public API or credit issuance"
+  ],
+  "run_error": {
+    "type": "AssertionError",
+    "message": "use_cache=False is not supported"
+  }
+}

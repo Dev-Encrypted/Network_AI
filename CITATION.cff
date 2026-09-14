@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "Ao citar o NETWORK AI, atribua Dev-Encrypted e informe a versão ou o commit consultado."
+type: software
+title: "NETWORK AI: pesquisa e bancada de inferência cooperativa descentralizada"
+authors:
+  - family-names: "Dev-Encrypted"
+    website: "https://github.com/Dev-Encrypted"
+version: "0.1.0-f0"
+date-released: "2026-09-14"
+url: "https://github.com/Dev-Encrypted/Network_AI"
+repository-code: "https://github.com/Dev-Encrypted/Network_AI"
+license: Apache-2.0
+keywords:
+  - distributed inference
+  - decentralized AI
+  - cooperative computing
+  - heterogeneous GPUs
+  - token economy
+abstract: >-
+  Pesquisa, especificações e bancada F0 para uma rede de inferência com GPUs
+  heterogêneas e tokens de uso. Inclui evidências locais e um estudo econômico
+  que rejeitou os parâmetros fictícios testados. Não é uma rede pública operacional.

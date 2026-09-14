@@ -1,0 +1,20 @@
+{
+  "artifact": "benchmarks/fixtures/qwen3-8b-e01.jsonl",
+  "sha256": "b6abf5d44010405c1076926bd4eae0d2c4293095044db272371c9f083b9f47ea",
+  "model_revision": "b968826d9c46dd6066d109eabc6255188de91218",
+  "samples_per_profile": 30,
+  "warmups_per_profile": 3,
+  "profiles": [
+    "2048/256",
+    "7168/1024"
+  ],
+  "all_prompt_token_counts_verified": true,
+  "template_kwargs": {
+    "enable_thinking": false
+  },
+  "inference_executed": false,
+  "limitations": [
+    "Forced minimum output is a throughput/VRAM workload, not a semantic quality test",
+    "Thirty samples cannot qualify p99 or the planned 1000-session production threshold"
+  ]
+}

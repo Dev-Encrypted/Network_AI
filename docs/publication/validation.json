@@ -1,0 +1,34 @@
+{
+  "observed_at_utc": "2026-09-14T16:12:18.511771+00:00",
+  "scope": "Initial public source snapshot and immutable F0 ZIP; publication review, not a product security audit",
+  "reviewed_source_files_before_this_report": 214,
+  "reviewed_source_manifest_sha256": "9ea91a34d6f7044aef9314e8e1244d610d73bca953bf1b9373ba480a128429af",
+  "tests": {
+    "python_passed": 21,
+    "rust_passed": 2,
+    "rust_fmt_check_passed": true,
+    "clippy_warnings_denied_passed": true
+  },
+  "documentation": {
+    "relative_links_checked": 375,
+    "markdown_files": 42,
+    "citation_cff_official_schema_valid": true
+  },
+  "secret_scan": {
+    "tool": "gitleaks 8.30.1",
+    "archive_depth": 3,
+    "decode_depth": 5,
+    "scanned_bytes_reported": 2184724934,
+    "detector_findings": 131,
+    "confirmed_secrets": 0,
+    "classification": "All 131 generic-api-key findings are SHA-256 input-token fingerprints in the exact pinned Qwen fixture; no path or rule was disabled",
+    "limitations": "Pattern scanning is not a proof that no secret or vulnerability can exist"
+  },
+  "restoration_test": {
+    "artifacts_restored": 8,
+    "current_code_replaced": false,
+    "archive_sha256": "5d6afd3b991b9938b9f8840266f2fef7fb5c10324f11265b6f8fc7872a55eca1"
+  },
+  "public_source_publication_authorized": true,
+  "public_network_operation_approved": false
+}

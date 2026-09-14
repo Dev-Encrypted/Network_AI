@@ -1,0 +1,23 @@
+flowchart LR
+  subgraph USER[Dominio do consumidor]
+    AG[Agente e ferramentas locais]
+    SEC[Arquivos e segredos]
+    AG --> SEC
+  end
+  subgraph OP[Dominio do operador]
+    GW[Gateway que pode ver conteudo]
+    CP[Controle e ledger]
+    PK[Publicador e chaves de release]
+  end
+  subgraph HOST[Dominio do participante]
+    DA[Daemon autenticado]
+    WO[Worker isolado]
+    AD[Administrador do host]
+    DA --> WO
+    AD -.->|pode observar memoria| WO
+  end
+  AG -->|contexto selecionado| GW
+  GW -->|capability limitada| DA
+  GW -->|metadados| CP
+  PK -->|artefatos assinados| DA
+  RELAY[Relay fora da confianca do conteudo] -->|tunel cifrado entre endpoints| DA

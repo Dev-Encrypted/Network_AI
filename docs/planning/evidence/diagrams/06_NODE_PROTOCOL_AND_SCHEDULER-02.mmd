@@ -1,0 +1,20 @@
+stateDiagram-v2
+  [*] --> PROPOSED
+  PROPOSED --> ACCEPTED: aceite do participante
+  PROPOSED --> EXPIRED: sem aceite
+  ACCEPTED --> RESERVED: recursos e epoch persistidos
+  RESERVED --> DOWNLOADING: faltam artefatos
+  RESERVED --> LOADING: cache integro
+  DOWNLOADING --> LOADING: verificacao concluida
+  LOADING --> VALIDATING: engine iniciou
+  VALIDATING --> READY: probe independente aceito
+  READY --> SERVING: sessao autorizada
+  SERVING --> READY: sessoes encerradas
+  READY --> DRAINING: troca ou saida
+  SERVING --> DRAINING: parar admissao
+  DRAINING --> RELEASED: sem sessoes ou prazo
+  DOWNLOADING --> FAILED: erro irrecuperavel
+  LOADING --> FAILED: memoria ou kernel
+  VALIDATING --> QUARANTINED: inconsistencia
+  READY --> EXPIRED: lease expirou
+  SERVING --> EXPIRED: limite do lease

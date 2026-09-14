@@ -1,0 +1,25 @@
+flowchart LR
+  C[Cliente e carteira] --> G1[Gateway escolhido]
+  C --> G2[Outro gateway ou cliente nativo]
+  C --> S[Registro cooperativo de TU]
+  C --> L[Liquidacao financeira opcional]
+  G1 --> I1[Indexador da comunidade]
+  G2 --> I2[Outro indexador ou oferta direta]
+  I1 <--> D[Descoberta P2P de anuncios assinados]
+  I2 <--> D
+  P[Publicador de modelo] --> D
+  N1[No independente GPU pequena] --> D
+  N2[No ou cluster GPU grande] --> D
+  G1 --> O[Coordenador escolhido por sessao]
+  G2 --> O
+  O --> N1
+  O --> N2
+  O --> POOL[Pool cooperativo ou comercial]
+  POOL --> S
+  POOL --> L
+  N1 --> S
+  N2 --> S
+  N1 --> L
+  N2 --> L
+  G1 --> S
+  G1 --> L

@@ -1,0 +1,17 @@
+stateDiagram-v2
+  [*] --> REGISTERED
+  REGISTERED --> BENCHMARKING: posse da chave e politica aceitas
+  BENCHMARKING --> AVAILABLE: qualificacao aprovada
+  AVAILABLE --> BUSY: atribuicao ativa
+  BUSY --> AVAILABLE: todas liberadas
+  AVAILABLE --> DRAINING: saida controlada
+  BUSY --> DRAINING: saida controlada
+  DRAINING --> OFFLINE: concluiu ou prazo expirou
+  AVAILABLE --> OFFLINE: perda de presenca
+  BUSY --> OFFLINE: perda de presenca
+  OFFLINE --> BENCHMARKING: reconexao e revalidacao
+  BENCHMARKING --> QUARANTINED: divergencia sob investigacao
+  BUSY --> QUARANTINED: incidente
+  QUARANTINED --> BENCHMARKING: liberacao auditada
+  AVAILABLE --> UPDATE_REQUIRED: protocolo incompativel
+  UPDATE_REQUIRED --> BENCHMARKING: upgrade verificado

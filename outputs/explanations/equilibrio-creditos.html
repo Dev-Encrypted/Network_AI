@@ -1,0 +1,112 @@
+<div id="nai-credit-balance-20260913">
+  <h3>Equilíbrio dos créditos · exemplo hipotético</h3>
+  <div class="viz-row text-small">
+    <span>Um grupo de modelo</span>
+    <span>Emissão: <span class="tabular-nums">1.000 NC/h</span></span>
+    <span>Capacidade líquida: <span class="tabular-nums">500 chamadas padronizadas/h</span></span>
+  </div>
+  <div class="viz-controls">
+    <label class="form-label" for="nai-credit-utilization">
+      Utilização em resgates: <output id="nai-credit-utilization-value" class="tabular-nums">60%</output>
+      <input class="form-range" id="nai-credit-utilization" type="range" min="0" max="100" step="1" value="60">
+    </label>
+    <label class="form-label" for="nai-credit-price">
+      Tarifa: <output id="nai-credit-price-value" class="tabular-nums">4 NC/chamada</output>
+      <input class="form-range" id="nai-credit-price" type="range" min="0.5" max="10" step="0.25" value="4">
+    </label>
+  </div>
+  <svg class="nai-credit-chart" role="img" aria-labelledby="nai-credit-chart-title nai-credit-chart-desc">
+    <title id="nai-credit-chart-title">Créditos emitidos e consumidos por hora</title>
+    <desc id="nai-credit-chart-desc">Exemplo hipotético, sem compra, concessões ou estornos de créditos.</desc>
+    <rect data-chart-frame fill="none" stroke="var(--border)"></rect>
+    <text class="axis-title" data-axis="y">Movimento</text>
+    <text data-category="earned" text-anchor="end">Emitidos</text>
+    <text data-category="spent" text-anchor="end">Consumidos</text>
+    <rect data-bar="earned" fill="var(--viz-series-1)"></rect>
+    <rect data-bar="spent" fill="var(--viz-series-2)"></rect>
+    <text data-value="earned" class="tabular-nums"></text>
+    <text data-value="spent" class="tabular-nums"></text>
+    <g data-ticks></g>
+    <text class="axis-title" data-axis="x" text-anchor="middle">Créditos por hora (NC/h)</text>
+  </svg>
+  <div class="viz-grid" aria-live="polite" aria-atomic="true">
+    <div class="card viz-stat">
+      <div>Variação dos créditos em circulação</div>
+      <div class="viz-stat-value tabular-nums" data-stock-delta>−200 NC/h</div>
+    </div>
+    <div class="card viz-stat">
+      <div>Tarifa para emissão = consumo</div>
+      <div class="viz-stat-value tabular-nums" data-balanced-price>3,33 NC/chamada</div>
+    </div>
+  </div>
+  <div class="viz-row text-small">
+    <span data-served class="tabular-nums">300 resgates/h</span>
+    <span>Sem compra, concessões ou estornos</span>
+    <span>Valores NC sem conversão em dinheiro</span>
+  </div>
+</div>
+<style>
+  #nai-credit-balance-20260913 .nai-credit-chart { display: block; width: 100%; overflow: visible; }
+  #nai-credit-balance-20260913 .nai-credit-chart text { fill: var(--foreground); font-size: 12px; }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('nai-credit-balance-20260913');
+  const svg = root.querySelector('.nai-credit-chart');
+  const util = root.querySelector('#nai-credit-utilization');
+  const price = root.querySelector('#nai-credit-price');
+  const format = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+  const number = n => format.format(n);
+  let rendered = false;
+  function attr(node, values) { for (const [key, value] of Object.entries(values)) node.setAttribute(key, String(value)); }
+  function draw() {
+    const width = svg.getBoundingClientRect().width || root.getBoundingClientRect().width;
+    if (!width) return;
+    const left = 104, right = 14, height = 209;
+    const plotWidth = Math.max(1, width - left - right);
+    const emission = 1000, calls = 500 * Number(util.value) / 100;
+    const spent = calls * Number(price.value), delta = emission - spent;
+    const maximum = Math.max(emission, spent, 1) * 1.15;
+    attr(svg, { viewBox: '0 0 ' + width + ' ' + height, height });
+    attr(root.querySelector('[data-chart-frame]'), { x: left, y: 29, width: plotWidth, height: 123 });
+    attr(root.querySelector('[data-axis="y"]'), { x: 4, y: 18 });
+    attr(root.querySelector('[data-axis="x"]'), { x: left + plotWidth / 2, y: 202 });
+    const animate = rendered && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    for (const [key, amount, y] of [['earned', emission, 64], ['spent', spent, 124]]) {
+      attr(root.querySelector('[data-category="' + key + '"]'), { x: left - 10, y: y + 12 });
+      const bar = root.querySelector('[data-bar="' + key + '"]');
+      const barWidth = plotWidth * amount / maximum;
+      bar.style.transition = animate ? 'width 160ms ease-out' : 'none';
+      bar.style.width = barWidth + 'px';
+      attr(bar, { x: left, y, width: barWidth, height: 16 });
+      const label = root.querySelector('[data-value="' + key + '"]');
+      attr(label, { x: left + 6, y: y - 8 });
+      label.textContent = number(amount) + ' NC/h';
+    }
+    const ticks = root.querySelector('[data-ticks]');
+    ticks.replaceChildren();
+    [0, 0.5, 1].forEach(fraction => {
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      attr(label, { x: left + plotWidth * fraction, y: 173, 'text-anchor': fraction === 0 ? 'start' : fraction === 1 ? 'end' : 'middle' });
+      label.textContent = number(maximum * fraction);
+      ticks.appendChild(label);
+    });
+    const tickLabels = Array.from(ticks.children);
+    if (tickLabels.length === 3) {
+      const boxes = tickLabels.map(node => node.getBBox());
+      if (boxes[0].x + boxes[0].width + 4 > boxes[1].x || boxes[1].x + boxes[1].width + 4 > boxes[2].x) tickLabels[1].remove();
+    }
+    root.querySelector('#nai-credit-utilization-value').textContent = util.value + '%';
+    root.querySelector('#nai-credit-price-value').textContent = number(Number(price.value)) + ' NC/chamada';
+    root.querySelector('[data-stock-delta]').textContent = (delta > 0 ? '+' : delta < 0 ? '−' : '') + number(Math.abs(delta)) + ' NC/h';
+    root.querySelector('[data-balanced-price]').textContent = calls > 0 ? number(emission / calls) + ' NC/chamada' : 'Sem resgates';
+    root.querySelector('[data-served]').textContent = number(calls) + ' resgates/h';
+    root.querySelector('#nai-credit-chart-desc').textContent = 'Exemplo hipotético: emissão de ' + number(emission) + ' NC por hora e consumo de ' + number(spent) + ' NC por hora. Variação do estoque: ' + number(delta) + ' NC por hora. Não representa lucro ou receita em dinheiro.';
+    rendered = true;
+  }
+  util.addEventListener('input', draw);
+  price.addEventListener('input', draw);
+  new ResizeObserver(draw).observe(svg);
+  draw();
+})();
+</script>

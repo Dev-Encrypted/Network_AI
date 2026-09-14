@@ -1,0 +1,465 @@
+{
+  "policy_version": "cooperative-elastic-2026-09-13-v1",
+  "status": "passed_reference",
+  "scope": "20 deterministic arithmetic/control examples with fictional inputs, not a production simulation",
+  "case_count": 20,
+  "cases": [
+    {
+      "id": "A01",
+      "name": "Useful cooperative readiness earns without paid buyers",
+      "inputs": {
+        "paid_buyers": 0,
+        "verified_ms": 600000,
+        "rate_microtu_per_second": 1000
+      },
+      "outputs": {
+        "earned_microtu": 600000,
+        "financial_deposit_required": false
+      },
+      "status": "passed_reference",
+      "limitation": "Assumes an eligible accepted lease, verified duration and reserved issuance budget."
+    },
+    {
+      "id": "A02",
+      "name": "Fewer participants can use a larger share of the same capacity",
+      "inputs": {
+        "safe_equal_tasks_per_minute": 40,
+        "active_accounts": [
+          10,
+          2
+        ]
+      },
+      "outputs": {
+        "quota_with_ten": "4",
+        "quota_with_two": "20",
+        "increase_factor": "5"
+      },
+      "status": "passed_reference",
+      "limitation": "Equal-task allocation only; real scheduling needs per-model resource cost and slots."
+    },
+    {
+      "id": "A03",
+      "name": "Zero buyers does not imply idle cooperative capacity",
+      "inputs": {
+        "paid_buyers": 0,
+        "cooperative_pressure_bps": 9000,
+        "queue_wait_seconds": 15
+      },
+      "outputs": {
+        "new_concurrency_ceiling": 1
+      },
+      "status": "passed_reference",
+      "limitation": "Pressure and queue observations are supplied as inputs, not measured from GPUs."
+    },
+    {
+      "id": "A04",
+      "name": "Promotion waits for stable windows and advances one level at a time",
+      "inputs": {
+        "regular_pressure_bps": 1000,
+        "stable_window_seconds": 300
+      },
+      "outputs": {
+        "timeline": [
+          {
+            "second": 30,
+            "ceiling": 1
+          },
+          {
+            "second": 60,
+            "ceiling": 1
+          },
+          {
+            "second": 90,
+            "ceiling": 1
+          },
+          {
+            "second": 120,
+            "ceiling": 1
+          },
+          {
+            "second": 150,
+            "ceiling": 1
+          },
+          {
+            "second": 180,
+            "ceiling": 1
+          },
+          {
+            "second": 210,
+            "ceiling": 1
+          },
+          {
+            "second": 240,
+            "ceiling": 1
+          },
+          {
+            "second": 270,
+            "ceiling": 1
+          },
+          {
+            "second": 300,
+            "ceiling": 2
+          },
+          {
+            "second": 330,
+            "ceiling": 2
+          },
+          {
+            "second": 360,
+            "ceiling": 2
+          },
+          {
+            "second": 390,
+            "ceiling": 2
+          },
+          {
+            "second": 420,
+            "ceiling": 2
+          },
+          {
+            "second": 450,
+            "ceiling": 2
+          },
+          {
+            "second": 480,
+            "ceiling": 2
+          },
+          {
+            "second": 510,
+            "ceiling": 2
+          },
+          {
+            "second": 540,
+            "ceiling": 2
+          },
+          {
+            "second": 570,
+            "ceiling": 2
+          },
+          {
+            "second": 600,
+            "ceiling": 4
+          },
+          {
+            "second": 630,
+            "ceiling": 4
+          }
+        ]
+      },
+      "status": "passed_reference",
+      "limitation": "Reference hysteresis, not latency or scheduling throughput under real load."
+    },
+    {
+      "id": "A05",
+      "name": "A new competing request stops new extras without changing accepted terms",
+      "inputs": {
+        "accepted_cost_microtu": 4000000,
+        "accepted_deadline_seconds": 60,
+        "new_queue_wait_seconds": 1
+      },
+      "outputs": {
+        "new_ceiling": 1,
+        "accepted_terms_unchanged": true
+      },
+      "status": "passed_reference",
+      "limitation": "Immutable quote reference; real in-flight jobs, deadlines and recovery still require tests."
+    },
+    {
+      "id": "A06",
+      "name": "Brief low-pressure oscillations do not repeatedly promote limits",
+      "inputs": {
+        "alternating_pressure_bps": [
+          2400,
+          5100
+        ],
+        "samples": 40
+      },
+      "outputs": {
+        "maximum_ceiling": 1,
+        "ending_ceiling": 1
+      },
+      "status": "passed_reference",
+      "limitation": "Tests a specific oscillation trace, not stability under every workload."
+    },
+    {
+      "id": "A07",
+      "name": "Missing telemetry and resource saturation prevent extra admissions",
+      "inputs": {
+        "stale_snapshot": true,
+        "memory_pressure_bps": 9000
+      },
+      "outputs": {
+        "stale_ceiling": 0,
+        "resource_pressure_ceiling": 1
+      },
+      "status": "passed_reference",
+      "limitation": "Invalid proof blocks new sessions; actual resource guards and OOM prevention are not implemented."
+    },
+    {
+      "id": "A08",
+      "name": "Idle capacity for one model does not invent capacity for another",
+      "inputs": {
+        "compact_safe_capacity": 40,
+        "giant_safe_capacity": 0,
+        "accounts_each": 2
+      },
+      "outputs": {
+        "compact_quota": "20",
+        "giant_quota": "0"
+      },
+      "status": "passed_reference",
+      "limitation": "Assumes fixed qualified profiles; model migration/resharding are separate operations."
+    },
+    {
+      "id": "A09",
+      "name": "Elastic account limit remains bounded by qualified physical slots",
+      "inputs": {
+        "account_ceiling": 4,
+        "qualified_available_slots": 2
+      },
+      "outputs": {
+        "maximum_admissible_concurrency": 2
+      },
+      "status": "passed_reference",
+      "limitation": "Real admission must atomically reserve all memory, network and route resources."
+    },
+    {
+      "id": "A10",
+      "name": "Issuing an already committed reward preserves total service exposure",
+      "inputs": {
+        "stock_microtu": 1000000000,
+        "commitments_microtu": 200000000,
+        "pending_refund_microtu": 50000000
+      },
+      "outputs": {
+        "exposure_before_microtu": 1250000000,
+        "exposure_after_microtu": 1250000000
+      },
+      "status": "passed_reference",
+      "limitation": "Service accounting only, not funds backing or database concurrency proof."
+    },
+    {
+      "id": "A11",
+      "name": "No consumption cannot create unlimited banked promises",
+      "inputs": {
+        "paid_buyers": 0,
+        "cooperative_redemptions": 0,
+        "days": 14,
+        "initial_stock_tu": 1000,
+        "reference_tu": 7000
+      },
+      "outputs": {
+        "days": [
+          {
+            "day": 1,
+            "new_accepted_and_verified_microtu": 1000000000,
+            "stock_microtu": 2000000000
+          },
+          {
+            "day": 2,
+            "new_accepted_and_verified_microtu": 450000000,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 3,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 4,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 5,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 6,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 7,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 8,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 9,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 10,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 11,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 12,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 13,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          },
+          {
+            "day": 14,
+            "new_accepted_and_verified_microtu": 0,
+            "stock_microtu": 2450000000
+          }
+        ],
+        "final_stock_microtu": 2450000000
+      },
+      "status": "passed_reference",
+      "limitation": "Every day is a new offered budget; accepted rates are not cut. Does not model contributor departure."
+    },
+    {
+      "id": "A12",
+      "name": "Cooperative earning and use can circulate for 30 days with zero sales",
+      "inputs": {
+        "paid_buyers": 0,
+        "daily_cooperative_use_tu": 200,
+        "daily_eligible_reward_tu": 200,
+        "days": 30
+      },
+      "outputs": {
+        "ending_service_stock_tu": 1000,
+        "financial_revenue": 0
+      },
+      "status": "passed_reference",
+      "limitation": "Constant fictional supply/demand and covered issuance; does not prove electricity or infrastructure funding."
+    },
+    {
+      "id": "A13",
+      "name": "Capacity loss restricts new promises without deleting earned TU",
+      "inputs": {
+        "stock_tu": 2000,
+        "reference_before_tu": 7000,
+        "reference_after_tu": 3500
+      },
+      "outputs": {
+        "headroom_before_microtu": 450000000,
+        "headroom_after_microtu": 0,
+        "preserved_stock_tu": 2000
+      },
+      "status": "passed_reference",
+      "limitation": "Risk detection, not a guarantee that replacement nodes or immediate redemptions exist."
+    },
+    {
+      "id": "A14",
+      "name": "Cooperative onboarding grants do not require commercial revenue",
+      "inputs": {
+        "verified_cooperative_issuance_tu": 980,
+        "sales": 0
+      },
+      "outputs": {
+        "grant_limit_microtu": 20000000,
+        "share_of_total": "1/50"
+      },
+      "status": "passed_reference",
+      "limitation": "Stock, campaign, identity and epoch controls must also permit the grant."
+    },
+    {
+      "id": "A15",
+      "name": "Uncommitted commercial capacity is available to cooperation",
+      "inputs": {
+        "safe_capacity": 100,
+        "commercial_cap": 25,
+        "confirmed_commercial_reservation": 0
+      },
+      "outputs": {
+        "cooperative_capacity_without_sales": 100,
+        "cooperative_capacity_at_commercial_cap": 75
+      },
+      "status": "passed_reference",
+      "limitation": "Local mixed-pool policy; safe capacity must already discount overhead and contingency."
+    },
+    {
+      "id": "A16",
+      "name": "A funded buyer cannot override the cooperative capacity commitment",
+      "inputs": {
+        "commercial_requested_capacity": 30,
+        "commercial_limit": 25,
+        "buyer_has_funds": true
+      },
+      "outputs": {
+        "new_commercial_reservation_allowed": false
+      },
+      "status": "passed_reference",
+      "limitation": "Other independent pools may advertise a different policy; existing accepted reservations remain binding."
+    },
+    {
+      "id": "A17",
+      "name": "Cooperative earnings do not create withdrawable payment balance",
+      "inputs": {
+        "starting_tu": 100,
+        "cooperative_earned_tu": 30,
+        "starting_payment_atomic": 0
+      },
+      "outputs": {
+        "ending_tu": 130,
+        "ending_payment_atomic": 0
+      },
+      "status": "passed_reference",
+      "limitation": "Two-ledger arithmetic; real wallet isolation and malicious cross-mode payloads require implementation tests."
+    },
+    {
+      "id": "A18",
+      "name": "One reserved interval cannot also receive full spot remuneration",
+      "inputs": {
+        "existing_mode": "cooperative",
+        "requested_mode": "commercial"
+      },
+      "outputs": {
+        "second_full_allocation_allowed": false
+      },
+      "status": "passed_reference",
+      "limitation": "Exact duplicate interval reference; real overlap, fractional resources and fake physical identities need tests."
+    },
+    {
+      "id": "A19",
+      "name": "An elastic quota is not saved and does not change model context",
+      "inputs": {
+        "previous_ceiling": 4,
+        "new_ceiling": 1,
+        "qualified_context_tokens": 8192
+      },
+      "outputs": {
+        "banked_extra_quota": 0,
+        "context_tokens": 8192
+      },
+      "status": "passed_reference",
+      "limitation": "Contract definition, not a benchmark of memory or context limits."
+    },
+    {
+      "id": "A20",
+      "name": "Insufficient TU cannot silently spend the payment wallet",
+      "inputs": {
+        "billing_mode": "cooperative",
+        "available_tu": 0,
+        "available_payment_units": 100
+      },
+      "outputs": {
+        "cooperative_request_admitted": false,
+        "payment_units_after": 100
+      },
+      "status": "passed_reference",
+      "limitation": "Mode-selection reference; secure API authorization and exact price comparison still need tests."
+    }
+  ],
+  "policy_sha256": "c603d2dfbad09ea3234ebce40a95cdba0043eb6df316605839da8b245116f9f0",
+  "simulator_sha256": "531fa9c49f222ebc2049504da8dd8d204cb16c4c519b16258cf16f3694006fbb"
+}

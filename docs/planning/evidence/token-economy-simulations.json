@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "policy_version": "planning-tu-2026-09-13-v1",
+  "scope": "deterministic arithmetic examples with fictional inputs; no empirical infrastructure validation",
+  "policy_sha256": "325cf8fafc3afc6b94de9a0ca3cdcc899cf1cd0f30376ac334d7c230c2cf0af5",
+  "simulator_sha256": "7b398008575c9aeb3b7a1267e7437c671123a900c33c7cb7ac753cf7bbae723b",
+  "numeric_money_representation": "integer microTU; displayed TU strings",
+  "case_count": 18,
+  "status": "passed_arithmetic",
+  "cases": [
+    {
+      "id": "T01",
+      "name": "Different models consume the same balance at different rates",
+      "inputs": {
+        "uncached_input": 2000,
+        "output": 500
+      },
+      "outputs": {
+        "compact_tu": "4.000000",
+        "medium_tu": "16.000000",
+        "giant_tu": "80.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Fictional rates; no claim about real model cost or quality."
+    },
+    {
+      "id": "T02",
+      "name": "Maximum authorization and release of unused balance",
+      "inputs": {
+        "max_output": 1000,
+        "actual_output": 500
+      },
+      "outputs": {
+        "holds_tu": {
+          "compact": "6.000000",
+          "medium": "24.000000",
+          "giant": "120.000000"
+        },
+        "releases_tu": {
+          "compact": "2.000000",
+          "medium": "8.000000",
+          "giant": "40.000000"
+        }
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Does not exercise gateway metering or concurrent wallet writes."
+    },
+    {
+      "id": "T03",
+      "name": "Verified cache discount remains within the original hold",
+      "inputs": {
+        "total_input": 2000,
+        "confirmed_cached_input": 500,
+        "output": 500
+      },
+      "outputs": {
+        "cost_tu": "3.625000",
+        "hold_tu": "6.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "A real deployment needs independent evidence of the cache hit."
+    },
+    {
+      "id": "T04",
+      "name": "Accumulated remainder prevents receipt fragmentation losses",
+      "inputs": {
+        "fragments_ms": 1,
+        "fragment_count": 1000,
+        "rate_microtu_per_second": 1501
+      },
+      "outputs": {
+        "carried_microtu": 1501,
+        "single_receipt_microtu": 1501,
+        "incorrect_independent_rounding_microtu": 1000
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Only rounding arithmetic; receipt authenticity is outside the simulation."
+    },
+    {
+      "id": "T05",
+      "name": "Splitting a fixed verified resource weight creates no reward",
+      "inputs": {
+        "fixed_route_budget_tu": "420",
+        "weights": [
+          1,
+          2,
+          4
+        ],
+        "same_total_weight_after_split": [
+          1,
+          2,
+          2,
+          2
+        ]
+      },
+      "outputs": {
+        "payouts_tu": [
+          "60.000000",
+          "120.000000",
+          "240.000000"
+        ],
+        "split_combined_tu": "240.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Assumes total verified weight is preserved; it does not detect fake identities."
+    },
+    {
+      "id": "T06",
+      "name": "Exposure, epoch and group limits all constrain a new lease",
+      "inputs": {
+        "capacity_ref_tu": "1000",
+        "stock_tu": "200",
+        "commitments_tu": "50",
+        "pending_refunds_tu": "10",
+        "epoch_room_tu": "70",
+        "group_room_tu": "100"
+      },
+      "outputs": {
+        "stock_room_tu": "90.000000",
+        "maximum_new_commitment_tu": "70.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Capacity input is fictional; its conservative measurement remains a field requirement."
+    },
+    {
+      "id": "T07",
+      "name": "An accepted commitment removes headroom before issuance",
+      "inputs": {
+        "initial_headroom_tu": "90.000000",
+        "two_requested_leases_tu": [
+          "60",
+          "60"
+        ]
+      },
+      "outputs": {
+        "first_accepted_tu": "60.000000",
+        "second_maximum_tu": "30.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Sequential reference; database locking and race prevention still need implementation tests."
+    },
+    {
+      "id": "T08",
+      "name": "Issuance, consumer holds and posting a refund do not hide exposure",
+      "inputs": {
+        "exposure_tu": "260.000000",
+        "issuance_tu": "20",
+        "consumer_hold_tu": "40"
+      },
+      "outputs": {
+        "after_issuance_exposure_tu": "260.000000",
+        "stock_after_hold_tu": "200.000000",
+        "after_refund_posting_exposure_tu": "260.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Operational claims accounting; not a financial accounting opinion."
+    },
+    {
+      "id": "T09",
+      "name": "Low demand makes fixed issuance grow stock while a capped flow declines",
+      "inputs": {
+        "days": 7,
+        "initial_stock_tu": "300",
+        "net_redemption_per_day_tu": "20",
+        "uncontrolled_issuance_per_day_tu": "100",
+        "growth_budget_tu": "0"
+      },
+      "outputs": {
+        "uncontrolled_end_tu": "860.000000",
+        "capped_daily_issuance_tu": "19.000000",
+        "capped_end_tu": "293.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Constant hypothetical capacity and demand; does not model contributor departure or recovery."
+    },
+    {
+      "id": "T10",
+      "name": "Demand drop cannot retroactively reduce an accepted lease rate",
+      "inputs": {
+        "rate_microtu_per_second": 1000,
+        "maximum_seconds": 900,
+        "verified_seconds": 450
+      },
+      "outputs": {
+        "initial_commitment_microtu": 900000,
+        "earned_microtu": 450000,
+        "still_committed_microtu": 450000
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Assumes valid verified intervals and that the accepted contract is honored."
+    },
+    {
+      "id": "T11",
+      "name": "Capacity contraction triggers risk even without new issuance",
+      "inputs": {
+        "exposure_tu": "300",
+        "capacity_ref_tu": [
+          "1000",
+          "500",
+          "300",
+          "0"
+        ]
+      },
+      "outputs": {
+        "categories": {
+          "1000": "within_target",
+          "500": "warning",
+          "300": "critical",
+          "0": "no_capacity"
+        },
+        "room_after_50_percent_drop_tu": "0.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Detection only; replacement GPUs and cash-funded continuity are not simulated."
+    },
+    {
+      "id": "T12",
+      "name": "A public tariff increase does not manufacture reference capacity",
+      "inputs": {
+        "public_tariff_index_before": 100,
+        "public_tariff_index_after": 110
+      },
+      "outputs": {
+        "capacity_ref_before_tu": "1000.000000",
+        "capacity_ref_after_tu": "1000.000000",
+        "incorrect_repriced_capacity_tu": "1100.000000"
+      },
+      "status": "passed_arithmetic",
+      "limitation": "A basket change still needs a reconciled policy decision; price alone does not add hardware."
+    },
+    {
+      "id": "T13",
+      "name": "Aggregate capacity cannot satisfy arbitrary model concentration",
+      "inputs": {
+        "compact_jobs_per_window": 90,
+        "giant_jobs_per_window": 10,
+        "requests_for_giant": 50
+      },
+      "outputs": {
+        "served_giant": 10,
+        "queued_or_unavailable_giant": 40,
+        "unused_compact_capacity": 90
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Jobs use fixed illustrative sizes; no automatic conversion of compact GPU capacity is assumed."
+    },
+    {
+      "id": "T14",
+      "name": "Paid traffic and token redemption share one physical capacity constraint",
+      "inputs": {
+        "net_capacity": 100,
+        "cooperative_allocation": 60,
+        "paid_allocation": 20
+      },
+      "outputs": {
+        "uncommitted_capacity": 20,
+        "overloaded_example": 110,
+        "overloaded_admission_allowed": false
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Capacity feasibility only; does not prove monetary profit or fulfillment of future TU claims."
+    },
+    {
+      "id": "T15",
+      "name": "Grant share is capped against realized issuance, not an unused budget",
+      "inputs": {
+        "verified_contributor_emission_tu": "980",
+        "grant_share_bps": 200
+      },
+      "outputs": {
+        "maximum_grant_tu": "20.000000",
+        "realized_total_tu": "1000.000000",
+        "grant_limit_without_contribution_microtu": 0
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Campaign, identity, stock and epoch limits must also permit the grant."
+    },
+    {
+      "id": "T16",
+      "name": "Self-calls do not increase issuance when work bonuses are disabled",
+      "inputs": {
+        "contracted_verified_earnings_tu": "30",
+        "self_call_cost_tu": "4",
+        "work_bonus_enabled": false
+      },
+      "outputs": {
+        "net_without_call_tu": "30.000000",
+        "net_with_call_tu": "26.000000",
+        "additional_issuance_microtu": 0
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Does not prove resistance to manipulated forecasts, hidden related parties or collusion."
+    },
+    {
+      "id": "T17",
+      "name": "Partial settlement and refund preserve the original ledger example in TU",
+      "inputs": {
+        "earned_microtu": 600000,
+        "hold_microtu": 400000,
+        "consumed_microtu": 250000,
+        "refund_microtu": 50000
+      },
+      "outputs": {
+        "available_after_settlement_microtu": 350000,
+        "available_after_refund_microtu": 400000,
+        "net_consumption_microtu": 200000
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Arithmetic only; database idempotency and fault injection are specified in the product backlog."
+    },
+    {
+      "id": "T18",
+      "name": "Account rotation does not give extra slots to a larger wallet",
+      "inputs": {
+        "initial_wallets_tu": {
+          "A": "10000",
+          "B": "100"
+        },
+        "equal_price_tu": "4",
+        "slots": 10
+      },
+      "outputs": {
+        "starts_by_account": {
+          "A": [
+            0,
+            2,
+            4,
+            6,
+            8
+          ],
+          "B": [
+            1,
+            3,
+            5,
+            7,
+            9
+          ]
+        },
+        "completed_jobs": {
+          "A": 5,
+          "B": 5
+        }
+      },
+      "status": "passed_arithmetic",
+      "limitation": "Only an equal-job rotation example, not DRF, heterogeneous-job fairness or Sybil resistance."
+    }
+  ]
+}

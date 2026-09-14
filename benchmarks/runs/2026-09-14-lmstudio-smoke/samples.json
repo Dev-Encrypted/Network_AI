@@ -1,0 +1,752 @@
+[
+  {
+    "index": 0,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.42677820002427325,
+    "total_seconds": 1.1273287000367418,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 50.0432445120045,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 1,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.3539951999555342,
+    "total_seconds": 1.5276900999597274,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 53.762693008277104,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 2,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.45333460002439097,
+    "total_seconds": 1.4185396999819204,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 35.23113072509791,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 3,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.36939030000939965,
+    "total_seconds": 1.066243499983102,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 50.30250489431058,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 4,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.3288105999818072,
+    "total_seconds": 1.5730492000002414,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 50.63902022618239,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 5,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.4578311999794096,
+    "total_seconds": 1.2069584000273608,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 45.465486344076055,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 6,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.396489400009159,
+    "total_seconds": 1.165524700016249,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 45.52147976471798,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 7,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.33385569998063147,
+    "total_seconds": 1.5827310000313446,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 50.49684082049279,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 8,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.41525859996909276,
+    "total_seconds": 1.112692499998957,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 48.839249058995094,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 9,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.4175700999912806,
+    "total_seconds": 1.0774278999888338,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 53.24391600706222,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 10,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.3579720999696292,
+    "total_seconds": 1.5891915999818593,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 51.42518366302766,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 11,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.4391792999813333,
+    "total_seconds": 1.2774772999691777,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 40.5696552334942,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 12,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.3703425999847241,
+    "total_seconds": 1.0254903999739327,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 53.50909593471434,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 13,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.33878990000812337,
+    "total_seconds": 1.6057944999774918,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 49.72899670305705,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 14,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.39939649996813387,
+    "total_seconds": 1.1424936999683268,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 45.76370744059293,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 15,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.402921500033699,
+    "total_seconds": 1.116518500028178,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 49.12835766058301,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 16,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.4383280999609269,
+    "total_seconds": 1.6215018999646418,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 53.29409534370381,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 17,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.44834619999164715,
+    "total_seconds": 1.2376637000124902,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 43.1818467570213,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 18,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.3845580000197515,
+    "total_seconds": 1.065991799987387,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 51.37684815725489,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 19,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.35677780001424253,
+    "total_seconds": 1.5843845999916084,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 51.50376271861162,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 20,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.5168005999876186,
+    "total_seconds": 1.413140199962072,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 37.97734450413271,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 21,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.3599337000050582,
+    "total_seconds": 1.005858399963472,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 54.208500140482585,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 22,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.32816059998003766,
+    "total_seconds": 1.6029518999857828,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 49.46725338424023,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 23,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.3567646999727003,
+    "total_seconds": 1.18693909997819,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 41.01962728654337,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 24,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.3371731000370346,
+    "total_seconds": 0.9858659000019543,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 54.047334656222496,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 25,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.3666018000221811,
+    "total_seconds": 1.5621429000166245,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 52.70892941146618,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 26,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.35990490001859143,
+    "total_seconds": 1.138979500043206,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 43.65131993395397,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 27,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 0.41195259999949485,
+    "total_seconds": 1.189631899993401,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 45.01783735182219,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 28,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.3671093999873847,
+    "total_seconds": 1.8045028999913484,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 43.834850878375285,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 29,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.5515773000079207,
+    "total_seconds": 1.3751361000468023,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 41.292142882323354,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  }
+]

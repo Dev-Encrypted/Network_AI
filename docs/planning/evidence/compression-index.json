@@ -1,0 +1,58 @@
+[
+  {
+    "file": "moonshotai--Kimi-K2.5.index.json.gz",
+    "raw_bytes": 23805996,
+    "compressed_bytes": 590454,
+    "raw_sha256": "d8bd8a653fd54b3e8b141fe1a9e46903e3846c4841ad50edb44170c5f1ffbcec",
+    "gzip_sha256": "21c23cf288acc88c70901a41f1cb09e97a219a9fcbdc1ff1e206e64ffdebbbd4",
+    "round_trip_verified": true
+  },
+  {
+    "file": "moonshotai--Kimi-K2.6.index.json.gz",
+    "raw_bytes": 23805996,
+    "compressed_bytes": 590500,
+    "raw_sha256": "f5f2946d0db8f87bc30af64a2c3d7d728ef2bfb5fe12e2d9f3a02b4072d04965",
+    "gzip_sha256": "f46de314aaa18d41e126f3657fcd726876627dc7bb849d0fe478741e7c54be50",
+    "round_trip_verified": true
+  },
+  {
+    "file": "moonshotai--Kimi-K2.7-Code.index.json.gz",
+    "raw_bytes": 23805996,
+    "compressed_bytes": 606545,
+    "raw_sha256": "92f30f84f455e3c493961c0481eb0db1513c532c40a6a2c42e161d9796fdfc84",
+    "gzip_sha256": "d243bcb6f6bd1bd80ff984e07834c5995ba2448f5a4073da4319746c3030cd22",
+    "round_trip_verified": true
+  },
+  {
+    "file": "moonshotai--Kimi-K3.index.json.gz",
+    "raw_bytes": 60261324,
+    "compressed_bytes": 1356967,
+    "raw_sha256": "3eddea619a2537c93902c689c7276696dd2e3013bcec3b76f6e2643490b48eb9",
+    "gzip_sha256": "da826851141b98dde94c853fc8f7467e3734142b97491567451d86d7fae8b525",
+    "round_trip_verified": true
+  },
+  {
+    "file": "moonshotai--Kimi-Linear-48B-A3B-Instruct.index.json.gz",
+    "raw_bytes": 2008241,
+    "compressed_bytes": 60796,
+    "raw_sha256": "6bd961741a00496a2708274ded8ed487d8635c15746225b2c5c0675cd967ad13",
+    "gzip_sha256": "1158ab4628d5ee826a5abc77d77d8b8e84442ff4688be94b90dfbeec486b31c6",
+    "round_trip_verified": true
+  },
+  {
+    "file": "Qwen--Qwen3-32B.index.json.gz",
+    "raw_bytes": 59044,
+    "compressed_bytes": 2564,
+    "raw_sha256": "68e066a65be872628751f5603243a94ddf9f923340e81d245944f66f5b6a03e1",
+    "gzip_sha256": "fda031edd172a8cc84364e28ab3e22e7fc66706f2b607baa7256cb1a8e016878",
+    "round_trip_verified": true
+  },
+  {
+    "file": "Qwen--Qwen3-8B.index.json.gz",
+    "raw_bytes": 33284,
+    "compressed_bytes": 1508,
+    "raw_sha256": "e95dd7d2eb4383ba7a896e8a3512e78eee9e65aec0d00600fb98379d59203125",
+    "gzip_sha256": "54800f61c9c95bc1515bda44d8bc748f9924643ce2b897dcf8da5302c1716d1b",
+    "round_trip_verified": true
+  }
+]

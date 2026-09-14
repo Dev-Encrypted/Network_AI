@@ -1,0 +1,30 @@
+flowchart TB
+  C[Browser ou CLI do consumidor] --> EDGE[Proxy HTTPS e gateway Rust]
+  subgraph REG[Regiao de controle]
+    EDGE --> A1[Control API instancia 1]
+    EDGE --> A2[Control API instancia 2]
+    A1 --> PG[(PostgreSQL primario)]
+    A2 --> PG
+    PG --> ST[(Standby e backups WAL)]
+    A1 --> RD[(Redis)]
+    A2 --> RD
+    REC[Conciliador e outbox] --> PG
+    OBJ[Armazenamento de modelos HTTP]
+    REL[Relay com quota]
+  end
+  subgraph P1[Participante Linux]
+    D1[Daemon Rust] --> K1[Worker Python isolado]
+    K1 --> GPU1[GPU]
+  end
+  subgraph P2[Cluster participante]
+    D2[Daemon e supervisor do cluster] --> K2[Engine distribuida privada]
+    K2 --> GPU2[GPUs com rede local validada]
+  end
+  D1 -->|conexao de saida| A1
+  D2 -->|conexao de saida| A2
+  EDGE -->|canal autorizado| D1
+  EDGE --> REL
+  REL -->|tunel| D2
+  OBJ --> D1
+  OBJ --> D2
+  D1 <-.->|modo C experimental| D2

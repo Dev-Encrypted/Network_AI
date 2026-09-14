@@ -1,0 +1,83 @@
+<div id="network-ai-cooperative-share" aria-label="Divisão ilustrativa de capacidade cooperativa">
+  <style>
+    #network-ai-cooperative-share { color: var(--foreground); }
+    #network-ai-cooperative-share .allocation-figure { margin: 20px 0 16px; }
+    #network-ai-cooperative-share .allocation-track { display: flex; height: 40px; width: 100%; overflow: hidden; background: var(--muted); }
+    #network-ai-cooperative-share .allocation-segment { min-width: 0; transition: width 200ms ease; }
+    #network-ai-cooperative-share .allocation-own { background: var(--viz-series-1); }
+    #network-ai-cooperative-share .allocation-others { background: color-mix(in srgb, var(--viz-series-1) 25%, var(--background)); }
+    #network-ai-cooperative-share .allocation-commercial { background: var(--viz-series-2); }
+    #network-ai-cooperative-share .allocation-legend { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: 12px; }
+    #network-ai-cooperative-share .allocation-key { display: inline-flex; align-items: center; gap: 6px; }
+    #network-ai-cooperative-share .allocation-swatch { width: 12px; height: 12px; display: inline-block; flex-shrink: 0; }
+    #network-ai-cooperative-share .allocation-result { margin-top: 16px; }
+    @media (prefers-reduced-motion: reduce) {
+      #network-ai-cooperative-share .allocation-segment { transition: none; }
+    }
+  </style>
+  <div class="text-small text-muted">Cenário fictício · um modelo · tarefas de custo igual</div>
+  <div class="viz-controls">
+    <label class="form-label" for="coop-capacity">
+      Capacidade segura: <output id="coop-capacity-value" class="tabular-nums">40 tarefas/min</output>
+      <input class="form-range" id="coop-capacity" type="range" min="10" max="100" step="10" value="40">
+    </label>
+    <label class="form-label" for="coop-people">
+      Participantes elegíveis: <output id="coop-people-value" class="tabular-nums">10</output>
+      <input class="form-range" id="coop-people" type="range" min="1" max="20" step="1" value="10">
+    </label>
+    <label class="form-label" for="coop-commercial">
+      Capacidade comercial já reservada
+      <select id="coop-commercial" class="form-select">
+        <option value="0" selected>0% — toda a capacidade para cooperação</option>
+        <option value="10">10% — reserva comercial parcial</option>
+        <option value="25">25% — teto do pool de referência</option>
+      </select>
+    </label>
+  </div>
+  <figure class="allocation-figure" aria-label="Parcela por participante dentro da capacidade segura">
+    <div class="allocation-track" role="img" id="coop-chart" aria-label="Sua parcela: 4 tarefas por minuto. Outros participantes: 36. Comercial: zero.">
+      <div id="coop-own-bar" class="allocation-segment allocation-own" style="width:10%"></div>
+      <div id="coop-others-bar" class="allocation-segment allocation-others" style="width:90%"></div>
+      <div id="coop-commercial-bar" class="allocation-segment allocation-commercial" style="width:0%"></div>
+    </div>
+    <figcaption class="allocation-legend">
+      <span class="allocation-key"><span class="allocation-swatch allocation-own" aria-hidden="true"></span>Sua parcela</span>
+      <span class="allocation-key"><span class="allocation-swatch allocation-others" aria-hidden="true"></span>Outros participantes</span>
+      <span class="allocation-key"><span class="allocation-swatch allocation-commercial" aria-hidden="true"></span>Comercial</span>
+    </figcaption>
+  </figure>
+  <div class="allocation-result" aria-live="polite" aria-atomic="true">
+    <span>Divisão por participante: </span>
+    <strong id="coop-result" class="tabular-nums" style="font-weight:500">até 4 tarefas/min</strong>
+  </div>
+  <div class="text-small text-muted">Tarifa em TU constante · limite temporário · sujeito a saldo, slots e prazo</div>
+  <script>
+    (() => {
+      const root = document.getElementById("network-ai-cooperative-share");
+      const field = id => root.querySelector("#" + id);
+      const capacity = field("coop-capacity");
+      const people = field("coop-people");
+      const commercial = field("coop-commercial");
+      const format = value => new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(value);
+      const update = () => {
+        const total = Number(capacity.value);
+        const count = Number(people.value);
+        const reservedPercent = Number(commercial.value);
+        const paid = total * reservedPercent / 100;
+        const perPerson = (total - paid) / count;
+        const ownPercent = (100 - reservedPercent) / count;
+        field("coop-capacity-value").textContent = format(total) + " tarefas/min";
+        field("coop-people-value").textContent = format(count);
+        field("coop-own-bar").style.width = ownPercent + "%";
+        field("coop-others-bar").style.width = (100 - reservedPercent - ownPercent) + "%";
+        field("coop-commercial-bar").style.width = reservedPercent + "%";
+        field("coop-result").textContent = "até " + format(perPerson) + " tarefas/min";
+        field("coop-chart").setAttribute("aria-label",
+          "Sua parcela: " + format(perPerson) + " tarefas por minuto. Outros participantes: " +
+          format(total - paid - perPerson) + ". Comercial: " + format(paid) + ".");
+      };
+      [capacity, people, commercial].forEach(control => control.addEventListener("input", update));
+      update();
+    })();
+  </script>
+</div>

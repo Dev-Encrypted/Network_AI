@@ -1,0 +1,40 @@
+{
+  "command": [
+    "/root/.local/share/network-ai/f0-vllm-0.29.0/bin/python",
+    "-m",
+    "vllm.entrypoints.openai.api_server",
+    "--model",
+    "/mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/Qwen3-8B-b968826d9c46dd6066d109eabc6255188de91218",
+    "--served-model-name",
+    "network-ai-qwen3-8b-bf16",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8123",
+    "--dtype",
+    "bfloat16",
+    "--max-model-len",
+    "8192",
+    "--max-num-seqs",
+    "1",
+    "--max-num-batched-tokens",
+    "2048",
+    "--gpu-memory-utilization",
+    "0.82",
+    "--enforce-eager",
+    "--no-enable-log-requests",
+    "--no-enable-log-outputs",
+    "--no-trust-remote-code",
+    "--no-enable-prefix-caching",
+    "--default-chat-template-kwargs",
+    "{\"enable_thinking\":false}"
+  ],
+  "free_mib": 1956,
+  "blockers": [
+    "GPU_0_NEEDS_AT_LEAST_21504_MIB_FREE"
+  ],
+  "dry_run": true,
+  "actual_vllm_argument_parser_validated": true,
+  "observed_at_utc": "2026-09-14T04:45:12.9414570Z",
+  "exit_code": 2
+}

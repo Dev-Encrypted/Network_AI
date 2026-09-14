@@ -1,0 +1,90 @@
+{
+  "build_debug_assertions": true,
+  "evidence_type": "MEASURED_LOCAL_LOOPBACK",
+  "limitations": [
+    "One computer; does not qualify two physical hosts, WAN, NAT or relays",
+    "Transport identities do not prove unique people, GPUs or correct inference",
+    "Latency includes application SHA-256, serialization and local scheduling",
+    "Application byte counts exclude QUIC, UDP, IP, TLS and retransmission overhead",
+    "Replay protection is in-memory and scoped to ephemeral bench identities; durable restart protection remains required",
+    "Iroh cancellation is a stream-read error; no GPU cancellation or ledger effect is exercised",
+    "libp2p application cancellation is not implemented in this bench"
+  ],
+  "payload_digest": "sha256",
+  "public_launch_approved": false,
+  "transports": [
+    {
+      "cancellation_read_error_observed": null,
+      "oversized_request_rejected": true,
+      "physical_hosts": 1,
+      "replay_rejected": true,
+      "request_after_negative_checks_passed": true,
+      "samples_by_size": [
+        {
+          "application_request_bytes": 1037,
+          "application_response_bytes": 45,
+          "payload_bytes": 1024,
+          "round_trip_p50_ms": 0.5942000000000001,
+          "round_trip_p95_ms": 0.6854,
+          "samples": 30
+        },
+        {
+          "application_request_bytes": 16397,
+          "application_response_bytes": 45,
+          "payload_bytes": 16384,
+          "round_trip_p50_ms": 1.2791000000000001,
+          "round_trip_p95_ms": 1.3941,
+          "samples": 30
+        },
+        {
+          "application_request_bytes": 65549,
+          "application_response_bytes": 45,
+          "payload_bytes": 65536,
+          "round_trip_p50_ms": 3.1073,
+          "round_trip_p95_ms": 3.2676,
+          "samples": 30
+        }
+      ],
+      "transport": "libp2p-0.57.0/QUIC",
+      "unauthorized_peer_rejected": true,
+      "wrong_server_identity_rejected": true
+    },
+    {
+      "cancellation_read_error_observed": true,
+      "oversized_request_rejected": true,
+      "physical_hosts": 1,
+      "replay_rejected": true,
+      "request_after_negative_checks_passed": true,
+      "samples_by_size": [
+        {
+          "application_request_bytes": 1037,
+          "application_response_bytes": 45,
+          "payload_bytes": 1024,
+          "round_trip_p50_ms": 0.28659999999999997,
+          "round_trip_p95_ms": 0.3678,
+          "samples": 30
+        },
+        {
+          "application_request_bytes": 16397,
+          "application_response_bytes": 45,
+          "payload_bytes": 16384,
+          "round_trip_p50_ms": 0.8315,
+          "round_trip_p95_ms": 0.9898000000000001,
+          "samples": 30
+        },
+        {
+          "application_request_bytes": 65549,
+          "application_response_bytes": 45,
+          "payload_bytes": 65536,
+          "round_trip_p50_ms": 2.5822000000000003,
+          "round_trip_p95_ms": 3.1199,
+          "samples": 30
+        }
+      ],
+      "transport": "iroh-1.2.0/QUIC",
+      "unauthorized_peer_rejected": true,
+      "wrong_server_identity_rejected": true
+    }
+  ],
+  "wire_protocol": "network-ai/f0/1"
+}

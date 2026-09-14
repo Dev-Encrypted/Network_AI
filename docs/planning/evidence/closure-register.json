@@ -1,0 +1,121 @@
+{
+  "revision": "planning-closure-program-2026-09-13-v6",
+  "scope": "specified_policy_with_bounded_reference_checks_not_integrated_validation",
+  "public_launch_approved": false,
+  "previous_simulation_revision": "planning-integrated-cooperative-2026-09-13-v4",
+  "proposed_funds": {
+    "aggregate": "COOP_CONTINUITY",
+    "protected": "COOP_CORE_RESERVE",
+    "working": "COOP_WORKING",
+    "unit": "TU",
+    "protected_target_hours": 72,
+    "protected_funds_normal_expansion_allowed": false,
+    "new_issuance_cap_unchanged": true,
+    "working_floor_reference_hours": 6,
+    "working_target_reference_hours": 24,
+    "working_target_must_cover_floor": true,
+    "refill_order": [
+      "working_floor",
+      "protected_target",
+      "working_target",
+      "burn"
+    ]
+  },
+  "ordinary_notice_hours": 48,
+  "receipt_accounting": {
+    "unissued_commitment": "L",
+    "existing_tu_held": "S",
+    "approved_unposted_burn_reversal": "J"
+  },
+  "commercial_bench": {
+    "protocol": "x402",
+    "scheme": "batch-settlement",
+    "network": "eip155:84532",
+    "asset_label": "USDC_TEST_ONLY",
+    "sdk_language": "TypeScript",
+    "deployed_contract_qualified": false,
+    "facilitator_qualified": false,
+    "actual_funds_transferred": false,
+    "tu_conversion_allowed": false,
+    "core_requires_financial_chain": false,
+    "seller_responsible_for_complete_route": true
+  },
+  "activation_requires": {
+    "cooperative": [
+      "FC01",
+      "FC02",
+      "FC03",
+      "FC05",
+      "FC06"
+    ],
+    "commercial": [
+      "FC01",
+      "FC02",
+      "FC03",
+      "FC04",
+      "FC05",
+      "FC06"
+    ]
+  },
+  "gates": [
+    {
+      "id": "FC01",
+      "decision_status": "specified",
+      "validation_status": "document_and_bounded_reference_checks",
+      "owner_role": "architecture_and_ledger",
+      "depends_on": []
+    },
+    {
+      "id": "FC02",
+      "decision_status": "specified",
+      "validation_status": "integrated_v6_not_executed",
+      "owner_role": "economics_and_scheduler",
+      "depends_on": [
+        "FC01",
+        "FC03"
+      ]
+    },
+    {
+      "id": "FC03",
+      "decision_status": "method_selected",
+      "validation_status": "awaits_real_hardware",
+      "owner_role": "inference_and_measurement",
+      "depends_on": [
+        "FC01"
+      ]
+    },
+    {
+      "id": "FC04",
+      "decision_status": "bench_reference_selected",
+      "validation_status": "not_integrated",
+      "owner_role": "payments_and_security_review",
+      "depends_on": [
+        "FC01"
+      ]
+    },
+    {
+      "id": "FC05",
+      "decision_status": "test_contract_specified",
+      "validation_status": "awaits_independent_operators",
+      "owner_role": "security_and_registry_operators",
+      "depends_on": [
+        "FC01"
+      ]
+    },
+    {
+      "id": "FC06",
+      "decision_status": "funding_and_pilot_gates_specified",
+      "validation_status": "funding_not_confirmed_and_pilot_not_executed",
+      "owner_role": "operations_and_finance",
+      "depends_on": [
+        "FC02",
+        "FC03",
+        "FC05"
+      ]
+    }
+  ],
+  "new_integrated_economic_simulation_executed": false,
+  "bounded_reference_cases_executed": 19,
+  "operating_policy_file": "operating-policy-v6.json",
+  "bounded_reference_file": "v6-policy-reference-checks.json"
+}

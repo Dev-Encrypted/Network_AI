@@ -1,0 +1,23 @@
+Sep 14 01:25:26.819 [INFO] Make sure you follow the BLOOM terms of use: https://bit.ly/bloom-license
+Sep 14 01:25:28.691 [INFO] Connecting to a private swarm, initial peers: ['/ip4/127.0.0.1/tcp/45853/p2p/12D3KooWDyWeEZm1Nzt3XL2UYVeVZSz3ZHog9hMCiXqQTQCSc7ue']
+Sep 14 01:25:28.691 [INFO] Running a server on ['/ip4/127.0.0.1/tcp/44949/p2p/12D3KooWSe8U3NE85ibUNLTjF75gUzZ6ea33AkPw7xVLEJ4UEjYa']
+Sep 14 01:25:28.692 [INFO] Model weights are loaded in float32 format
+Sep 14 01:25:28.692 [INFO] Attention cache for all blocks will consume up to 0.02 GiB
+Sep 14 01:25:28.704 [INFO] Announced that blocks range(12, 24) are joining
+Sep 14 01:25:28.845 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 12
+Sep 14 01:25:29.203 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 13
+Sep 14 01:25:29.326 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 14
+Sep 14 01:25:29.494 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 15
+Sep 14 01:25:29.629 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 16
+Sep 14 01:25:29.769 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 17
+Sep 14 01:25:29.886 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 18
+Sep 14 01:25:29.988 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 19
+Sep 14 01:25:30.188 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 20
+Sep 14 01:25:30.306 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 21
+Sep 14 01:25:30.428 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 22
+Sep 14 01:25:30.547 [INFO] Loaded /mnt/c/Users/Encry/Documents/Projetos/Web/Network AI/.models/bloom-560m-ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971 block 23
+/root/.local/share/network-ai/f0-petals-py310/lib/python3.10/site-packages/bitsandbytes/libbitsandbytes_cpu.so: undefined symbol: cadam32bit_grad_fp32
+Sep 14 01:25:30.622 [INFO] Started
+Sep 14 01:25:36.352 [INFO] Announced that blocks ['network-ai-f0-18abcbf992614d618a59672ddcf24210.12', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.13', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.14', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.15', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.16', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.17', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.18', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.19', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.20', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.21', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.22', 'network-ai-f0-18abcbf992614d618a59672ddcf24210.23'] are offline
+Sep 14 01:25:36.361 [INFO] Shutting down
+Sep 14 01:25:36.363 [INFO] Module container shut down successfully

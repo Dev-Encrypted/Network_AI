@@ -1,0 +1,36 @@
+{
+  "evidence_type": "MEASURED_LOCAL",
+  "observed_at_utc": "2026-09-14T04:11:34.4068583Z",
+  "cpu": {
+    "Name": "Intel(R) Core(TM) i9-14900K",
+    "NumberOfCores": 24,
+    "NumberOfLogicalProcessors": 32
+  },
+  "ram": {
+    "TotalPhysicalMemory": 137107353600
+  },
+  "os": {
+    "Caption": "Microsoft Windows 11 Pro",
+    "Version": "10.0.26200",
+    "BuildNumber": "26200"
+  },
+  "gpu_csv_fields": "name,driver_version,total_mib,used_mib,free_mib,compute_capability",
+  "gpu": [
+    "NVIDIA GeForce RTX 4090, 596.49, 24564, 22153, 1986, 8.9"
+  ],
+  "disk_c_bytes": {
+    "Used": 1690861076480,
+    "Free": 308516450304
+  },
+  "versions": {
+    "python": "Python 3.12.10",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)",
+    "cargo": "cargo 1.93.1 (083ac5135 2025-12-15)",
+    "node": "v24.13.0",
+    "git": "git version 2.54.0.windows.1",
+    "wsl_kernel": "6.6.87.2-microsoft-standard-WSL2"
+  },
+  "physical_hosts": 1,
+  "other_gpu_applications_present": true,
+  "hardware_uniqueness_or_ownership_attested": false
+}

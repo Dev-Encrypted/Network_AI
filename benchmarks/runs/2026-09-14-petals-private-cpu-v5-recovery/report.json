@@ -1,0 +1,318 @@
+{
+  "evidence_type": "MEASURED_LOCAL_CPU_PRIVATE_SWARM",
+  "physical_hosts": 1,
+  "block_servers": 2,
+  "model": "bigscience/bloom-560m",
+  "revision": "ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971",
+  "petals_commit": "22afba627a7eb4fcfe9418c49472c6a51334b8ac",
+  "petals_version": "2.3.0.dev2",
+  "torch_version": "2.2.2+cpu",
+  "transformers_version": "4.43.1",
+  "precommitted_max_absolute_logit_error": 0.001,
+  "public_swarm_joined": false,
+  "routing_throughput_hint_is_measured": false,
+  "GPU_used": false,
+  "public_launch_approved": false,
+  "started_at_utc": "2026-09-14T04:31:28.825279+00:00",
+  "harness_sha256": "3994494ebae25eba219f05eb0e2655719bd7d2b235ea821b0a69fc78ce53fee3",
+  "limitations": [
+    "One physical computer; no LAN/WAN or independent operators",
+    "BLOOM-560m CPU is a research reference, not a Kimi proof or the Qwen service engine",
+    "The pinned upstream contains an always-true resume-position assert; resume metadata is not qualified",
+    "Private loopback and synthetic inputs only; no public API or credit issuance"
+  ],
+  "forward_samples": [
+    {
+      "sample": 0,
+      "warmup": true,
+      "local_seconds": 0.221499887004029,
+      "remote_seconds": 0.2676032310118899,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 1,
+      "warmup": true,
+      "local_seconds": 0.1723425870295614,
+      "remote_seconds": 0.23424083000281826,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 2,
+      "warmup": true,
+      "local_seconds": 0.19628646096680313,
+      "remote_seconds": 0.26139396999496967,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 3,
+      "warmup": false,
+      "local_seconds": 0.1642930880188942,
+      "remote_seconds": 0.21733080496778712,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 4,
+      "warmup": false,
+      "local_seconds": 0.15626106195850298,
+      "remote_seconds": 0.22433823195751756,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 5,
+      "warmup": false,
+      "local_seconds": 0.181526361964643,
+      "remote_seconds": 0.23950414801947773,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 6,
+      "warmup": false,
+      "local_seconds": 0.15253471198957413,
+      "remote_seconds": 0.23076091497205198,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 7,
+      "warmup": false,
+      "local_seconds": 0.16562727297423407,
+      "remote_seconds": 0.2246027429937385,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 8,
+      "warmup": false,
+      "local_seconds": 0.1772827100357972,
+      "remote_seconds": 0.2456374199828133,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 9,
+      "warmup": false,
+      "local_seconds": 0.15107432601507753,
+      "remote_seconds": 0.21722070599207655,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 10,
+      "warmup": false,
+      "local_seconds": 0.1624325709999539,
+      "remote_seconds": 0.22248336498159915,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 11,
+      "warmup": false,
+      "local_seconds": 0.17568708799080923,
+      "remote_seconds": 0.2467925000237301,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 12,
+      "warmup": false,
+      "local_seconds": 0.16154949797783047,
+      "remote_seconds": 0.21614609501557425,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 13,
+      "warmup": false,
+      "local_seconds": 0.15669532003812492,
+      "remote_seconds": 0.22030049603199586,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 14,
+      "warmup": false,
+      "local_seconds": 0.17666730901692063,
+      "remote_seconds": 0.2457638829946518,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 15,
+      "warmup": false,
+      "local_seconds": 0.1630414670216851,
+      "remote_seconds": 0.21946558397030458,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 16,
+      "warmup": false,
+      "local_seconds": 0.16137334296945482,
+      "remote_seconds": 0.22221537603763863,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 17,
+      "warmup": false,
+      "local_seconds": 0.19059600197942927,
+      "remote_seconds": 0.24946140899555758,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 18,
+      "warmup": false,
+      "local_seconds": 0.15435543097555637,
+      "remote_seconds": 0.21424371399916708,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 19,
+      "warmup": false,
+      "local_seconds": 0.1584326699958183,
+      "remote_seconds": 0.22556392900878564,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 20,
+      "warmup": false,
+      "local_seconds": 0.17559432599227875,
+      "remote_seconds": 0.242289149959106,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 21,
+      "warmup": false,
+      "local_seconds": 0.155884874984622,
+      "remote_seconds": 0.2188441619509831,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 22,
+      "warmup": false,
+      "local_seconds": 0.1626681240159087,
+      "remote_seconds": 0.2249228940345347,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 23,
+      "warmup": false,
+      "local_seconds": 0.19380103499861434,
+      "remote_seconds": 0.24479204299859703,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 24,
+      "warmup": false,
+      "local_seconds": 0.15147294802591205,
+      "remote_seconds": 0.21586805797414854,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 25,
+      "warmup": false,
+      "local_seconds": 0.15548086201306432,
+      "remote_seconds": 0.21973228600108996,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 26,
+      "warmup": false,
+      "local_seconds": 0.17785241303499788,
+      "remote_seconds": 0.23949629499111325,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 27,
+      "warmup": false,
+      "local_seconds": 0.15438304597046226,
+      "remote_seconds": 0.21726706402841955,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 28,
+      "warmup": false,
+      "local_seconds": 0.15905790601391345,
+      "remote_seconds": 0.21787369303638116,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 29,
+      "warmup": false,
+      "local_seconds": 0.17691608500899747,
+      "remote_seconds": 0.25932912598364055,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 30,
+      "warmup": false,
+      "local_seconds": 0.15251730900490656,
+      "remote_seconds": 0.2163472999818623,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 31,
+      "warmup": false,
+      "local_seconds": 0.15586203697603196,
+      "remote_seconds": 0.2218077279976569,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 32,
+      "warmup": false,
+      "local_seconds": 0.17750796797918156,
+      "remote_seconds": 0.23823698103660718,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    }
+  ],
+  "generation_checks": [
+    {
+      "prompt": "A cat sat on the",
+      "token_ids_equal": true,
+      "new_token_count": 8
+    },
+    {
+      "prompt": "Era uma vez uma pequena cidade",
+      "token_ids_equal": true,
+      "new_token_count": 8
+    },
+    {
+      "prompt": "The sequence is one, two, three,",
+      "token_ids_equal": true,
+      "new_token_count": 8
+    }
+  ],
+  "numerical_checks_passed": true,
+  "missing_block_error": {
+    "type": "P2PDaemonError",
+    "seconds": 0.07791200396604836
+  },
+  "failure_detection_executed": true,
+  "recovery_after_restart_executed": true,
+  "recovery_seconds": 5.5026419420028105,
+  "recovery_maximum_absolute_logit_error": 0.0,
+  "replacement_identity_authorized_by_local_lab_controller": true,
+  "finished_at_utc": "2026-09-14T04:32:08.265266+00:00"
+}

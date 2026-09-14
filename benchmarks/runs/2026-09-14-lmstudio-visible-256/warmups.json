@@ -1,0 +1,83 @@
+[
+  {
+    "index": 0,
+    "request_sha256": "a624e6900579e501be4ed5692d0fb68e02d1e660e3bd606460dbc0854f7ef608",
+    "expected": "brasília",
+    "synthetic_output": "Brasília",
+    "http_status": 200,
+    "ttft_seconds": 1.3325293000089005,
+    "generation_ttft_seconds": 0.7057499999646097,
+    "total_seconds": 1.3671960000065155,
+    "received_generation_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 53.05046220242462,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "response_finished_without_length_cutoff": true,
+    "error": null
+  },
+  {
+    "index": 1,
+    "request_sha256": "0b011a1d216cff2b550c5d6e4c902017cbb5f68c2eb56806c4a5577c3633fc75",
+    "expected": "42",
+    "synthetic_output": "42",
+    "http_status": 200,
+    "ttft_seconds": 1.8123706000042148,
+    "generation_ttft_seconds": 0.4310848999884911,
+    "total_seconds": 1.8429522999795154,
+    "received_generation_deltas": 69,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 72,
+      "total_tokens": 147,
+      "completion_tokens_details": {
+        "reasoning_tokens": 67
+      }
+    },
+    "reported_decode_tokens_per_second": 50.329662835944085,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "response_finished_without_length_cutoff": true,
+    "error": null
+  },
+  {
+    "index": 2,
+    "request_sha256": "c08159a6ae69c61a96f9ca8496d369f95286e9c0719e8d7eb18670efb9880e8f",
+    "expected": "computação",
+    "synthetic_output": "COMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.9806329000275582,
+    "generation_ttft_seconds": 0.35233680001692846,
+    "total_seconds": 1.0429551000124775,
+    "received_generation_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 49.31302603541118,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "response_finished_without_length_cutoff": true,
+    "error": null
+  }
+]

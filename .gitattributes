@@ -1,0 +1,11 @@
+# Preserve bytes of historical evidence and source hashes on every host.
+* -text
+*.py diff
+*.rs diff
+*.md diff
+*.toml diff
+*.yml diff
+*.json diff
+*.jsonl diff
+*.gz binary
+*.zip binary

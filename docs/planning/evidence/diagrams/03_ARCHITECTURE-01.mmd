@@ -1,0 +1,28 @@
+flowchart LR
+  U[Consumidor e agente local] --> G[Gateway de inferencia]
+  U --> W[Web e API de controle]
+  subgraph CTRL[Plano de controle]
+    W --> API[NestJS modular]
+    API --> CAT[Catalogo e politicas]
+    API --> SCH[Placement e scheduler]
+  end
+  subgraph AUD[Plano de creditos e auditoria]
+    LED[Ledger e conciliador] --> DB[(PostgreSQL)]
+    LED --> OUT[Outbox e incidentes]
+  end
+  API --> LED
+  API --> DB
+  API --> R[(Redis efemero)]
+  G -->|metadados e reserva| API
+  subgraph ART[Plano de distribuicao]
+    PUB[Publicador aceito pelo pool] --> MAN[Manifestos assinados]
+    MAN --> S3[Objetos HTTP S3]
+  end
+  subgraph INF[Plano de inferencia]
+    G --> D[Daemon e guarda da sessao]
+    D --> ENG[Worker Python e engine]
+    D <-->|ativacoes autorizadas| PEER[Outros participantes]
+  end
+  SCH -->|atribuicoes| D
+  S3 -->|pesos selecionados| D
+  D -->|recibos sem prompts| LED

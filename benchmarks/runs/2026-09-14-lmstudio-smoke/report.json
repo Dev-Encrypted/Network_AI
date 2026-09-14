@@ -1,0 +1,53 @@
+{
+  "evidence_type": "MEASURED_LOCAL",
+  "experiment": "A_SMOKE_EXISTING_BACKEND",
+  "observed_at_utc": "2026-09-14T03:26:18.376095+00:00",
+  "model": "Qwen3.8-27B / Q4",
+  "endpoint": "http://127.0.0.1:1235",
+  "physical_hosts": 1,
+  "configuration": "existing LM Studio model; unchanged shared GPU/context",
+  "harness_sha256": "6513ab126c371e0188fcd8dcb6edcf1704ce7aaeed5e0bf987fa6170f072b36b",
+  "fixture_sha256": "08b4bed0617dc41bc01956659211d09704a07c89f51d14765920454f2756017d",
+  "requested_samples": 30,
+  "samples": 30,
+  "warmups": 3,
+  "completed": 30,
+  "correct_answers": 20,
+  "ttft_p50_seconds": 0.3703425999847241,
+  "ttft_p95_seconds": 0.5168005999876186,
+  "p99_qualification_available": false,
+  "median_reported_decode_tokens_per_second": 49.598125043648636,
+  "gpu_before": [
+    {
+      "name": "NVIDIA GeForce RTX 4090",
+      "memory_total_mib": "24564",
+      "memory_used_mib": "22152",
+      "utilization_percent": "0",
+      "power_w": "30.99",
+      "temperature_c": "51"
+    }
+  ],
+  "gpu_after": [
+    {
+      "name": "NVIDIA GeForce RTX 4090",
+      "memory_total_mib": "24564",
+      "memory_used_mib": "22152",
+      "utilization_percent": "71",
+      "power_w": "225.98",
+      "temperature_c": "64"
+    }
+  ],
+  "client_cancellation_observed": true,
+  "request_after_cancellation_completed": true,
+  "backend_cancellation_and_resource_reclamation_proven": false,
+  "E01_Qwen3_8B_BF16_qualified": false,
+  "public_launch_approved": false,
+  "limitations": [
+    "Short synthetic prompts, not the E01 2K/256 or 8192-token workload",
+    "Backend usage counters are reported, not independently tokenized",
+    "SSE delta timing is not an independently observed GPU token schedule",
+    "GPU was shared with existing applications; no isolated throughput or energy qualification",
+    "One physical host; loopback does not validate WAN, NAT or distributed inference",
+    "Client disconnect and subsequent completion do not prove engine cancellation"
+  ]
+}

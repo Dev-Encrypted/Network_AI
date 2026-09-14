@@ -1,0 +1,52 @@
+{
+  "status": "passed",
+  "parser": "mermaid@12.0.0 with jsdom@26.1.0",
+  "scope": "syntax only; visual layout not reviewed",
+  "diagrams": [
+    {
+      "file": "diagrams/03_ARCHITECTURE-01.mmd",
+      "sha256": "fa78fb77ab208898b022d83c2b06a3dcc5c772d7e251d4c253b66edbe873ada5",
+      "status": "passed"
+    },
+    {
+      "file": "diagrams/03_ARCHITECTURE-02.mmd",
+      "sha256": "b7db4fa39dad753acb6bfc48c37330a731b9710bc16254e6651c18dbc1e635e3",
+      "status": "passed"
+    },
+    {
+      "file": "diagrams/03_ARCHITECTURE-03.mmd",
+      "sha256": "b7bde8fbfb7e8021ca11bef7fcbdc9b2cbfc94c643e79b5cb919472052cb4d21",
+      "status": "passed"
+    },
+    {
+      "file": "diagrams/03_ARCHITECTURE-04.mmd",
+      "sha256": "e5aa22735669640381f5ed5cfe46aff3e5cd9e1471923a05262c1a7834b5d4cb",
+      "status": "passed"
+    },
+    {
+      "file": "diagrams/06_NODE_PROTOCOL_AND_SCHEDULER-01.mmd",
+      "sha256": "2008242866dd6a3f06d841a2ee5f7ad493536e4c9e06cbff3af8b1bfe850c807",
+      "status": "passed"
+    },
+    {
+      "file": "diagrams/06_NODE_PROTOCOL_AND_SCHEDULER-02.mmd",
+      "sha256": "39fc7bba05c38284d0fdb8df8f35b1d697dcff75de9d5a5c95d74ba1c904b540",
+      "status": "passed"
+    },
+    {
+      "file": "diagrams/06_NODE_PROTOCOL_AND_SCHEDULER-03.mmd",
+      "sha256": "589fa25c1ed373740e9a6784fc0665e340b936ba49378a4a2703f4b3be2ac6f4",
+      "status": "passed"
+    },
+    {
+      "file": "diagrams/12_ROADMAP_AND_BACKLOG-01.mmd",
+      "sha256": "51838a26cb2fb3bdcc0c982fc31aba61b62e0f5d78de994831a130e1f6eef8da",
+      "status": "passed"
+    },
+    {
+      "file": "diagrams/18_OPEN_NETWORK_AND_COMPUTE_MARKET-01.mmd",
+      "sha256": "2c5bdc4d53a77ba2579ffd74ebcf5494b913b0fe9a932d35bbf622d6948e4033",
+      "status": "passed"
+    }
+  ]
+}

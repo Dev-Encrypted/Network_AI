@@ -1,0 +1,49 @@
+{
+  "cancel": {
+    "index": 0,
+    "request_sha256": "80670ee69213e62616e49152ce62a89750af6285f79c07f8913991033cbb3ddd",
+    "expected": "brasília",
+    "synthetic_output": "",
+    "http_status": 200,
+    "ttft_seconds": null,
+    "generation_ttft_seconds": 0.3435087000252679,
+    "total_seconds": 0.3436420999933034,
+    "received_generation_deltas": 1,
+    "backend_usage": {},
+    "reported_decode_tokens_per_second": null,
+    "finish_reason": null,
+    "done_marker": false,
+    "client_closed_stream": true,
+    "correct_synthetic_answer": false,
+    "completed": false,
+    "response_finished_without_length_cutoff": false,
+    "error": null
+  },
+  "subsequent": {
+    "index": 1,
+    "request_sha256": "2f8b437f48e96e513e4959d7733cad6cbe6b7b1e17b4f428dc768b84deb1468a",
+    "expected": "42",
+    "synthetic_output": "",
+    "http_status": 200,
+    "ttft_seconds": null,
+    "generation_ttft_seconds": 0.3284269000287168,
+    "total_seconds": 0.9708002000115812,
+    "received_generation_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 32,
+      "total_tokens": 107,
+      "completion_tokens_details": {
+        "reasoning_tokens": 32
+      }
+    },
+    "reported_decode_tokens_per_second": 48.340501760906996,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "response_finished_without_length_cutoff": false,
+    "error": null
+  }
+}

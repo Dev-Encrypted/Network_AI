@@ -1,0 +1,77 @@
+[
+  {
+    "index": 0,
+    "request_sha256": "b9453cf89a37aae32db54c344c7cb8ad0d810e14e84729e9592f4aca5a0050f3",
+    "expected": "brasília",
+    "synthetic_output": "The user asks for only the name of the capital of Brazil, with no thinking shown (/no_think). The capital of Brazil is Brasília.\nBrasília",
+    "http_status": 200,
+    "ttft_seconds": 1.3038150999927893,
+    "total_seconds": 2.0132839999860153,
+    "received_text_deltas": 33,
+    "backend_usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 36,
+      "total_tokens": 104,
+      "completion_tokens_details": {
+        "reasoning_tokens": 30
+      }
+    },
+    "reported_decode_tokens_per_second": 49.51684294313724,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 1,
+    "request_sha256": "34c99b121cedd16ff8a723b3558b09d5571aae274a09bd10b24a271a44c32a13",
+    "expected": "42",
+    "synthetic_output": "The user asks \"Quanto é 17 + 25?\" (What is 17 + 25?) and says to answer only with the number. They also added \"/no_think\" which likely means they want a direct answer without showing thinking.\n\n17 + 25 = ",
+    "http_status": 200,
+    "ttft_seconds": 0.41268120001768693,
+    "total_seconds": 1.6650942999986,
+    "received_text_deltas": 64,
+    "backend_usage": {
+      "prompt_tokens": 75,
+      "completion_tokens": 64,
+      "total_tokens": 139,
+      "completion_tokens_details": {
+        "reasoning_tokens": 64
+      }
+    },
+    "reported_decode_tokens_per_second": 50.30900509685902,
+    "finish_reason": "length",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": false,
+    "completed": true,
+    "error": null
+  },
+  {
+    "index": 2,
+    "request_sha256": "9e52076baba489c4991cbb7404ca2cf6e02df59ccff3a43f2325998d01eca629",
+    "expected": "computação",
+    "synthetic_output": "We need respond only word COMPUTAÇÃO no explanations. User says /no_think likely wants direct. Final just COMPUTAÇÃO.\nCOMPUTAÇÃO",
+    "http_status": 200,
+    "ttft_seconds": 0.47767410002416,
+    "total_seconds": 1.2250309000373818,
+    "received_text_deltas": 32,
+    "backend_usage": {
+      "prompt_tokens": 70,
+      "completion_tokens": 35,
+      "total_tokens": 105,
+      "completion_tokens_details": {
+        "reasoning_tokens": 28
+      }
+    },
+    "reported_decode_tokens_per_second": 45.57338964346589,
+    "finish_reason": "stop",
+    "done_marker": true,
+    "client_closed_stream": false,
+    "correct_synthetic_answer": true,
+    "completed": true,
+    "error": null
+  }
+]

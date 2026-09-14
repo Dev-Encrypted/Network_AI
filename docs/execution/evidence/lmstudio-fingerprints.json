@@ -1,0 +1,141 @@
+{
+  "evidence_type": "LOCAL_ARTIFACT_FINGERPRINT",
+  "observed_at_utc": "2026-09-14T04:11:52.140351+00:00",
+  "artifacts": [
+    {
+      "role": "model",
+      "filename": "Qwen3.8-27B-Uncensored-Q4_K_M.gguf",
+      "bytes": 16810714528,
+      "sha256": "4c5e2db039e9325ac7724c8846c71356a24ad1cdfa28002d73ecb6be645f9675"
+    },
+    {
+      "role": "backend",
+      "filename": "llama-server.exe",
+      "bytes": 20152,
+      "sha256": "a9b1b003cd2a616ab1d890df6e266a96c9f7c25b991e108ca18658f1247c151b"
+    }
+  ],
+  "loaded_models_snapshot": [
+    {
+      "type": "llm",
+      "modelKey": "qwen3.8-27b-uncensored@q4_k_m",
+      "format": "gguf",
+      "displayName": "Qwen3.8 27B Uncensored",
+      "publisher": "JonathanColetti",
+      "path": "JonathanColetti/Qwen3.8-27B-Uncensored-GGUF/Qwen3.8-27B-Uncensored-Q4_K_M.gguf",
+      "sizeBytes": 16810714528,
+      "indexedModelIdentifier": "JonathanColetti/Qwen3.8-27B-Uncensored-GGUF/Qwen3.8-27B-Uncensored-Q4_K_M.gguf",
+      "deviceIdentifier": null,
+      "paramsString": "27B",
+      "architecture": "qwen35",
+      "quantization": {
+        "name": "Q4_K_M",
+        "bits": 4
+      },
+      "identifier": "Qwen3.8-27B / Q4",
+      "ttlMs": null,
+      "lastUsedTime": 1789356678777,
+      "vision": false,
+      "trainedForToolUse": true,
+      "maxContextLength": 262144,
+      "contextLength": 128000,
+      "status": "idle",
+      "queued": 0,
+      "parallel": 1
+    }
+  ],
+  "upstream_license_and_origin_qualified": false,
+  "same_as_Qwen3_8B_BF16": false,
+  "backend_binary_manifest": [
+    {
+      "file": "ggml-base.dll",
+      "bytes": 824504,
+      "sha256": "2f8b80012ff2eb71b7e54ac36f1a296e5564143794dfb9b5189548e9650ed1c4"
+    },
+    {
+      "file": "ggml-cpu.dll",
+      "bytes": 1108152,
+      "sha256": "7f2ac305f411cd83dc39a9ad7f75313fe94a442e2f1d889242a046d8ea0a8177"
+    },
+    {
+      "file": "ggml-cuda.dll",
+      "bytes": 141415608,
+      "sha256": "ca8ee7756829398812d7e479280173bff2d575546ee737695e01c9a102bd2a93"
+    },
+    {
+      "file": "ggml_llamacpp.dll",
+      "bytes": 88248,
+      "sha256": "501cdaa0b00b2750b02e1deee1f9f46d777d68f3123b882bbbb6364c3db51fd9"
+    },
+    {
+      "file": "liblmstudio_bindings_cuda12.node",
+      "bytes": 171192,
+      "sha256": "93f5fc262a4d34eb74246627521ccea114a1db067d6e319ee2d7c651366a4d83"
+    },
+    {
+      "file": "libomp.dll",
+      "bytes": 668856,
+      "sha256": "0d6f110d0086696403e2a5fbce1558f5ff56bb1d402110ccf950e8f19209f2bf"
+    },
+    {
+      "file": "llama-common.dll",
+      "bytes": 5180600,
+      "sha256": "fb53bf7a18a1b4eb46ba280965b7254bc15a89498fa48f0fd6fe59ac29a42a84"
+    },
+    {
+      "file": "llama-server-impl.dll",
+      "bytes": 2962616,
+      "sha256": "290063ef1ecc224e7861ddde5b1d82601fb0dd5159df79152a70fa72b00aa026"
+    },
+    {
+      "file": "llama-server.exe",
+      "bytes": 20152,
+      "sha256": "a9b1b003cd2a616ab1d890df6e266a96c9f7c25b991e108ca18658f1247c151b"
+    },
+    {
+      "file": "llama.dll",
+      "bytes": 3022520,
+      "sha256": "a5b256b6b0f0632f1974d47521fb9c182c6344dafeb13b5ec7add4b8cddc6c30"
+    },
+    {
+      "file": "llm_engine.dll",
+      "bytes": 4904632,
+      "sha256": "78adfab69ece19bbf3920ccfed3eae2701889a3f5fd519375492bd80cc144ddf"
+    },
+    {
+      "file": "llm_engine_cuda12.node",
+      "bytes": 434872,
+      "sha256": "b880867e0d3dc25a2ebf49f2174f941bb6ec7d729fc24958be864d0eaf452451"
+    },
+    {
+      "file": "lmstudiocore.dll",
+      "bytes": 398520,
+      "sha256": "4be749d4ff80948cf088e5ac6386f39eadfce92f85fe640e5319b65033bf62f2"
+    },
+    {
+      "file": "MSVCP140.dll",
+      "bytes": 643512,
+      "sha256": "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca"
+    },
+    {
+      "file": "mtmd.dll",
+      "bytes": 1752248,
+      "sha256": "2f4b646b9e417571c8b9cfe1baff5ca363a3c5c978c0763dfca92efe8d5800c9"
+    },
+    {
+      "file": "VCOMP140.dll",
+      "bytes": 212920,
+      "sha256": "95d4ce4a6802d1e18b5e0e1722cc30ea72ca7e033f83828f05c0b7b993fe7cbf"
+    },
+    {
+      "file": "VCRUNTIME140.dll",
+      "bytes": 178616,
+      "sha256": "d1f4225df2cd877dbf130d5668a021dce3f94118455ff5ec952061c30afc9ce7"
+    },
+    {
+      "file": "VCRUNTIME140_1.dll",
+      "bytes": 50112,
+      "sha256": "a7146c08f89fe5b04541ab507cdb59ff7b44534d4ba3c668a426c6450a03434e"
+    }
+  ]
+}

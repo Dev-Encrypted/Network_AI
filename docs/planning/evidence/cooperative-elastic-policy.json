@@ -1,0 +1,29 @@
+{
+  "policy_version": "cooperative-elastic-2026-09-13-v1",
+  "status": "current_proposal_hypothetical_parameters_not_implemented",
+  "cooperative_unit": "TU",
+  "microtu_per_tu": 1000000,
+  "cooperative_earnings_require_paid_buyers": false,
+  "cooperative_credit_cash_conversion": false,
+  "billing_modes": ["cooperative", "commercial"],
+  "automatic_billing_mode_fallback": false,
+  "coverage_horizon_days": 7,
+  "service_stock_target_bps": 3500,
+  "service_stock_warning_bps": 5000,
+  "service_stock_critical_bps": 8000,
+  "onboarding_max_share_of_cooperative_issuance_bps": 200,
+  "reference_pool_commercial_capacity_cap_bps": 2500,
+  "elastic": {
+    "evaluation_seconds": 30,
+    "stable_seconds_per_promotion": 300,
+    "regular_pressure_for_two_bps": 5000,
+    "regular_pressure_for_four_bps": 2500,
+    "resource_pressure_blocks_extras_bps": 8000,
+    "concurrency_levels": [1, 2, 4],
+    "extra_session_max_seconds": 60,
+    "initial_price_discount_bps": 0,
+    "quota_is_bankable": false,
+    "context_limit_changes_automatically": false
+  },
+  "notice": "Service credits are not financial deposits. Exact numeric values require benchmark and pilot calibration."
+}

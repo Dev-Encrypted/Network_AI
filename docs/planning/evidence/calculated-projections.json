@@ -1,0 +1,180 @@
+{
+  "evidence_type": "CALCULATED_PROJECTION",
+  "no_gpu_or_network_benchmark_executed": true,
+  "model_metadata_arithmetic": [
+    {
+      "model": "meta-llama/Llama-3.1-70B-Instruct",
+      "revision": "1605565b47bb9346c5515c34102e054115b4f98b",
+      "weight_files": 30,
+      "weight_bytes_declared": 141107497872,
+      "weight_GiB": 131.4165982156992,
+      "weight_only_16GiB_units_lower_bound": 9,
+      "largest_file_bytes_declared": 4999711728,
+      "complete_weights_downloaded_or_verified": false
+    },
+    {
+      "model": "moonshotai/Kimi-K2.5",
+      "revision": "4d01dfe0332d63057c186e0b262165819efb6611",
+      "weight_files": 64,
+      "weight_bytes_declared": 595177988208,
+      "weight_GiB": 554.3026963323355,
+      "weight_only_16GiB_units_lower_bound": 35,
+      "largest_file_bytes_declared": 9809050936,
+      "complete_weights_downloaded_or_verified": false,
+      "language_layers": 61,
+      "max_shards_per_language_layer": 1
+    },
+    {
+      "model": "moonshotai/Kimi-K2.6",
+      "revision": "7eb5002f6aadc958aed6a9177b7ed26bb94011bb",
+      "weight_files": 64,
+      "weight_bytes_declared": 595177988208,
+      "weight_GiB": 554.3026963323355,
+      "weight_only_16GiB_units_lower_bound": 35,
+      "largest_file_bytes_declared": 9809050936,
+      "complete_weights_downloaded_or_verified": false,
+      "language_layers": 61,
+      "max_shards_per_language_layer": 1
+    },
+    {
+      "model": "moonshotai/Kimi-K2.7-Code",
+      "revision": "74797c9c62378b951a1f6fcf5c4631024e9b8bef",
+      "weight_files": 64,
+      "weight_bytes_declared": 595177988208,
+      "weight_GiB": 554.3026963323355,
+      "weight_only_16GiB_units_lower_bound": 35,
+      "largest_file_bytes_declared": 9809050936,
+      "complete_weights_downloaded_or_verified": false,
+      "language_layers": 61,
+      "max_shards_per_language_layer": 1
+    },
+    {
+      "model": "moonshotai/Kimi-K3",
+      "revision": "f831ab66814297da540d832a5235f8e904f29d06",
+      "weight_files": 96,
+      "weight_bytes_declared": 1560936091448,
+      "weight_GiB": 1453.7350194975734,
+      "weight_only_16GiB_units_lower_bound": 91,
+      "largest_file_bytes_declared": 16990916912,
+      "complete_weights_downloaded_or_verified": false,
+      "language_layers": 93,
+      "max_shards_per_language_layer": 1
+    },
+    {
+      "model": "moonshotai/Kimi-Linear-48B-A3B-Instruct",
+      "revision": "e1df551a447157d4658b573f9a695d57658590e9",
+      "weight_files": 20,
+      "weight_bytes_declared": 98248224120,
+      "weight_GiB": 91.50078903883696,
+      "weight_only_16GiB_units_lower_bound": 6,
+      "largest_file_bytes_declared": 4999934384,
+      "complete_weights_downloaded_or_verified": false,
+      "language_layers": 27,
+      "max_shards_per_language_layer": 2
+    },
+    {
+      "model": "Qwen/Qwen3-32B",
+      "revision": "9216db5781bf21249d130ec9da846c4624c16137",
+      "weight_files": 17,
+      "weight_bytes_declared": 65524328560,
+      "weight_GiB": 61.02428637444973,
+      "weight_only_16GiB_units_lower_bound": 4,
+      "largest_file_bytes_declared": 3957109648,
+      "complete_weights_downloaded_or_verified": false,
+      "language_layers": 64,
+      "max_shards_per_language_layer": 2
+    },
+    {
+      "model": "Qwen/Qwen3-8B",
+      "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+      "weight_files": 5,
+      "weight_bytes_declared": 16381516776,
+      "weight_GiB": 15.256476379930973,
+      "weight_only_16GiB_units_lower_bound": 1,
+      "largest_file_bytes_declared": 3996250744,
+      "complete_weights_downloaded_or_verified": false,
+      "language_layers": 36,
+      "max_shards_per_language_layer": 2
+    }
+  ],
+  "homogeneous_24GiB_scenarios": [
+    {
+      "registered": 10,
+      "nominal_GiB": 240,
+      "online": 6,
+      "accepted": 4,
+      "reserved": 2,
+      "ready": 1,
+      "ready_target": 0,
+      "equivalent_weight_budget_GiB": "0.00",
+      "relaxed_redundant_K3_sets": 0
+    },
+    {
+      "registered": 100,
+      "nominal_GiB": 2400,
+      "online": 60,
+      "accepted": 48,
+      "reserved": 24,
+      "ready": 21,
+      "ready_target": 10,
+      "equivalent_weight_budget_GiB": "68.00",
+      "relaxed_redundant_K3_sets": 0
+    },
+    {
+      "registered": 1000,
+      "nominal_GiB": 24000,
+      "online": 600,
+      "accepted": 480,
+      "reserved": 240,
+      "ready": 216,
+      "ready_target": 108,
+      "equivalent_weight_budget_GiB": "734.40",
+      "relaxed_redundant_K3_sets": 0
+    },
+    {
+      "registered": 10000,
+      "nominal_GiB": 240000,
+      "online": 6000,
+      "accepted": 4800,
+      "reserved": 2400,
+      "ready": 2160,
+      "ready_target": 1080,
+      "equivalent_weight_budget_GiB": "7344.00",
+      "relaxed_redundant_K3_sets": 5
+    }
+  ],
+  "qwen8b_KV_bytes_8192_tokens_one_session": 1207959552,
+  "qwen8b_total_GiB_with_hypothetical_3GiB_overhead": 19.381476379930973,
+  "activation_8192x7168_BF16_MiB": 112.0,
+  "activation_min_seconds_at_100Mbit": 9.39524096,
+  "illustrative_93_stage_network_seconds_per_token": 4.65,
+  "illustrative_network_only_tokens_per_second": 0.2150537634408602,
+  "illustrative_independent_93_component_availability": 0.39271102835780486,
+  "relay_useful_GB_per_month_scenarios": [
+    "1.2",
+    "300",
+    "9000",
+    "90000"
+  ],
+  "R2_gross_storage_USD_excludes_allowances_operations_taxes": {
+    "1000": "15.000",
+    "5000": "75.000",
+    "20000": "300.000",
+    "50000": "750.000"
+  },
+  "daily_example_supply_units": 1560,
+  "daily_example_demand_units": 1320,
+  "daily_example_peak_shortfall_units": 360,
+  "ledger_example_payment_atomic": {
+    "unit": "FICTIONAL_PAYMENT_UNIT",
+    "earned": 600000,
+    "hold": 400000,
+    "consumed": 250000,
+    "released": 150000,
+    "available": 350000,
+    "refund": 50000,
+    "final_available": 400000
+  },
+  "index_compression_raw_bytes": 133779881,
+  "index_compression_gzip_bytes": 3209334
+}

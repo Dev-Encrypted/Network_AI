@@ -1,0 +1,279 @@
+{
+  "status": "passed_bounded_reference_checks",
+  "policy_version": "planning-operating-policy-2026-09-13-v6",
+  "policy_sha256": "2dc3a61855f6456a06300c4563bba957d6416d80c034add4371b320182fd9f93",
+  "checker_sha256": "e14860bbc3251a56b3355e04971cd4ea201913fe64aa2a607561c7462f59f625",
+  "case_count": 19,
+  "cases": [
+    {
+      "id": "Q01",
+      "name": "v5_priority_can_starve_normal_renewal",
+      "observed": {
+        "v5_working": 0,
+        "v6_working": 60,
+        "v6_protected": 40,
+        "renewal_cost": 60
+      },
+      "expected": {
+        "v5_working": 0,
+        "v6_working": 60,
+        "v6_protected": 40,
+        "renewal_cost": 60
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q02",
+      "name": "insufficient_consumption_does_not_fabricate_floor",
+      "observed": {
+        "floor": 20,
+        "protected": 0,
+        "working_extra": 0,
+        "burn": 0,
+        "working_after": 20,
+        "protected_after": 0
+      },
+      "expected": {
+        "floor": 20,
+        "protected": 0,
+        "working_extra": 0,
+        "burn": 0,
+        "working_after": 20,
+        "protected_after": 0
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q03",
+      "name": "all_targets_met_burns_only_new_surplus",
+      "observed": {
+        "floor": 0,
+        "protected": 0,
+        "working_extra": 0,
+        "burn": 100,
+        "working_after": 100,
+        "protected_after": 100
+      },
+      "expected": {
+        "floor": 0,
+        "protected": 0,
+        "working_extra": 0,
+        "burn": 100,
+        "working_after": 100,
+        "protected_after": 100
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q04",
+      "name": "refill_reserve_then_working_above_floor",
+      "observed": {
+        "floor": 0,
+        "protected": 50,
+        "working_extra": 20,
+        "burn": 30,
+        "working_after": 100,
+        "protected_after": 100
+      },
+      "expected": {
+        "floor": 0,
+        "protected": 50,
+        "working_extra": 20,
+        "burn": 30,
+        "working_after": 100,
+        "protected_after": 100
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q05",
+      "name": "zero_usage_creates_no_credit",
+      "observed": {
+        "floor": 0,
+        "protected": 0,
+        "working_extra": 0,
+        "burn": 0,
+        "working_after": 20,
+        "protected_after": 10
+      },
+      "expected": {
+        "floor": 0,
+        "protected": 0,
+        "working_extra": 0,
+        "burn": 0,
+        "working_after": 20,
+        "protected_after": 10
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q06",
+      "name": "lower_targets_do_not_confiscate_old_balances",
+      "observed": {
+        "floor": 0,
+        "protected": 0,
+        "working_extra": 0,
+        "burn": 10,
+        "working_after": 120,
+        "protected_after": 130
+      },
+      "expected": {
+        "floor": 0,
+        "protected": 0,
+        "working_extra": 0,
+        "burn": 10,
+        "working_after": 120,
+        "protected_after": 130
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q07",
+      "name": "existing_holds_are_not_free_renewal_funds",
+      "observed": {
+        "free_working_after": 20,
+        "held_unchanged": 100
+      },
+      "expected": {
+        "free_working_after": 20,
+        "held_unchanged": 100
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q08",
+      "name": "expansion_cannot_consume_floor",
+      "observed": false,
+      "expected": false,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q09",
+      "name": "depleted_protected_target_blocks_new_expansion",
+      "observed": false,
+      "expected": false,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q10",
+      "name": "funded_justified_complete_expansion",
+      "observed": true,
+      "expected": true,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q11",
+      "name": "idle_budget_is_not_demand",
+      "observed": false,
+      "expected": false,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q12",
+      "name": "fragment_is_not_complete_route",
+      "observed": false,
+      "expected": false,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q13",
+      "name": "issuance_or_reserve_support_does_not_erase_recurring_deficit",
+      "observed": {
+        "numerator": 9,
+        "denominator": 10,
+        "deficit": 10,
+        "covers_normal_cost": false
+      },
+      "expected": {
+        "numerator": 9,
+        "denominator": 10,
+        "deficit": 10,
+        "covers_normal_cost": false
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q14",
+      "name": "equal_recurring_flow_is_arithmetic_only",
+      "observed": {
+        "numerator": 1,
+        "denominator": 1,
+        "deficit": 0,
+        "covers_normal_cost": true
+      },
+      "expected": {
+        "numerator": 1,
+        "denominator": 1,
+        "deficit": 0,
+        "covers_normal_cost": true
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q15",
+      "name": "bootstrap_allocation_still_requires_headroom",
+      "observed": {
+        "headroom": 30,
+        "requested": 40,
+        "permitted": false
+      },
+      "expected": {
+        "headroom": 30,
+        "requested": 40,
+        "permitted": false
+      },
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q16",
+      "name": "negative_quantity_rejected",
+      "observed": true,
+      "expected": true,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q17",
+      "name": "working_floor_above_target_rejected",
+      "observed": true,
+      "expected": true,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q18",
+      "name": "out_of_range_stored_integer_rejected",
+      "observed": true,
+      "expected": true,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    },
+    {
+      "id": "Q19",
+      "name": "empty_workload_does_not_prove_equilibrium",
+      "observed": true,
+      "expected": true,
+      "status": "passed_reference",
+      "limitation": "bounded arithmetic or admission predicate, not an implemented ledger or economic equilibrium proof"
+    }
+  ],
+  "integrated_economic_simulation_executed": false,
+  "hardware_or_payment_execution": false,
+  "public_launch_approved": false,
+  "conclusion": "priority counterexample corrected in the reference; recurring viability and deployed behavior remain unvalidated"
+}

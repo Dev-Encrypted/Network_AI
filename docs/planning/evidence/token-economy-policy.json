@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "policy_version": "planning-tu-2026-09-13-v1",
+  "status": "historical_service_credit_reference_not_current_configuration",
+  "superseded_by": "cooperative-elastic-policy.json and planning documents 20/21; commercial payments are separate in 18/19",
+  "unit": "TU",
+  "micro_units_per_unit": 1000000,
+  "legacy_nc_to_tu_ratio": "1:1",
+  "coverage": {
+    "horizon_days": 7,
+    "target_bps": 3500,
+    "warning_bps": 5000,
+    "critical_bps": 8000,
+    "reference_basket_reprices_with_public_tariff": false
+  },
+  "issuance": {
+    "daily_net_redemptions_multiplier_bps": 9500,
+    "grants_max_share_of_realized_issuance_bps": 200,
+    "new_qualified_admission_opportunities_bps": 500,
+    "work_bonus_enabled": false,
+    "transfers_enabled": false,
+    "purchases_enabled": false,
+    "earned_balance_expiration_enabled": false
+  },
+  "contracts": {
+    "maximum_lease_seconds": 900,
+    "quote_validity_seconds": 60,
+    "ordinary_tariff_notice_hours": 24,
+    "ordinary_tariff_minimum_change_interval_hours": 24,
+    "ordinary_tariff_max_change_bps": 1000,
+    "sessions_per_account_per_group": 1,
+    "sessions_per_account_per_group_when_idle": 2,
+    "future_flex_max_discount_bps": 3000,
+    "initial_flex_discount_bps": 0
+  },
+  "fictional_model_tariffs": {
+    "notice": "Arithmetic examples only. These are not prices or measured capacity for any actual model or GPU.",
+    "denominator_processed_tokens": 1000,
+    "profiles": {
+      "compact": {
+        "input_microtu": 1000000,
+        "cached_microtu": 250000,
+        "output_microtu": 4000000
+      },
+      "medium": {
+        "input_microtu": 4000000,
+        "cached_microtu": 1000000,
+        "output_microtu": 16000000
+      },
+      "giant": {
+        "input_microtu": 20000000,
+        "cached_microtu": 5000000,
+        "output_microtu": 80000000
+      }
+    }
+  }
+}

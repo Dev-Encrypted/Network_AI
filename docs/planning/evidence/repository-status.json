@@ -1,0 +1,158 @@
+[
+  {
+    "repo": "akash-network/provider",
+    "source": "https://api.github.com/repos/akash-network/provider",
+    "observed_at_utc": "2026-09-13T03:37:47.1969155Z",
+    "default_branch": "main",
+    "pushed_at": "2026-09-11T20:50:08Z",
+    "archived": false,
+    "license": "Apache-2.0",
+    "url": "https://github.com/akash-network/provider"
+  },
+  {
+    "repo": "bigscience-workshop/petals",
+    "source": "https://api.github.com/repos/bigscience-workshop/petals",
+    "observed_at_utc": "2026-09-13T03:37:45.8115263Z",
+    "default_branch": "main",
+    "pushed_at": "2024-09-07T11:54:28Z",
+    "archived": false,
+    "license": "MIT",
+    "url": "https://github.com/bigscience-workshop/petals"
+  },
+  {
+    "repo": "exo-explore/exo",
+    "source": "https://api.github.com/repos/exo-explore/exo",
+    "observed_at_utc": "2026-09-13T03:37:46.1488532Z",
+    "default_branch": "main",
+    "pushed_at": "2026-08-25T18:59:53Z",
+    "archived": false,
+    "license": "Apache-2.0",
+    "url": "https://github.com/exo-explore/exo"
+  },
+  {
+    "repo": "gensyn-ai/rl-swarm",
+    "source": "https://api.github.com/repos/gensyn-ai/rl-swarm",
+    "observed_at_utc": "2026-09-13T03:37:47.3674402Z",
+    "default_branch": "main",
+    "pushed_at": "2026-01-05T21:15:30Z",
+    "archived": false,
+    "license": "MIT",
+    "url": "https://github.com/gensyn-ai/rl-swarm"
+  },
+  {
+    "repo": "ggml-org/llama.cpp",
+    "source": "https://api.github.com/repos/ggml-org/llama.cpp",
+    "observed_at_utc": "2026-09-13T03:37:48.7042565Z",
+    "default_branch": "master",
+    "pushed_at": "2026-09-13T01:07:37Z",
+    "archived": false,
+    "license": "MIT",
+    "url": "https://github.com/ggml-org/llama.cpp"
+  },
+  {
+    "repo": "golemfactory/golem-js",
+    "source": "https://api.github.com/repos/golemfactory/golem-js",
+    "observed_at_utc": "2026-09-13T03:37:47.1090339Z",
+    "default_branch": "master",
+    "pushed_at": "2026-09-03T14:55:04Z",
+    "archived": false,
+    "license": "LGPL-3.0",
+    "url": "https://github.com/golemfactory/golem-js"
+  },
+  {
+    "repo": "golemfactory/yagna",
+    "source": "https://api.github.com/repos/golemfactory/yagna",
+    "observed_at_utc": "2026-09-13T03:37:45.6631199Z",
+    "error": "Response status code does not indicate success: 404 (Not Found)."
+  },
+  {
+    "repo": "gpustack/gpustack",
+    "source": "https://api.github.com/repos/gpustack/gpustack",
+    "observed_at_utc": "2026-09-13T03:37:48.5442605Z",
+    "default_branch": "main",
+    "pushed_at": "2026-09-10T09:09:29Z",
+    "archived": false,
+    "license": "Apache-2.0",
+    "url": "https://github.com/gpustack/gpustack"
+  },
+  {
+    "repo": "Haidra-Org/AI-Horde",
+    "source": "https://api.github.com/repos/Haidra-Org/AI-Horde",
+    "observed_at_utc": "2026-09-13T03:37:45.9729294Z",
+    "default_branch": "main",
+    "pushed_at": "2026-09-04T15:37:12Z",
+    "archived": false,
+    "license": "AGPL-3.0",
+    "url": "https://github.com/Haidra-Org/AI-Horde"
+  },
+  {
+    "repo": "learning-at-home/hivemind",
+    "source": "https://api.github.com/repos/learning-at-home/hivemind",
+    "observed_at_utc": "2026-09-13T03:37:45.9766099Z",
+    "default_branch": "master",
+    "pushed_at": "2026-01-11T21:13:45Z",
+    "archived": false,
+    "license": "MIT",
+    "url": "https://github.com/learning-at-home/hivemind"
+  },
+  {
+    "repo": "NVIDIA/TensorRT-LLM",
+    "source": "https://api.github.com/repos/NVIDIA/TensorRT-LLM",
+    "observed_at_utc": "2026-09-13T03:37:49.6687838Z",
+    "default_branch": "main",
+    "pushed_at": "2026-09-13T03:01:18Z",
+    "archived": false,
+    "license": "NOASSERTION",
+    "url": "https://github.com/NVIDIA/TensorRT-LLM"
+  },
+  {
+    "repo": "PrimeIntellect-ai/prime-iroh",
+    "source": "https://api.github.com/repos/PrimeIntellect-ai/prime-iroh",
+    "observed_at_utc": "2026-09-13T03:37:47.3674402Z",
+    "default_branch": "main",
+    "pushed_at": "2026-07-28T05:25:07Z",
+    "archived": false,
+    "license": "MIT",
+    "url": "https://github.com/PrimeIntellect-ai/prime-iroh"
+  },
+  {
+    "repo": "PrimeIntellect-ai/prime-pipeline",
+    "source": "https://api.github.com/repos/PrimeIntellect-ai/prime-pipeline",
+    "observed_at_utc": "2026-09-13T03:37:47.3674403Z",
+    "default_branch": "main",
+    "pushed_at": "2025-05-13T04:32:09Z",
+    "archived": false,
+    "license": null,
+    "url": "https://github.com/PrimeIntellect-ai/prime-pipeline"
+  },
+  {
+    "repo": "RaoFoundation/subtensor",
+    "source": "https://api.github.com/repos/RaoFoundation/subtensor",
+    "observed_at_utc": "2026-09-13T03:37:48.3085970Z",
+    "default_branch": "main",
+    "pushed_at": "2026-09-12T18:38:15Z",
+    "archived": false,
+    "license": "Apache-2.0",
+    "url": "https://github.com/RaoFoundation/subtensor"
+  },
+  {
+    "repo": "sgl-project/sglang",
+    "source": "https://api.github.com/repos/sgl-project/sglang",
+    "observed_at_utc": "2026-09-13T03:37:48.7564522Z",
+    "default_branch": "main",
+    "pushed_at": "2026-09-13T03:29:46Z",
+    "archived": false,
+    "license": "Apache-2.0",
+    "url": "https://github.com/sgl-project/sglang"
+  },
+  {
+    "repo": "vllm-project/vllm",
+    "source": "https://api.github.com/repos/vllm-project/vllm",
+    "observed_at_utc": "2026-09-13T03:37:48.7319981Z",
+    "default_branch": "main",
+    "pushed_at": "2026-09-13T03:27:09Z",
+    "archived": false,
+    "license": "Apache-2.0",
+    "url": "https://github.com/vllm-project/vllm"
+  }
+]

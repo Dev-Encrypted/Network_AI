@@ -1,0 +1,27 @@
+{
+  "id": "moonshotai/Kimi-Linear-48B-A3B-Instruct",
+  "architecture": [
+    "KimiLinearForCausalLM"
+  ],
+  "model_type": "kimi_linear",
+  "text_config": null,
+  "metadata": {
+    "total_parameters": 49122681728,
+    "total_size": 98245528576
+  },
+  "first_tensor_names": [
+    "lm_head.weight",
+    "model.embed_tokens.weight",
+    "model.layers.0.input_layernorm.weight",
+    "model.layers.0.mlp.down_proj.weight",
+    "model.layers.0.mlp.gate_proj.weight"
+  ],
+  "layers": 27,
+  "max_files_per_layer": 2.0,
+  "layer_0_files": [
+    "model-00001-of-00020.safetensors"
+  ],
+  "layer_1_files": [
+    "model-00001-of-00020.safetensors"
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "evidence_type": "MEASURED_CPU_PARTIAL_LOAD",
+  "observed_at_utc": "2026-09-14T04:07:42.986343+00:00",
+  "repo": "moonshotai/Kimi-K3",
+  "revision": "f831ab66814297da540d832a5235f8e904f29d06",
+  "torch_version": "2.13.0+cu130",
+  "tensors": [
+    {
+      "name": "w1.weight_packed",
+      "shape": [
+        3072,
+        1792
+      ],
+      "bytes": 5505024,
+      "dtype": "torch.uint8",
+      "slice_hash_reverified": true
+    },
+    {
+      "name": "w1.weight_scale",
+      "shape": [
+        3072,
+        112
+      ],
+      "bytes": 344064,
+      "dtype": "torch.uint8",
+      "slice_hash_reverified": true
+    },
+    {
+      "name": "w2.weight_packed",
+      "shape": [
+        3584,
+        1536
+      ],
+      "bytes": 5505024,
+      "dtype": "torch.uint8",
+      "slice_hash_reverified": true
+    },
+    {
+      "name": "w2.weight_scale",
+      "shape": [
+        3584,
+        96
+      ],
+      "bytes": 344064,
+      "dtype": "torch.uint8",
+      "slice_hash_reverified": true
+    },
+    {
+      "name": "w3.weight_packed",
+      "shape": [
+        3072,
+        1792
+      ],
+      "bytes": 5505024,
+      "dtype": "torch.uint8",
+      "slice_hash_reverified": true
+    },
+    {
+      "name": "w3.weight_scale",
+      "shape": [
+        3072,
+        112
+      ],
+      "bytes": 344064,
+      "dtype": "torch.uint8",
+      "slice_hash_reverified": true
+    }
+  ],
+  "tensor_payload_bytes": 17547264,
+  "load_seconds": 0.1386825109948404,
+  "whole_shard_digest_verified": false,
+  "dequantization_executed": false,
+  "expert_forward_executed": false,
+  "gpu_load_executed": false,
+  "stage_parity_proven": false,
+  "complete_kimi_inference_executed": false,
+  "limitations": [
+    "U8 contains packed weights and encoded scales; interpreting it as ordinary uint8 arithmetic would be incorrect",
+    "This proves bounded slice loading and layout, not a runnable K3 expert or distributed decoder"
+  ]
+}

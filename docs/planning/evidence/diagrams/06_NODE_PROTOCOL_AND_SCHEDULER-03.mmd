@@ -1,0 +1,22 @@
+stateDiagram-v2
+  [*] --> CREATED
+  CREATED --> HELD: saldo reservado
+  CREATED --> FAILED: saldo ou politica
+  HELD --> QUEUED: espera autorizada
+  HELD --> PREPARING: rota candidata
+  QUEUED --> PREPARING: capacidade disponivel
+  PREPARING --> AUTHORIZED: todos confirmam
+  PREPARING --> FAILED: prazo ou rejeicao
+  AUTHORIZED --> PREFILLING: Start aceito
+  PREFILLING --> STREAMING: primeiro evento gerado
+  PREFILLING --> RECOVERING: falha recuperavel
+  STREAMING --> RECOVERING: politica de retomada explicita
+  RECOVERING --> PREFILLING: nova tentativa mesma configuracao
+  RECOVERING --> INTERRUPTED: impossivel recuperar
+  STREAMING --> COMPLETED: finish valido
+  PREFILLING --> CANCELLING: cancelamento
+  STREAMING --> CANCELLING: cancelamento
+  CANCELLING --> CANCELLED: confirmacao ou prazo local
+  STREAMING --> INTERRUPTED: perda abrupta
+  AUTHORIZED --> FAILED: Start expirou
+  QUEUED --> CANCELLED: cancelar fila

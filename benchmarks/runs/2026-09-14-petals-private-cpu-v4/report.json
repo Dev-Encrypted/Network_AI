@@ -1,0 +1,315 @@
+{
+  "evidence_type": "MEASURED_LOCAL_CPU_PRIVATE_SWARM",
+  "physical_hosts": 1,
+  "block_servers": 2,
+  "model": "bigscience/bloom-560m",
+  "revision": "ac2ae5fab2ce3f9f40dc79b5ca9f637430d24971",
+  "petals_commit": "22afba627a7eb4fcfe9418c49472c6a51334b8ac",
+  "petals_version": "2.3.0.dev2",
+  "torch_version": "2.2.2+cpu",
+  "transformers_version": "4.43.1",
+  "precommitted_max_absolute_logit_error": 0.001,
+  "public_swarm_joined": false,
+  "routing_throughput_hint_is_measured": false,
+  "GPU_used": false,
+  "public_launch_approved": false,
+  "started_at_utc": "2026-09-14T04:28:43.207753+00:00",
+  "harness_sha256": "b3915ab9bca75e8347f619a138240d12d432dcc8d8ab11a3219a299fb83090f5",
+  "limitations": [
+    "One physical computer; no LAN/WAN or independent operators",
+    "BLOOM-560m CPU is a research reference, not a Kimi proof or the Qwen service engine",
+    "The pinned upstream contains an always-true resume-position assert; resume metadata is not qualified",
+    "Private loopback and synthetic inputs only; no public API or credit issuance"
+  ],
+  "forward_samples": [
+    {
+      "sample": 0,
+      "warmup": true,
+      "local_seconds": 0.19672196405008435,
+      "remote_seconds": 0.2711071440135129,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 1,
+      "warmup": true,
+      "local_seconds": 0.16761356894858181,
+      "remote_seconds": 0.24895960104186088,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 2,
+      "warmup": true,
+      "local_seconds": 0.19875149900326505,
+      "remote_seconds": 0.2982337199500762,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 3,
+      "warmup": false,
+      "local_seconds": 0.16471600998193026,
+      "remote_seconds": 0.2385132439667359,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 4,
+      "warmup": false,
+      "local_seconds": 0.17081938800401986,
+      "remote_seconds": 0.2642799209570512,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 5,
+      "warmup": false,
+      "local_seconds": 0.19565735897049308,
+      "remote_seconds": 0.2595537009765394,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 6,
+      "warmup": false,
+      "local_seconds": 0.1613057180074975,
+      "remote_seconds": 0.23755845101550221,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 7,
+      "warmup": false,
+      "local_seconds": 0.1744592849863693,
+      "remote_seconds": 0.23986433795653284,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 8,
+      "warmup": false,
+      "local_seconds": 0.18596742197405547,
+      "remote_seconds": 0.2635834380052984,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 9,
+      "warmup": false,
+      "local_seconds": 0.15343955904245377,
+      "remote_seconds": 0.22680016100639477,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 10,
+      "warmup": false,
+      "local_seconds": 0.16516504099126905,
+      "remote_seconds": 0.23967342998366803,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 11,
+      "warmup": false,
+      "local_seconds": 0.20245864504249766,
+      "remote_seconds": 0.28240390797145665,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 12,
+      "warmup": false,
+      "local_seconds": 0.1756309469928965,
+      "remote_seconds": 0.24479174194857478,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 13,
+      "warmup": false,
+      "local_seconds": 0.17571456299629062,
+      "remote_seconds": 0.24708628497319296,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 14,
+      "warmup": false,
+      "local_seconds": 0.20479156100191176,
+      "remote_seconds": 0.27760918700369075,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 15,
+      "warmup": false,
+      "local_seconds": 0.17094394599553198,
+      "remote_seconds": 0.24219903198536485,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 16,
+      "warmup": false,
+      "local_seconds": 0.20064900297438726,
+      "remote_seconds": 0.25505454605445266,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 17,
+      "warmup": false,
+      "local_seconds": 0.19853551499545574,
+      "remote_seconds": 0.2759188950294629,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 18,
+      "warmup": false,
+      "local_seconds": 0.16277593601262197,
+      "remote_seconds": 0.2384708250174299,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 19,
+      "warmup": false,
+      "local_seconds": 0.17660578998038545,
+      "remote_seconds": 0.24465804197825491,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 20,
+      "warmup": false,
+      "local_seconds": 0.19585771101992577,
+      "remote_seconds": 0.26762732304632664,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 21,
+      "warmup": false,
+      "local_seconds": 0.16637411300325766,
+      "remote_seconds": 0.23649622598895803,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 22,
+      "warmup": false,
+      "local_seconds": 0.18107478803722188,
+      "remote_seconds": 0.24286275799386203,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 23,
+      "warmup": false,
+      "local_seconds": 0.20459373301127926,
+      "remote_seconds": 0.2795080649666488,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 24,
+      "warmup": false,
+      "local_seconds": 0.17337085300823674,
+      "remote_seconds": 0.24347273004241288,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 25,
+      "warmup": false,
+      "local_seconds": 0.18782381701748818,
+      "remote_seconds": 0.2653757520020008,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 26,
+      "warmup": false,
+      "local_seconds": 0.21878119197208434,
+      "remote_seconds": 0.2735304170055315,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 27,
+      "warmup": false,
+      "local_seconds": 0.1631789859966375,
+      "remote_seconds": 0.23977950995322317,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 28,
+      "warmup": false,
+      "local_seconds": 0.1752261189976707,
+      "remote_seconds": 0.24448987597133964,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 29,
+      "warmup": false,
+      "local_seconds": 0.19137359998421744,
+      "remote_seconds": 0.262980432016775,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 30,
+      "warmup": false,
+      "local_seconds": 0.1674318119767122,
+      "remote_seconds": 0.23630525695625693,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 31,
+      "warmup": false,
+      "local_seconds": 0.18006626196438447,
+      "remote_seconds": 0.2572179280105047,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    },
+    {
+      "sample": 32,
+      "warmup": false,
+      "local_seconds": 0.21887117804726586,
+      "remote_seconds": 0.3140390809858218,
+      "maximum_absolute_logit_error": 0.0,
+      "last_token_argmax_equal": true
+    }
+  ],
+  "generation_checks": [
+    {
+      "prompt": "A cat sat on the",
+      "token_ids_equal": true,
+      "new_token_count": 8
+    },
+    {
+      "prompt": "Era uma vez uma pequena cidade",
+      "token_ids_equal": true,
+      "new_token_count": 8
+    },
+    {
+      "prompt": "The sequence is one, two, three,",
+      "token_ids_equal": true,
+      "new_token_count": 8
+    }
+  ],
+  "numerical_checks_passed": true,
+  "missing_block_error": {
+    "type": "P2PDaemonError",
+    "seconds": 0.08255846897372976
+  },
+  "failure_detection_executed": true,
+  "recovery_after_restart_executed": false,
+  "finished_at_utc": "2026-09-14T04:29:20.444944+00:00"
+}

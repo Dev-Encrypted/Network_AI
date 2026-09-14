@@ -1,0 +1,29 @@
+{
+  "policy_version": "planning-commercial-payments-2026-09-13-v2",
+  "status": "proposed_commercial_mode_only_not_implemented",
+  "display_unit": "UP_FICTIONAL_PAYMENT_UNIT",
+  "micro_units_per_unit": 1000000,
+  "settlement_network_selected": false,
+  "settlement_asset_selected": false,
+  "native_currency_or_consensus_assumed": false,
+  "node_creation_requires_central_approval": false,
+  "model_publication_requires_global_approval": false,
+  "gain_requires_funded_counterparty": true,
+  "payment_transfers_instead_of_burns": true,
+  "fictional_spot_split_bps": {
+    "providers": 9000,
+    "gateway": 600,
+    "operations": 200,
+    "reserve": 200
+  },
+  "reference_pool_grant_share_of_available_fee_revenue_bps": 200,
+  "notes": [
+    "All numeric examples are fictional, not market prices or earned balances.",
+    "Each accepted offer fixes its unit, fees, dispute policy and counterparties.",
+    "Independent pools and offers need not use the fictional split or grant policy.",
+    "READY reservation and spot billing may not pay twice for the same resource interval.",
+    "Funding conditions apply only to financial earnings; useful cooperative leases may issue TU with zero buyers."
+  ],
+  "billing_mode": "commercial",
+  "cooperative_service_policy": "cooperative-elastic-policy.json"
+}

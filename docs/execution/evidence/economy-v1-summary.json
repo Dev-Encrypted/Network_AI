@@ -1,0 +1,117 @@
+{
+  "evidence_type": "SIMULATED",
+  "generated_at_utc": "2026-09-14T04:30:33.390274+00:00",
+  "study_id": "f0-event-economy-v1-2026-09-14",
+  "manifest_sha256": "7853701865fd848517958132c04ee0220924969ca0d121474054789db59f7598",
+  "runs_verified": 5600,
+  "synthetic_candidate_passed": 0,
+  "synthetic_days_per_run": 90,
+  "calibration_seed_count": 20,
+  "holdout_seed_count": 50,
+  "scenarios": 16,
+  "variants": 5,
+  "accounting_and_resource_invariants_passed_in_all_runs": true,
+  "gate_failures": {
+    "observed_no_economic_hibernation": 5160,
+    "mature_funded_compatible_slo": 5459,
+    "mature_no_cohort_free_balance_depletion": 3016,
+    "mature_no_protected_spend": 2137,
+    "mature_recycled_payout_covers_normal_cost": 700,
+    "no_undetected_bad_output_charged": 700
+  },
+  "baseline_holdout": [
+    {
+      "variant": "v4_availability_single",
+      "seeds": 50,
+      "passed": 0,
+      "funded_compatible_requests": 63019,
+      "completed": 29843,
+      "completion_fraction": 0.47355559434456274,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      }
+    },
+    {
+      "variant": "v5_demand_single",
+      "seeds": 50,
+      "passed": 0,
+      "funded_compatible_requests": 58783,
+      "completed": 9261,
+      "completion_fraction": 0.1575455488831805,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 23
+      }
+    },
+    {
+      "variant": "v5_availability_split",
+      "seeds": 50,
+      "passed": 0,
+      "funded_compatible_requests": 61949,
+      "completed": 43560,
+      "completion_fraction": 0.7031590501864436,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 50
+      }
+    },
+    {
+      "variant": "v5_demand_split",
+      "seeds": 50,
+      "passed": 0,
+      "funded_compatible_requests": 58297,
+      "completed": 23261,
+      "completion_fraction": 0.39900852531005027,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_protected_spend": 50,
+        "mature_no_cohort_free_balance_depletion": 18
+      }
+    },
+    {
+      "variant": "v6_demand_split",
+      "seeds": 50,
+      "passed": 0,
+      "funded_compatible_requests": 58783,
+      "completed": 9261,
+      "completion_fraction": 0.1575455488831805,
+      "failed_gates": {
+        "observed_no_economic_hibernation": 50,
+        "mature_funded_compatible_slo": 50,
+        "mature_no_cohort_free_balance_depletion": 23
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "phase": "calibration",
+      "runs": 1600,
+      "report": "benchmarks\\runs\\2026-09-14-economy-v1-calibration\\report.json",
+      "raw": "benchmarks\\runs\\2026-09-14-economy-v1-calibration\\runs.jsonl.gz",
+      "raw_sha256": "7bdb31b4028bc51c615f20366edb4472b62be55431423d8bbc05a319c055315c"
+    },
+    {
+      "phase": "holdout",
+      "runs": 4000,
+      "report": "benchmarks\\runs\\2026-09-14-economy-v1-holdout\\report.json",
+      "raw": "benchmarks\\runs\\2026-09-14-economy-v1-holdout\\runs.jsonl.gz",
+      "raw_sha256": "42221b5fb2df9eb96e07cc3683500fadd61c35d2b784a7e59942ea10ae0c752e"
+    }
+  ],
+  "public_launch_approved": false,
+  "decision": "REJECT_THE_TESTED_FICTIONAL_CONFIGURATION",
+  "full_policy_acceptance_evaluated": false,
+  "remaining_coverage": [
+    "Recovery within 24h after all prerequisites return requires an explicit event predicate and evaluator",
+    "Elastic concurrency 1/2/4 and its fairness envelope are not part of this experiment",
+    "Measured GPU costs and participant behavior must replace fictional inputs",
+    "Independent READY attestation, federation/consensus and real operating finance are not modeled as proofs"
+  ],
+  "interpretation": "A balanced ledger does not establish recurring liquidity or acceptable access. These runs reject this parameter set, not every possible cooperative design."
+}
