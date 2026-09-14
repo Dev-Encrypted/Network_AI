@@ -1,26 +1,28 @@
-# Estado dos gates após o primeiro incremento
+# Current advancement and launch gates
 
-| Gate | Estado | O que falta |
+Status reflects the September 14, 2026 F0 evidence and private v0.2 implementation. A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
+
+| Gate | Current evidence | Still required |
 |---|---|---|
-| FC01 — Coerência dos contratos | Referência v6 preservada; implementação parcial em bancada | Revisão do protocolo executável completo e sua persistência/concorrência |
-| FC02 — Economia e liquidez | Ensaio de eventos executado; parâmetros reprovados | Nova calibração, comportamento/custo medidos, elasticidade e avaliador de recuperação completos |
-| FC03 — Capacidade e troca | Evidência local parcial | Qwen3-8B em GPU disponível, segundo host físico, outras GPUs e relação real contribuição/consumo |
-| FC04 — Comércio opcional | Não executado | Adaptador de teste, vendedor, liquidação, repasses, contestação e saída |
-| FC05 — Confiança e continuidade | Transporte local exercitado | Quatro operadores independentes, quorum 3, fraude/atestação, restauração e substituição reais |
-| FC06 — Piloto e abertura | Não autorizado por evidência | Custeio confirmado, responsáveis e campanhas reais de 7/30 dias |
+| FC01: contract coherence | Candidate v6 preserved; private persistent admission/accounting implemented and tested | Full target cooperative/distributed contracts and lifecycle consistency |
+| FC02: economics and liquidity | Event study completed; fictional parameters rejected | New calibration, observed costs/behavior, fresh holdout, full elastic/recovery evaluation |
+| FC03: capacity and exchange | Local inference, small CPU partition and two-agent shared-domain evidence | Model above 27B on qualified multi-device routes, distinct physical hosts, other hardware and measured exchange ratios |
+| FC04: optional commerce | Historical adapter reference only | Responsible seller, bounded payments, finality, payouts, disputes and exit |
+| FC05: trust and continuity | Local transport controls, node epochs, receipt outbox and database restore | Independent operators, quorum, adversarial verification, partitions and replacement gateway recovery |
+| FC06: funded pilot and opening | Private application available for further work | Confirmed operating/closure resources, named responsibilities and actual 7/30-day pilots |
 
-## Dependências concretas
+## Concrete capacity gaps
 
-O lançador Qwen3-8B está preparado e seu parser foi validado contra o vLLM instalado. Ele exige pelo menos 21.504 MiB livres na GPU 0 antes de iniciar. No preflight havia aproximadamente 1,9 GiB livres, com o modelo do LM Studio carregado. A sessão existente permanece ativa; descarregá-la e restaurá-la depende da resposta do usuário à pergunta já apresentada.
+The official Qwen3-8B launcher is prepared and its parser was checked against the installed vLLM. Its preflight requires at least 21,504 MiB free on GPU 0. The historical observation had about 1.9 GiB free because another model was loaded. Prepared artifacts do not mean that BF16 benchmark ran.
 
-Um segundo computador físico e seu acesso também foram solicitados. Ainda não foi informado outro host. WSL, processos locais e conexões loopback não satisfazem esse requisito.
+No second physical host was used in the reported experiments. Loopback, WSL and multiple processes cannot satisfy a real-host requirement. There is also no qualified complete Kimi K3 route; partial tensor loading is narrower evidence.
 
-Não há cluster compatível confirmado para a referência completa Kimi K3. A análise e o carregamento parcial prosseguiram, mas não sustentam alegações de paridade completa, latência WAN ou soma de VRAM utilizável.
+The recommended product focus is models above 27B. The next capacity campaign must explicitly qualify such a profile, with exact model identity, per-device memory, complete inference, quality/parity, links, concurrency and recovery. Small controlled baselines remain useful without being promoted to proof of the larger target.
 
-## Escopo que continua proibido pelos gates
+## Economic and public-operation boundaries
 
-Os TU do simulador são números de laboratório. Não configurar saldos reais com eles, copiar seu estado inicial para um gênese, prometer rendimento a contribuidores ou aceitar pagamentos com base nos preços fictícios. Não reduzir saldos existentes para corrigir o experimento.
+Do not apply rejected fictional tariffs or issuance settings to public balances, copy simulated starting funds into a real genesis, or promise contributor income from unqualified capacity. The private LAB_TU grant is a clearly separate test mechanism.
 
-Não anunciar suporte a qualquer GPU/modelo apenas por haver um registro de catálogo. Abertura de nós, licenciamento, compatibilidade da engine, rota física completa, isolamento e orçamento permanecem verificações distintas.
+An open catalog does not certify every GPU/model combination. License, architecture, engine, physical route, trust and funding are separate checks. Paid service needs FC04 in addition to applicable common gates; no payments or withdrawals are enabled today.
 
-O próximo incremento de produto é uma rede privada funcional, condicionada a um perfil medido. A reprovação econômica não impede continuar a pesquisa de inferência; impede ativar a economia pública com os parâmetros reprovados.
+Economic failure does not prevent further private inference engineering. It prevents describing the tested settings as a sustainable public policy. See [the candidate rules](../planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md) and [implementation coverage](../implementation/STATUS.md).

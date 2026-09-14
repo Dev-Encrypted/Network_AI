@@ -1,42 +1,44 @@
-# Contabilidade de laboratório e limites de confiança
+# Laboratory accounting and trust boundaries
 
-## Unidade e reserva
+## Unit and maximum reservation
 
-`LAB_TU` é uma unidade inteira de teste, com 1.000.000 de micro-unidades por unidade visível. Não é o TU cooperativo público, não circula em blockchain, não compra dinheiro e não pode ser sacado. O saldo inicial de novos usuários é zero. O bootstrap do administrador e concessões posteriores são lançamentos explícitos, limitados e auditáveis contra a conta `LAB_ISSUER`.
+`LAB_TU` is an integer test unit with 1,000,000 micro-units per displayed unit. It is separate from proposed cooperative TU, has no cash redemption, and does not represent guaranteed future capacity. New accounts start at zero. The administrator bootstrap and later grants are explicit auditable postings against `LAB_ISSUER`.
 
-Preços e contagem de tokens são coisas diferentes. Um token de texto não tem custo universal entre modelos. Cada manifesto fixa preço de entrada, preço de saída e denominador. Com inteiros de 64 bits:
+Text-token counts and credit prices are different. Each immutable manifest defines input rate, output rate and denominator. Using bounded integer arithmetic:
 
 ```text
-custo = ceil((tokens_entrada × tarifa_entrada + tokens_saida × tarifa_saida) / denominador)
-reserva = custo(contexto_maximo - saida_solicitada, saida_solicitada)
+charge = ceil((input_tokens × input_rate + output_tokens × output_rate) / denominator)
+hold = charge(max_context_tokens - requested_output_tokens, requested_output_tokens)
 ```
 
-O teto é conservador e pode ser maior que o uso típico. Usuários não podem gastar saldo reservado por outra sessão. Uma cotação congela manifesto, preços, limite e validade. A sessão não troca para um modelo diferente de forma silenciosa.
+Rates and charges use micro-units. The hold is conservative and can exceed typical usage. Reserved funds cannot pay for another active request. A quote freezes the manifest, prices, output limit and expiry. The session cannot silently switch to another model.
 
-## Liquidação
+## Settlement and failure
 
-Um recibo concluído deve conter tokens positivos, conclusão do stream, motivo de término e uso dentro dos limites autorizados. O nó assina o recibo; o controle valida identidade, tentativa e época. Este perfil usa contagem **declarada pela engine**, sem prova criptográfica da execução nem tokenização independente.
+A completed receipt needs valid positive usage, a completed stream, a finish reason, and counts within authorized limits. The node signs the receipt; control verifies identity, attempt and epoch. Counts are **reported by the inference engine**, without independent tokenization or cryptographic proof of computation.
 
-Se válido, a cobrança é limitada ao hold. Neste experimento, 80% vão para o operador e 20% para a conta de trabalho do laboratório, com arredondamento inteiro da taxa. A diferença da reserva volta ao consumidor. Os percentuais são parâmetros de teste; não foram demonstrados como sustentáveis para uma rede pública.
+A valid charge cannot exceed the hold. The private experiment allocates 80% to the provider and 20% to the lab working account, subject to integer fee rounding. Unused held funds return to the consumer. These proportions have not been established as public-network economics.
 
-Falha, cancelamento e interrupção devolvem a reserva integral. Uso inconsistente gera `DISPUTED`, cobrança zero e estado terminal de falha. Trabalho entregue antes de um cancelamento pode ser consumido gratuitamente nessa política privada. Esse subsídio impede tratar o perfil como um mercado resistente a abuso; deve ser revisto antes da abertura, junto com custeio de trabalho parcial e provas de entrega.
+Failure, cancellation and interruption return the full reservation. Inconsistent usage creates `DISPUTED` billing, zero charge and a failed terminal outcome. A consumer can receive partial work before cancelling without paying for it under this private rule. That behavior is a laboratory subsidy requiring a different abuse and partial-delivery policy before an open market.
 
-Sem compradores ou pedidos, não existe emissão automática por ficar online. Ganhos dos operadores vêm de trabalho liquidado; concessões do laboratório têm origem explícita. A regra candidata de remuneração por cobertura e os limites elásticos ainda precisam de revisão econômica. O saldo de teste não representa cobertura ou capacidade futura garantida.
+Without completed work, there is no automatic provider income merely for remaining online. Lab grants have an explicit issuer. The candidate cooperative policy of contracted readiness and elastic limits is not implemented here. [Proposed economy](../planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md).
 
-## Proteções no banco
+## Database protections
 
-- Todo journal tem pelo menos duas linhas, cuja soma deve ser zero no commit.
-- Triggers projetam as linhas nos saldos. Contas de usuários não podem ficar negativas.
-- O usuário de runtime não pode atualizar saldos nem inserir um saldo inicial diferente de zero.
-- Journal, linhas, recibos e eventos não podem ser alterados ou apagados por essa role.
-- Um journal já confirmado não aceita novas linhas, mesmo que a tentativa de anexação fosse balanceada.
-- A chave de negócio identifica reserva e liquidação; retries não criam cobrança adicional.
-- A soma global dos saldos deve ser zero; a projeção de cada conta deve corresponder à soma de suas linhas.
+- Every journal transaction has at least two lines whose sum is zero at commit.
+- Triggers project entries into balances; user accounts cannot become negative.
+- The runtime role cannot directly update balances or insert a nonzero initial balance.
+- Committed journals, lines, receipts and events cannot be rewritten or deleted by that role.
+- A committed journal cannot receive later lines, even a balanced pair.
+- Business identities make hold and settlement retries idempotent.
+- Global balances reconcile to zero, and each account projection matches its journal lines.
 
-Essas regras também foram testadas após restauração de um dump. O proprietário do PostgreSQL ainda tem poderes administrativos e pode modificar o banco. Essa fronteira de confiança pertence ao coordenador privado; não é consenso descentralizado ou registro imutável perante um administrador malicioso.
+These properties were also checked after restoring a dump. The PostgreSQL owner still has administrative powers. This is not a decentralized ledger immutable against a malicious administrator.
 
-## Escopo de privacidade e segurança
+## Content and resource trust
 
-O caminho de conteúdo não passa pelo NestJS nem pelo PostgreSQL. A engine, o gateway e o agente veem o conteúdo em memória. A interface não injeta HTML do modelo. Não há promessa de computação confidencial em GPUs de desconhecidos. Pesos não são baixados nem executados a partir do manifesto, e o perfil não habilita ferramentas, execução remota de código ou chamadas arbitrárias a URLs fornecidas por consumidores.
+NestJS and PostgreSQL do not receive prompt or answer bodies. The browser proxy, gateway, agent and engine see content in memory; the engine controls its own retention. Model output is not executed as HTML by the UI. The profile does not enable model-provided tools, arbitrary remote code or user-directed URL fetching.
 
-O inventário de GPU e o hash do modelo são declarações/configurações do operador com qualificação administrativa local. O sistema não detecta dois domínios falsos para uma mesma GPU em máquinas não confiáveis. Convites, limites por conta e nomes de domínios permitem testar o fluxo, mas não substituem provas físicas, anti-Sybil ou verificação econômica. As [lacunas de abertura](STATUS.md) permanecem registradas.
+Model hashes and GPU capacity are operator declarations with private administrative qualification. Domain grouping prevents oversubscription among correctly assigned agents; it does not detect every false physical identity in an untrusted network. Invitations and account limits are operational controls rather than independent anti-Sybil proof.
+
+The project focuses on models above 27B, but charging a model profile does not prove a distributed route can execute it. Larger-model capacity, cooperative issuance, adversarial verification and cash settlement remain separate [launch requirements](STATUS.md).

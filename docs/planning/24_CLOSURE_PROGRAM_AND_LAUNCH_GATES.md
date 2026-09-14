@@ -1,220 +1,208 @@
-# Plano operacional consolidado e critérios de abertura
+# 24. Candidate v6 operating policy and launch gates
 
-**Revisão 6 — 13/09/2026. Especificação corrigida; produto e piloto ainda não executados.** Este é o documento vigente para economia, contratação, continuidade e sequência de abertura. Substitui a revisão 5 deste mesmo arquivo, preservada no ZIP v5. Os documentos 07/09 detalham seus contratos; 20/22 conservam fundamentos e decisões anteriores. Em conflito, aplicar esta revisão. As 54 execuções do 23 continuam sendo evidência da v4, sem aprovação econômica.
+**English editorial edition: September 14, 2026. Original candidate: revision 6, September 13, 2026.** This chapter explains the selected cooperative design and preserves its experimental constants. It does not approve its economics or change runtime configuration. The later F0 event study rejected the tested settings, and the current product uses separate `LAB_TU` rules.
 
-## 1. Alternativa escolhida e motivo
+The [original full revision](../publication/README.md) and [structured policy](evidence/operating-policy-v6.json) remain preserved. For current observed gate status, use [FC01–FC06](../execution/GATES.md).
 
-Adotar uma **rede cooperativa com contratação de capacidade útil, créditos internos que circulam e mercado opcional entre contrapartes identificadas**. A contratação e o consumo têm orçamentos distintos, reconciliados no mesmo registro. A emissão financia entrada controlada e crescimento aprovado; não deve mascarar déficit recorrente.
+## 1. Selected model
 
-| Alternativa | Decisão e consequência |
+Use a cooperative network with useful-capacity contracts, circulating internal usage credits, and an optional market between identified counterparties. Contribution commitments and consumption reservations have separate budgets reconciled in the same cooperative record. Bounded issuance can support entry or approved growth; it must not hide a recurring deficit.
+
+| Alternative | Decision and reason |
 |---|---|
-| Pagar todo nó online | Rejeitada: cadastro e oferta excedente não demonstram necessidade nem capacidade de resgate |
-| Pagar somente tokens produzidos | Rejeitada como regra cooperativa: não remunera cobertura pronta e contraria a proposta do produto |
-| Crédito mútuo com saldos negativos | Adiado: acrescenta risco de inadimplência, limites de crédito e cobrança antes de validar a cooperação |
-| Expiração compulsória, rendimento por saldo ou moeda negociável | Fora do piloto: alteram direitos e incentivos sem corrigir falta de hardware ou de custeio |
-| Disponibilidade contratada, circulação e reservas segregadas | Escolhida: preserva a proposta, limita compromissos e permite testar equilíbrio sem compradores |
-| Um único meio de pagamento obrigatório para toda a rede | Rejeitado: o contrato da oferta declara a liquidação; o núcleo cooperativo não depende de uma cadeia financeira |
+| Pay every online node | Rejected: an advertised device may be unnecessary, unavailable, duplicated, or unable to support redemption |
+| Pay only generated text tokens as the cooperative rule | Rejected for the target design: this does not compensate explicitly contracted readiness |
+| Mutual credit with negative member balances | Deferred: adds default and collection risk before cooperation has been validated |
+| Mandatory expiry, yield on balances, or a tradable currency | Outside the pilot: these change rights and incentives without supplying useful capacity |
+| Funded readiness, circulation and separated reserves | Selected candidate: preserves contribution and limits obligations |
+| A mandatory payment chain for the entire network | Rejected: optional sellers can declare their settlement method independently of TU |
 
-Não substituir suporte universal por uma promessa de catálogo já operacional. Qualquer participante pode publicar ofertas e criar um nó compatível; cada configuração precisa de runtime, licença, memória, rede e rota completa qualificados. Modelos gigantes distribuídos continuam pesquisa central em F0, com aprovação por arquitetura.
+Community members should be able to propose models and operate compatible nodes. Every configuration still needs licensing, runtime, memory, connectivity and complete-route qualification. **Models above 27B are the recommended focus**; their resource needs must be measured rather than inferred as a fixed number of people.
 
-## 2. Corrigir primeiro o fluxo de TU
+## 2. Working liquidity before reserve replenishment
 
-Na v5, todo consumo recompunha primeiro a reserva protegida. **Contraexemplo:** o fundo operacional está vazio, faltam 100 microTU na reserva protegida e entram 100 microTU de consumo finalizado. A v5 coloca tudo na reserva e deixa zero para renovação normal. Isso pode provocar DEFENSE por falta de liquidez, mesmo depois de um pagamento de uso. É uma falha da prioridade, não prova de que toda configuração v5 fracassaria.
+The earlier v5 replenished the protected reserve before normal working liquidity. A counterexample: the working fund is empty, the protected reserve is short by 100 microTU, and finalized consumption returns 100 microTU. Sending it all to the reserve leaves nothing for normal essential renewal.
 
-Preservar dois compartimentos da mesma unidade:
+Candidate v6 preserves these compartments:
 
-| Controle | Finalidade | Regra |
+| Account or control | Purpose | Boundary |
 |---|---|---|
-| COOP_WORKING | Pagar contratações normais | Possui piso de renovação essencial e alvo de operação |
-| COOP_CORE_RESERVE | Sustentar rotas essenciais em contingência | Proibido para expansão normal, grants e despesas em dinheiro |
-| COOP_CONTINUITY | Apresentar o total coletivo | Agregado sem lançamentos próprios; não somar novamente no estoque |
-| Caixa de operação | Pagar despesas externas efetivas | Dinheiro ou cessões em espécie identificadas, separados de TU |
-| Fundos comerciais | Depósitos e direitos dos clientes/provedores | Nunca são caixa livre do núcleo ou cobertura de emissão |
+| `COOP_WORKING` | Normal useful-capacity commitments | Has an essential renewal floor and a normal operating target |
+| `COOP_CORE_RESERVE` | Qualified essential contingency routes | Cannot fund normal expansion, grants, or cash expenses |
+| `COOP_CONTINUITY` | Aggregate reporting view | No independent postings; do not count it again in stock |
+| External operating funds | Actual cash or defined in-kind support | Separate from TU |
+| Commercial funds | Customer/seller deposits and obligations | Not free cooperative operating cash |
 
-Valores retidos para contratos, sessões e restituições são indisponíveis para novas promessas. Os alvos abaixo referem-se a saldo livre para compromissos futuros; obrigações já cobertas por holds não entram outra vez no custo futuro. Todos os saldos livres e retidos continuam em S.
+Funds held for leases, sessions, or approved refunds are unavailable for new promises. Their balances remain in issued stock. Targets below concern free funds for obligations not already covered by holds.
 
-### Dimensionar piso e alvos
+### Floors and targets
 
-O plano de capacidade publica custo por intervalo, rotas essenciais, réplicas normais, compromissos já cobertos, prazo de recomposição e evidência. Usar arredondamento conservador para reservar orçamento.
+- `F`: cost of essential renewals not yet funded during horizon `H`.
+- `H`: the greater of the six-hour reference and conservative settlement delay plus one maximum lease.
+- `W*`: the greater of `F` and the unfunded approved normal operating cost for the next 24 hours.
+- `R*`: cost of 72 hours of the qualified essential contingency set, rather than the whole advertised fleet.
 
-- Piso operacional F: custo das próximas renovações essenciais ainda não cobertas durante H.
-- H: maior entre seis horas de referência e o atraso conservador de liquidação cooperativa acrescido de um lease máximo. Medir o atraso; antes de haver dados, usar o limite do contrato sob ensaio e declarar a hipótese.
-- Alvo operacional W*: maior entre F e o custo das próximas 24 horas de operação normal aprovada ainda não coberta.
-- Alvo protegido R*: custo de 72 horas do conjunto essencial de contingência qualificado. Não usa o custo de toda a frota anunciada.
+Six, 24 and 72 hours are candidate test references. If measured settlement requires more liquidity, recalculate targets and show they fit the exposure cap, or reduce scope. Do not impose a 24-hour working ceiling when the necessary floor is larger.
 
-Seis, 24 e 72 horas são referências de bancada, não valores ótimos. A medição pode exigir mais liquidez; nesse caso recalcular os alvos e provar que cabem no teto de exposição, ou reduzir o escopo antes da abertura. Não manter um teto de 24 horas para WORKING quando o piso necessário for maior.
+### Deterministic replenishment
 
-### Prioridade de recomposição
+For finalized consumption `q` and free balances `W` and `R`:
 
-Para consumo finalizado q e saldos livres W/R, fazer uma transação determinística:
+```text
+a = min(q, max(0, F - W))
+p = min(q - a, max(0, R* - R))
+w = min(q - a - p, max(0, W* - W - a))
+b = q - a - p - w
+W_after = W + a + w
+R_after = R + p
+q = a + p + w + b
+S_after = S_before - b
+```
 
-    a = min(q, max(0, F - W))
-    p = min(q - a, max(0, R* - R))
-    w = min(q - a - p, max(0, W* - W - a))
-    b = q - a - p - w
-    W_depois = W + a + w
-    R_depois = R + p
-    q = a + p + w + b
-    S_depois = S_antes - b
+The order is **essential working floor → protected reserve → remaining working target → excess burn**. In the counterexample, `F=60` and `W*=100` send 60 to working and 40 to protected funds. This transfer issues nothing. If consumption cannot cover the floor, the system must acknowledge insufficient funding and constrain new commitments.
 
-Ordem: **piso operacional → reserva protegida → restante do alvo operacional → queima do excedente**. O piso protege a próxima renovação; a reserva continua protegida contra expansão.
+Record policy version, previous balances, targets and each destination. Refunds trace their original sources and cannot exceed or duplicate the original operation. Reversing recycled funds is not permission to mint them again. Changing a target does not redistribute finalized amounts retroactively.
 
-No contraexemplo, se F=60 e W*=100, a nova regra destina 60 ao operacional e 40 ao protegido. Não há emissão nessa transferência. Se q não cobre sequer o piso, admitir a insuficiência e limitar novos contratos; a fórmula não fabrica o que falta.
+## 3. Contract complete useful capacity
 
-Gravar versão, saldos anteriores, alvos e parcelas por destino na liquidação. Reembolso reverte as origens sem reemitir TU reciclados; depois da finalização, reparação depende do fundo responsável. Devolução não pode ultrapassar a parcela original nem ser aplicada duas vezes. Mudança de alvo não redistribui valores já finalizados.
+Select complete routes from justified coverage and funded demand before selecting providers. Include weights, session memory, prefill, decode, communication, loading and contingency. A fragment with no complete usable route is not normal coverage.
 
-## 3. Contratar capacidade sem gastar toda a oferta
+Each contract has one of three reasons: essential coverage, demand-backed expansion, or a bounded experiment. Self-calls, advertised balances, identity count and raw generated-token volume do not create another reason.
 
-Escolher primeiro as rotas completas que atendem cobertura e demanda justificadas, incluindo memória de sessão, prefill, decode, comunicação, carregamento e contingência. Somente depois selecionar fornecedores e reservar as fontes de pagamento.
+```text
+reward = verified_READY_duration × accepted_assigned_capacity_rate
+```
 
-O orçamento identifica três motivos: cobertura essencial, expansão demandada ou experimento limitado. Saldo disponível, autochamadas, número de identidades e volume bruto de tokens não criam um quarto motivo.
+Carry rounding remainders across intervals. Explicitly contracted idle readiness earns under its terms; announcements, downloads and uncontracted availability do not automatically earn. All parts share the route's approved budget, so splitting an identity cannot multiply compensation.
 
-Remuneração continua:
+Among equivalent qualified offers, use auditable rotation by known operator, useful capacity and opportunity already received. Publish selection rates, waiting and rejection reasons by class. This cannot guarantee simultaneous work for every idle contributor.
 
-    ganho = duração READY verificada × tarifa aceita da capacidade atribuída
+### Expansion conditions
 
-Carregar restos de arredondamento entre janelas. READY ocioso expressamente contratado recebe; anúncio, download e capacidade não contratada não recebem automaticamente. Todos os componentes de uma rota dividem seu orçamento, sem multiplicar a tarifa ao fragmentar identidades.
+New expansion or renewal requires all of the following:
 
-Entre ofertas equivalentes, aplicar rotação auditável por operador conhecido, capacidade útil e oportunidade já recebida. Publicar taxa de seleção, espera e motivos de recusa por classe. A regra não garante trabalho para todos ao mesmo tempo. Novos participantes usam o envelope limitado já definido no 22; fraude e identidade física continuam riscos mensuráveis.
+1. Independent compatible demand justifies the additional capacity.
+2. Existing contracts are preserved without duplicate physical reservations.
+3. Normal funding covers the new hold while preserving the essential working floor.
+4. The protected reserve is replenished and external operation is funded.
+5. Group/epoch budgets and issuance limits are respected.
 
-Expansão ou sua renovação exige, cumulativamente:
+If a condition fails, stop new expansion, drain accepted work under its terms, and recalculate the plan. Do not evict valid sessions to improve a budget metric. If a distributed route disappears, honor useful components' accepted leases through draining and avoid renewing purposeless fragments.
 
-1. Procura independente e compatível que justifique a capacidade adicional.
-2. Contratos já aceitos preservados e nenhuma dupla reserva física.
-3. Fonte normal coberta, mantendo o piso operacional após a nova reserva.
-4. Reserva protegida recomposta e custeio externo suficiente.
-5. Orçamento por grupo/época e limites de emissão respeitados.
+## 4. Operating states
 
-Não retirar sessões válidas para recompor um indicador. Quando um critério falhar, suspender novas expansões, drenar ao prazo e recalcular o plano. Se uma rota distribuída deixa de existir, honrar os leases dos componentes úteis até sua drenagem; não renovar fragmentos sem utilidade aprovada.
-
-### Estados de operação
-
-| Estado | Entrada | Conduta |
+| State | Entry | Action |
 |---|---|---|
-| NORMAL | Rotas essenciais financiáveis por WORKING e emissão autorizada; registro/custeio saudáveis | Contratar mínimo; expansão somente com os cinco critérios |
-| DEFENSE | Próximo lease essencial não cabe nessas fontes, ou falha exige substituição de contingência | Registro confirma incidente e permite CORE_RESERVE apenas para rotas essenciais previstas |
-| RECOVERY | Condições mínimas voltaram; orçamento está em recomposição | Renovar gradualmente; exigir estabilidade por 24 h para normalizar expansão |
-| HIBERNATING | Falta rota completa, financiamento mínimo ou custeio operacional | Interromper novas promessas afetadas, drenar, preservar saldos e checkpoints |
-| Registro sem quorum | Não há confirmação segura | Bloquear novos gastos independentemente do estado econômico |
+| NORMAL | Essential routes are fundable from working funds and authorized issuance; ledger and external funding are healthy | Contract minimum justified coverage; expand only under every condition |
+| DEFENSE | An essential renewal or contingency replacement cannot use normal sources | Record the incident and use protected funds only for the predefined essential set |
+| RECOVERY | Minimum conditions returned and budgets are rebuilding | Renew gradually; require 24 hours of stability before normal expansion |
+| HIBERNATING | A complete route, minimum funding or external operation is absent | Stop new affected promises, drain, and preserve balances/checkpoints |
+| Ledger without quorum | Safe confirmation is unavailable | Block new spending regardless of economic state |
 
-Cada uso protegido exige incidente, política, rota, prazo e hold exclusivos. Não depender de uma liberação manual por chamada. Sem orçamento para o conjunto essencial inteiro, operar apenas o subconjunto previamente qualificado e custeado. Retomada exige recursos, quorum, liquidez e custeio; ausência permanente deles não tem recuperação automática.
+Every protected use has a unique incident, policy, route, deadline and hold. If the entire essential set cannot be funded, operate only a previously qualified and funded subset. Recovery needs resources, quorum, liquidity and external support; it is not automatic if those conditions never return.
 
-## 4. Fechar a conta em três dimensões
+## 5. Close three different accounts
 
-**Conservação contábil, equilíbrio recorrente e capacidade de atendimento são condições diferentes.**
+### Stock and issuance exposure
 
-### Estoque e emissão
+`S` includes all free and held issued TU. `L` includes committed future issuance only. `J` includes approved but unapplied reversals of burned TU only. Transfers of existing funds remain within `S`.
 
-S inclui TU livres/retidos de participantes e dos dois compartimentos. L contém apenas emissão futura já comprometida. J contém apenas reversões de TU queimados aprovadas ainda não lançadas. Transferência de TU existentes continua em S.
+```text
+E = S + L + J
+new_authorizable_issuance <= max(0, 0.35 × C_ref_7_days - E)
+```
 
-    E = S + L + J
-    emissão_nova_autorizável <= max(0, 0,35 × C_ref_7_dias - E)
+Retain group/epoch caps, a collective allocation no greater than contributor issuance divided by 19, and grants no greater than contributor issuance divided by 49. Recycling does not generate another allocation or grant base. These are experimental prudential parameters, not an immediate redemption or financial-value guarantee.
 
-Manter também tetos de grupo/época, dotação coletiva de até emissão a contribuidores/19 e grants de até emissão a contribuidores/49. Reciclagem não gera outra dotação ou base de grants. Esses parâmetros prudenciais permanecem hipóteses, sem promessa de resgate imediato ou valor financeiro. C_ref usa recursos qualificados conjuntamente e preços de referência fixados; reajustar a tarifa pública não aumenta capacidade.
+`C_ref` uses jointly qualified resources and fixed reference prices. Raising a public tariff does not increase physical capacity. Do not inflate the reference to pass a budget check.
 
-### Fluxo recorrente cooperativo
+### Recurring cooperative flow
 
-Para o escopo maduro, comparar consumo finalizado efetivamente reciclado com pagamentos normais de READY e demais obrigações aprovadas em TU. Excluir nova emissão, transferências da reserva protegida, doações extraordinárias e saldo inicial da fonte recorrente.
+```text
+recurring_coverage = finalized_recycled_TU_in_period / normal_TU_cost_in_period
+```
 
-    cobertura_recorrente = TU reciclados no período / custo normal do período em TU
+Exclude new issuance, protected-reserve transfers, extraordinary donations and initial balances from recurring sources. A ratio below one indicates a deficit at the tested scope. Reduce future commitments, revise demand/cost assumptions, or declare a bounded subsidy. Increasing price may reduce demand and cannot be assumed to fix the problem.
 
-Cobertura inferior a 1 aponta déficit naquele escopo; reduzir novas contratações, rever demanda e custos ou explicitar subsídio com prazo. Não aumentar preços somente para fazer a equação passar: preço maior pode reduzir uso. A reserva dá tempo para recuperar; não transforma déficit permanente em equilíbrio.
+Require a 30-day mature phase with fixed scope and load, no ordinary new issuance, no extraordinary injections, and no decline in working/protected balances used to hide a deficit. Also measure participant balances and access: consuming their starting stock until they cannot use the system is not a sustainable result. Separate fixed-cohort studies from experiments involving entry and exit.
 
-Exigir no próximo ensaio uma fase madura de 30 dias, escopo e carga fixados, com nova emissão ordinária desativada, sem aporte extraordinário e sem redução dos saldos operacional/protegido para encobrir déficit. Falha rejeita a configuração autossustentável ensaiada. Crescimento aprovado pode usar emissão limitada em outra fase; misturar as fases esconderia o problema.
+### Available service and cohort access
 
-A fase madura também deve mostrar a evolução dos saldos dos participantes. Usar seu estoque inicial até deixá-los sem acesso não demonstra equilíbrio, mesmo que os fundos coletivos terminem cheios. Comparar demanda e liquidez por coorte ao início e ao fim; uma deterioração contínua impede aprovação de sustentabilidade. Cenários com saída/entrada de participantes ficam identificados separadamente do regime de composição fixa.
+Cross-reference who contributes, what they wish to consume, their spending liquidity, and complete routes. Credits earned on compact models do not create a giant-model route. Global totals of TU or VRAM cannot approve coverage.
 
-### Disponibilidade por modelo e acesso por coorte
+Count desired requests, compatible funded requests, and admitted requests separately. Temporary route absence and capacity rejections stay in the compatible denominator. Report unfunded demand and contributors without opportunity too.
 
-Cruzamento entre quem contribui, os modelos que pretende consumir e as rotas disponíveis é obrigatório. Muitos créditos de modelos compactos não criam uma rota para o gigante. Registrar demanda por configuração, liquidez dos participantes e limites físicos; uma soma global de TU ou VRAM não aprova cobertura.
+Publish how many fixed reference requests an accepted contribution hour can buy for each class, with model, tokenizer, precision, context, output and load held constant.
 
-Contar pedidos desejados, pedidos com saldo e configuração suportada, e pedidos aceitos separadamente. Falta de rota temporária e recusas 429/503 não desaparecem do denominador compatível. Reportar também falta de saldo, concentração e participantes sem oportunidade de contribuição.
+## 6. Bootstrap without fictional public balances
 
-Para cada classe, publicar quantas chamadas de referência uma hora contratada compra, a qualidade/configuração e a distribuição de espera. A comparação só vale com modelo, tokenizer, precisão, contexto, cache, tamanho da saída e carga fixados. Métricas de latência e goodput ajudam a medir trabalho dentro do contrato. [Benchmarking do vLLM](https://raw.githubusercontent.com/vllm-project/vllm/main/docs/benchmarking/cli.md).
+The cooperative candidate starts from funded infrastructure and explicitly time-bounded hardware contributions. It does not copy a simulator's initial stock into a real genesis or mint founder balances without a source.
 
-## 5. Entrada da rede sem saldo fictício
+1. Qualify capacity and calculate conservative reference capacity.
+2. Authorize short initial leases within exposure limits; issue only after verified readiness.
+3. Form funds through bounded allocations, finalized useful consumption, and voluntary transfers of existing TU with recorded sources.
+4. Reconcile free funds, holds, participant balances and L/J together.
+5. Open a pilot only after approved targets and participants' ability to consume have been demonstrated.
 
-Não presumir uma reserva inicial pronta. A bancada privada começa com infraestrutura custeada e hardware cedido com prazo, sem criar saldo para fundadores.
+Do not require a purchase to contribute or compel contributors to return earnings. If the bootstrap does not fit actual capacity and demand, reduce scope or extend the experiment rather than adding an invisible issuance exception.
 
-1. Qualificar capacidade e estabelecer C_ref conservador com evidência.
-2. Autorizar primeiros leases curtos dentro dos tetos de emissão; emitir apenas após READY verificado. Recibos novos aguardam revisão conforme a fonte.
-3. Formar fundos por dotações limitadas, consumo útil finalizado e doações voluntárias de TU existentes, todas identificadas. Chamadas de laboratório têm orçamento experimental explícito.
-4. Conferir simultaneamente fundos livres, holds, TU dos participantes e L/J dentro do teto. Não copiar o saldo inicial sintético da v4 para um gênese real.
-5. Só abrir o piloto depois de atingir os alvos aprovados e demonstrar que os participantes conseguem consumir.
+The private product's explicit 100 LAB_TU administrator grant is a **different laboratory mechanism**. It is not implementation of this public bootstrap policy.
 
-Não exigir compra para contribuir, nem devolução compulsória do que foi ganho. Se a formação dos fundos não fecha dentro do teto e da demanda observada, reduzir escopo ou prolongar a bancada; não criar uma exceção silenciosa de emissão.
+## 7. Low demand and heterogeneous GPUs
 
-## 6. Pouca demanda, concorrência e GPUs diferentes
+Retain candidate temporary concurrency limits of 1/2/4 per configuration, with recent signals and gradual promotion. Extra headroom can permit additional funded requests; it cannot enlarge context, mint a permanent bonus, change prices, or reuse protected standby as uncommitted throughput. Stop granting new extras when queues return while preserving accepted terms.
 
-Manter limites temporários 1/2/4 por configuração, com promoção gradual e sinais recentes. Mais folga permite mais uso simultâneo por quem tem saldo. Não aumentar contexto, emitir bônus permanente, mudar preço ou tomar a contingência como throughput livre. Na presença de fila, remover novos extras antes de afetar direitos aceitos.
+Keep bounded queues, deadlines and retry budgets. Device, OS, engine, model, quantization and network profiles remain distinct. A complete model on one node, a nearby cluster, and a cross-participant pipeline require separate qualification.
 
-Fila deve ter prazo, tamanho e backpressure; tentativas repetidas precisam de orçamento para não agravar sobrecarga. Essa preocupação é consistente com as práticas de tratamento de sobrecarga do Google SRE. [Referência primária](https://sre.google/sre-book/handling-overload/).
+The project's above-27B focus strengthens the need for complete-route planning. More parameters at a fixed precision generally require more weight memory and contributed capacity, but a fixed user count cannot be derived without device and topology assumptions. [Sizing explanation](../MODEL_SCALING.md).
 
-Perfis de GPU, sistema, engine, modelo, quantização e rede continuam separados. Manter três caminhos: modelo inteiro em nó, cluster próximo e distribuição experimental entre participantes. Provar paridade, estado, recuperação e desempenho do caminho C antes de anunciá-lo; a pesquisa de Kimi/modelos gigantes começa em F0.
+TU remains an internal usage unit. Text tokens measure model workload; other modalities require their own declared units and compatible implementations. There is no universal TU-to-text-token equivalence.
 
-TU continua unidade interna de uso. Tokens de texto são unidades de medição do modelo; uma chamada é cobrada pela tabela de sua configuração. Imagem, áudio e outras modalidades declaram suas próprias unidades. Não adotar equivalência universal entre um TU e um token de qualquer modelo.
+## 8. Optional commercial integration
 
-## 7. Comércio com responsabilidade definida
+The historical first adapter reference is x402 batch settlement on an EVM test path, Base Sepolia, test USDC and TypeScript. This is an optional integration candidate, not a required cooperative currency. No contract, facilitator release, custody or withdrawal service is qualified by this document.
 
-Preservar **x402 batch-settlement/EVM, Base Sepolia, USDC de teste e SDK TypeScript como primeira referência de integração opcional**. O esquema documenta autorizações cumulativas e liquidação em lotes para chamadas recorrentes. [Documentação oficial](https://docs.x402.org/schemes/batch-settlement).
+One seller assumes responsibility for the whole route toward the buyer. Subcontracted stages require funded agreements before acceptance. Record seller, buyer, profile, maximum price, unit, funding sources, measurement, finality, payout, dispute responsibility and maximum loss. A per-call price ceiling is separate from a wallet funding cap.
 
-Essa escolha é de adaptador, não de moeda da rede nem requisito do TU. Nenhum contrato, facilitador, release ou saque está qualificado neste pacote. Outros operadores podem oferecer outros meios explicitamente, sem somar saldos ou promover uma oferta não qualificada ao selo do pool.
+Do not promise atomic settlement across unrelated currencies or networks. Retries cannot charge twice. Failure of another stage cannot erase an accepted component's readiness obligation. Payouts, fees and allocated losses must fit the offer's budget.
 
-O contrato comum deve identificar comprador, vendedor responsável pela rota, configuração, preço máximo, unidade, fontes de fundos, medição, finalização, retirada, responsável por disputa e perda máxima. A carteira autoriza depósito e reposição com teto próprio; preço máximo por chamada não é autorização de depósito ilimitado.
+Qualification includes concurrent ceilings, persistent authorizations, replay, partial/streamed work, restart, reconciliation, disputes, and withdrawal while the original gateway is unavailable. Refund/repair funding must exist before a public offer. A failed adapter stays disabled without preventing otherwise healthy cooperation.
 
-No primeiro caminho comercial, **um vendedor assume a rota inteira perante o cliente**. Ele pode ser o próprio nó ou um operador de rota. Subcontratar componentes exige orçamento e contratos financiados antes dos respectivos aceites. O coordenador não ganha licença para custódia ilimitada; centralização ou custódia do vendedor precisa aparecer nos termos. Manter concorrência entre vendedores e gateways.
+Compute margin from finalized service revenue minus provider obligations, payments, attributed infrastructure, support and loss provisions. Deposits, TU and third-party funds are not revenue. A cheaper API claim requires equivalent quality, workload, latency and measured costs.
 
-Não prometer divisão atômica entre componentes, redes ou moedas diferentes. Não cobrar o cliente duas vezes por retry e não deixar de pagar READY contratado de um componente por falha de outro. Repasses, taxas e quem cobre a perda devem caber no orçamento da oferta.
+## 9. Governance and rule stability
 
-Retirada de depósito não reclamado e reparação de serviço já cobrado são obrigações distintas. O protocolo não prova qualidade da inferência. [Especificação EVM](https://github.com/x402-foundation/x402/blob/main/specs/schemes/batch-settlement/scheme_batch_settlement_evm.md).
+The reference ledger uses four independent organizations, equal power, a quorum of three, and an existing CometBFT/ABCI integration path. Inference-node entry and validator entry have separate rules. This is not Bitcoin-style permissionless validation and is not implemented in the private coordinator.
 
-Qualificação comercial exige teto com sessões concorrentes, persistência de vouchers, replay, cobrança parcial/streaming, reinício, reconciliação, disputa e retirada com gateway original desligado. Fonte de reparação e responsável precisam existir antes da oferta pública. Uma falha mantém o adaptador desabilitado; não bloqueia cooperação saudável.
+Ledger confirmation authorizes transitions rather than proving hardware or computation. The historical candidate retains 2/3 attestation, newcomer review, aggregated exposure limits and dispute rights; release, dependencies, verifier independence and costs need qualification before execution.
 
-A conta comercial usa receita de serviço finalizada menos remuneração de provedores, processamento de pagamento, infraestrutura atribuída, suporte e provisão de perdas. Depósito não utilizado, TU e dinheiro de terceiros não são receita. Comparar API mais barata somente com mesma configuração/qualidade, carga, latência e margem medida. Não fixar percentuais de repasse sem esse cálculo.
+Ordinary tariff changes require at least 48 hours' notice, at most one table per day, and an initial per-profile variation bound of 10%. Rights, issuance and governance changes use the longer seven-day process and quorum. Accepted contracts keep their agreed version. An incident can stop new admission under existing rules without erasing balances.
 
-## 8. Confiança e regras estáveis
+## 10. Experiment that can accept or reject the candidate
 
-Manter o registro cooperativo federado de referência do 22: quatro organizações independentes, poder igual, quorum de três e integração CometBFT/ABCI existente. O nó de inferência é aberto; a função de validador possui admissão explícita. Isso não equivale à validação permissionless do Bitcoin.
+The [19 v6 reference checks](evidence/v6-policy-reference-checks.json) establish selected arithmetic and counterexamples only. They are not a market simulation, hardware proof or consensus deployment.
 
-A confirmação autoriza transições contábeis, não prova hardware ou cálculo. Atestação 2/3, revisão de novatos, limites agregados e direito de contestação permanecem. Antes de executar, qualificar release, dependências e operadores; não há consenso novo neste plano.
+An integrated study must model lease and queue periods, receipt review, finality, cancellation, exits and refunds; compare policy variants on common loads and shocks; and disclose every remaining simplification. The original planned design uses 20 calibration seeds and 50 distinct holdout seeds over 90 days, with the last 30 days testing maturity without ordinary issuance.
 
-Aviso ordinário mínimo de 48 h, no máximo uma nova tabela por dia e variação inicial de até 10% por configuração. Alterações de direitos/emissão/governança seguem sete dias e quorum do 22. Contratos aceitos permanecem na versão acordada. Incidente pode suspender novas admissões sob regras existentes, sem apagar saldo.
+Include no cash buyers with useful use, no use, concentrated demand, hoarding, correlated entry/exit, new models, settlement delays, lost operating support, undetected fraud and resource return. Publish per-profile/cohort time series, free/held stock, normal costs, funding sources, waits, rejections, provider selection, and contribution-to-consumption ratios.
 
-## 9. Experimento que aprova ou rejeita a economia
+Baseline acceptance requires no accounting or resource invariant violations, no economic hibernation under approved load, at least 95% of compatible funded requests completed within contract, no hidden mature-phase deficit, and cohort access within the declared envelope. Shocks may degrade service, but recovery must occur within 24 hours after all minimum resources, quorum, liquidity and external support return, without resetting balances.
 
-A correção de prioridade recebe verificações pontuais em [v6-policy-reference-checks.json](evidence/v6-policy-reference-checks.json). Elas demonstram aritmética e contraexemplos limitados; não simulam mercado, comportamento humano, GPU ou consenso.
+**Later F0 result:** 5,600 cases were run, with zero passing all implemented economic gates. The baseline v6 holdout completion rate was 15.75%. Full elastic behavior and the complete recovery evaluator remain missing. The observed holdout is now historical; a revision tuned to it needs new seeds. [Analysis](../execution/ECONOMY_V1_RESULTS.md).
 
-O próximo ensaio integrado deve:
+## 11. Responsibilities and launch order
 
-1. Representar eventos e períodos reais dos contratos, filas, revisão de recibos, finalização, saídas e reembolsos. Declarar toda simplificação restante.
-2. Comparar, com as mesmas cargas/choques, a v4 e as três variantes de decomposição previstas na v5. Acrescentar a v6 completa, mantendo uma comparação v5/v6 que mude somente a prioridade de recomposição.
-3. Usar 20 sementes de calibração e 50 distintas de validação, publicadas antes dos resultados, por 90 dias sintéticos. A fase madura dos últimos 30 dias testa circulação sem nova emissão ou subsídio extraordinário.
-4. Incluir zero compradores com uso, zero uso, demanda concentrada, retenção de TU, chegada/saída correlacionada, novos modelos, demora de liquidação, perda de fundos operacionais, fraude sem detecção e retorno de recursos.
-5. Publicar séries por modelo/coorte, estoque livre/retido, custo normal, fontes de financiamento, espera, recusas, taxa de seleção e relação contribuição/consumo. Não escolher a melhor semente nem mudar o preço de referência para aprovar o teste.
+| Gate | Responsible role to assign | Required evidence |
+|---|---|---|
+| FC01: contracts | Architecture and ledger | Consistent executable rules, stock/obligation sources and persistent concurrency behavior |
+| FC02: economics | Economic analysis and scheduler | Complete study, mature coverage and cohort access |
+| FC03: capacity | Inference and measurement | Qualified models/devices/links and measured contribution-to-consumption relation |
+| FC04: optional market | Payments and seller operation | Settlement, payouts, dispute funding and exit |
+| FC05: trust and continuity | Security and independent operators | Adversarial tests, quorum, partitions, restoration and replacement |
+| FC06: funded pilot | Operations and finance | Confirmed resources and successful actual pilot campaigns |
 
-Reimplementar os controles no mesmo ambiente de eventos e identificar as adaptações ao protocolo experimental. Não reetiquetar as 54 execuções históricas como se já contivessem revisão de recibos, piso operacional ou fase madura sem emissão.
+Assign these roles to real people or organizations; the plan does not assume a funded team. Main sequence: contract coherence, capacity and economic tests with calibration loops, independent trust/continuity, then a funded pilot. Start larger-model and identity research early. Do not make the first private inference bench wait for payments or four organizations, and do not call that bench a public decentralized service.
 
-Aceite básico: nenhuma violação contábil ou de recurso; zero hibernação econômica na carga aprovada; pelo menos 95% dos pedidos compatíveis com saldo dentro do contrato; fase madura sem déficit encoberto; relação de troca e acesso por coorte compatíveis com o envelope publicado. Publicar também demanda sem saldo e recusas, mesmo quando o SLO for atingido.
+The candidate requires 30 days of confirmed operation and seven days of orderly closure coverage before opening. Below 30 days of runway, freeze costly expansion; below 14, restrict costly paths while preserving closure funding. In-kind resources specify capacity and duration. Actual 7/30-day pilot campaigns remain required.
 
-Choques podem causar degradação declarada. Retomar em até 24 h após recursos, quorum, liquidez e custeio mínimos voltarem, sem reinicializar saldos. Se não houver uma configuração que passe, a conclusão é reduzir escopo ou rejeitar a hipótese ensaiada, não afrouxar o indicador depois.
-
-## 10. Responsáveis, ordem e critérios de abertura
-
-Papéis abaixo precisam ser atribuídos a pessoas/organizações reais. Nenhuma equipe, compra ou financiamento foi presumido.
-
-| Etapa | Responsável | Evidência necessária | Estado atual |
-|---|---|---|---|
-| FC01 — Contratos e coerência | Arquitetura + ledger | Regras vigentes, fontes S/L/J, prioridade e contratos sem conflito | Revisão documental e referências pontuais |
-| FC02 — Economia e liquidez | Economia + scheduler | Simulação fiel, fase madura e coortes aprovadas | Ensaio integrado v6 pendente |
-| FC03 — Capacidade e troca | Inferência + medição | GPU/modelo/rede medidos, custos e relação contribuição/consumo | Hardware/rastros reais pendentes |
-| FC04 — Comércio opcional | Pagamentos + operação do vendedor | Adaptador, finalização, repasses, disputa e saída qualificados | Referência selecionada; integração pendente |
-| FC05 — Confiança e continuidade | Segurança + operadores independentes | Fraude, quorum, partição, restauração e substituição de gateway exercitados | Operadores e testes reais pendentes |
-| FC06 — Custeio e piloto | Operação + finanças | 30 dias de operação e sete de encerramento cobertos; pilotos 7/30 dias aprovados | Recursos não confirmados e piloto não executado |
-
-Sequência principal: FC01 → medições FC03 e ensaio FC02, com retorno explícito à calibração → FC05 → FC06. Pesquisa de inferência gigante e desenhos de identidade/registro começam em F0. Não condicionar a primeira bancada privada de inferência a integrar pagamentos ou montar quatro organizações; não anunciar essa bancada como rede descentralizada operacional.
-
-FC04 tem trilha independente e só libera comércio quando os critérios comuns também passam. Contrato e escolha do adaptador vêm antes da implementação de escrow; qualificação completa vem depois dos testes de fundos e disputa. Isso elimina dependências circulares entre escolha e prova.
-
-O custeio inclui energia assumida pelos participantes, controle, verificação, relay, distribuição de pesos, suporte e substitutos. Cessão em espécie informa prazo e capacidade. Antes da abertura, confirmar os 30+7 dias; abaixo de 30 dias congelar expansão custosa, abaixo de 14 restringir caminhos caros, e preservar o fundo de encerramento.
-
-**Conclusão de engenharia desta revisão:** o desenho foi corrigido e consolidado. Resultados pontuais não aprovam sustentabilidade ou operação pública. A próxima decisão de abertura depende dos ensaios integrados e das medições, mantendo explícitas as condições para reduzir oferta ou pausar.
+The design remains a candidate with explicit reasons to reduce scope or pause. Current approval status is maintained in the [gate register](../execution/GATES.md).

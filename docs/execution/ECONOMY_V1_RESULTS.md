@@ -1,47 +1,51 @@
-# Economia: primeiro ensaio de eventos
+# F0 economic event study: tested configuration rejected
 
-**Resultado: a configuração fictícia testada foi reprovada.** O programa executou 1.600 casos de calibração e 4.000 de validação, com 90 dias por caso. As 20 sementes de calibração e 50 de validação são distintas; preços, parâmetros, 16 cenários e cinco variantes foram registrados antes dos resultados. A validação usou o mesmo código e os mesmos parâmetros da calibração.
+The study contains **5,600 runs of 90 simulated days**. Twenty calibration seeds and fifty distinct holdout seeds were registered for five variants and sixteen scenarios. The same code and parameters were used for both phases. Prices, speeds, behavior and operating support were fictional.
 
-O [resumo verificável](evidence/economy-v1-summary.json) identifica os hashes do protocolo e dos arquivos brutos. O [protocolo registrado](../../benchmarks/economy-study-v1.json) tem SHA-256 `7853701865fd848517958132c04ee0220924969ca0d121474054789db59f7598`.
+The [verifiable summary](evidence/economy-v1-summary.json) binds the study and raw data hashes. The [preregistered manifest](../../benchmarks/economy-study-v1.json) has SHA-256 `7853701865fd848517958132c04ee0220924969ca0d121474054789db59f7598`.
 
-## O que foi executado
+## What ran
 
-O simulador usa eventos individuais de pedidos, contratos de 900 segundos, fila de 120 segundos, revisão de recibos de 24 horas — 72 horas no cenário de atraso —, cancelamentos, falhas e reversões de cobranças finalizadas. Os saldos começam em zero. A emissão por READY é comprometida em `L` antes da contratação; saldo reservado continua em `S`; somente a reversão aprovada de TU queimado entra em `J`. Reembolsos de valores reciclados precisam reservar recursos existentes.
+The event simulator represents individual requests, 900-second capacity contracts, a 120-second queue, 24-hour receipt review (72 hours in the delay scenario), cancellation, failures and reversals of finalized charges. Balances begin at zero. Future readiness issuance enters L before commitment; held issued balances remain in S; approved reversal of burned TU enters J. Refunding recycled amounts requires existing reserved funds.
 
-Os últimos 30 dias suspendem a emissão ordinária. O dinheiro operacional é um contador separado, com contribuição regular explicitamente hipotética e cenário de perda desse custeio. Nenhum comprador em dinheiro é necessário no cenário básico. Não houve crédito real emitido ou transferência financeira.
+The last 30 days suspend ordinary issuance. External operating money is a separate fictional counter, with an explicit recurring support assumption and a scenario losing that support. The baseline does not require cash buyers. No real credits or financial transfers occurred.
 
-Os 5.600 casos passaram nas invariantes contábeis e de reserva de recursos implementadas. **Zero casos passaram em todos os critérios econômicos implementados.** A igualdade dos lançamentos não garante circulação, cobertura nem acesso.
+All cases preserved implemented accounting and resource-reservation invariants. **No case passed every implemented economic acceptance gate.** Balanced postings did not ensure circulation, coverage or usable access.
 
-## Comparação no cenário básico
+## Baseline comparison
 
-Taxa agregada de conclusão visível dos pedidos compatíveis com saldo durante a fase madura, nas 50 sementes de validação. A meta registrada é 95%; recusas por capacidade permanecem no denominador.
+Aggregate visible completion of compatible funded requests in the mature period across fifty holdout seeds. The registered target is 95%; capacity refusals remain in the denominator.
 
-| Variante no ambiente comum de eventos | Conclusão | Resultado |
+| Variant in the common event environment | Completion | Result |
 |---|---:|---|
-| v4: disponibilidade, fundo único | 47,36% | Reprovada |
-| v5: demanda, fundo único | 15,75% | Reprovada |
-| v5: disponibilidade, fundos separados | 70,32% | Reprovada; também usa reserva protegida |
-| v5: demanda, fundos separados | 39,90% | Reprovada; também usa reserva protegida |
-| v6: demanda, recomposição do piso primeiro | 15,75% | Reprovada |
+| v4: availability, one fund | 47.36% | Rejected |
+| v5: demand, one fund | 15.75% | Rejected |
+| v5: availability, separated funds | 70.32% | Rejected; also consumes protected funds |
+| v5: demand, separated funds | 39.90% | Rejected; also consumes protected funds |
+| v6: demand, essential floor replenished first | 15.75% | Rejected |
 
-Essas são decomposições de política no novo simulador. Não são reexecuções idênticas do programa horário histórico da v4 e não o substituem.
+These are policy decompositions in the new event simulator, not identical reruns of the historical v4 hourly program.
 
-## Causa observada
+## Observed cause within the fictional scenario
 
-O cenário fictício mantém uma rota compacta e uma rota grande como cobertura essencial. A rota grande exige três provedores, a 2 TU/h por provedor; a compacta custa 1 TU/h. São 168 TU/dia de cobertura contínua, antes de qualquer expansão. O cenário gera 96 desejos de uso/dia, com preços de 2 TU e 8 TU e participação de 25% do modelo grande.
+Essential coverage consists of one compact route and one large route. The large route needs three providers at 2 TU/hour each; the compact route costs 1 TU/hour. Continuous coverage therefore costs 168 TU/day before expansion. The scenario generates 96 desired uses/day with prices of 2 TU and 8 TU, with 25% of desired requests targeting the large model.
 
-A demanda desejada não vira automaticamente consumo financiado. Os provedores compactos recebem uma parcela pequena dos pagamentos e muitos pedidos ficam sem saldo. Provedores grandes acumulam TU que não retornam na mesma velocidade à operação. A emissão inicial sustenta parte desse desequilíbrio; quando termina, a cobertura cai. Priorizar o piso operacional corrige a ordem de recomposição, mas não cria o fluxo que está faltando.
+Desired demand does not automatically become funded consumption. Compact providers receive a smaller share of payments, and many requests lack balance. Large providers accumulate TU that does not return to operation at the same rate. Initial issuance supports part of the imbalance; coverage falls when it ends. Replenishing the essential floor first fixes priority but does not create the missing flow.
 
-Na semente de calibração 1001 da v6, o grupo grande termina com 3.933,5 TU livres e o grupo compacto com 8,25 TU, enquanto o último dia registra zero custo de contratos novos. É um exemplo rastreável da concentração e da paralisação, não uma previsão sobre participantes reais.
+In v6 calibration seed 1001, the large cohort finishes with 3,933.5 free TU and the compact cohort with 8.25 TU, while the final day records zero new contract cost. This is a traceable concentration/stoppage example under the fictional inputs, not a prediction of actual participants.
 
-## Consequência para a execução
+## Implication
 
-FC02 permanece aberto. Não transformar os preços, recompensas ou cobertura desse experimento em configuração pública. A próxima calibração precisa tratar a combinação de cobertura essencial, janelas contratadas, demanda efetivamente financiada e liquidez por grupo. Modelos de pouca procura podem exigir cobertura agendada ou contratada por interessados; o anúncio de um modelo não obriga o fundo comum a mantê-lo disponível continuamente.
+FC02 remains open. Revise essential coverage, contract windows, funded demand and cohort liquidity together. Low-demand models may need scheduled or requester-funded coverage; publishing a model does not require the common fund to keep it continuously online.
 
-Isso precisa ser ensaiado com novos parâmetros e novas sementes de validação. As 50 sementes usadas aqui já foram observadas e não devem ser reapresentadas como validação inédita de uma revisão ajustada a esses resultados. Nenhum saldo existente seria reduzido retroativamente.
+The intended focus above 27B makes complete-route coverage and multi-provider obligations especially relevant. Actual route costs and contribution capacity must come from qualification rather than copying these three-provider fictional assumptions.
 
-## Limites do experimento
+A revised study needs new parameters and fresh holdout seeds. The fifty seeds here have been observed and cannot be presented as unseen validation for a policy adjusted to these results. No real participant's balance should be retroactively reduced to fix a failed configuration.
 
-Velocidades, preços, disponibilidade, retenção e caixa são hipóteses. Atestação e quorum entram como condições simuladas; não houve consenso federado ou comprovação de hardware. Os limites elásticos 1/2/4 ainda não estão integrados. O critério de retomada em 24 horas precisa de um avaliador explícito do instante em que **todos** os pré-requisitos voltam. O resultado `synthetic_candidate_passed` dos arquivos brutos se refere somente aos critérios implementados; o resumo marca `full_policy_acceptance_evaluated=false`.
+## Coverage limits
 
-Os dados publicam demanda sem saldo, filas e recusas, fontes de pagamento, saldos livres/retidos, séries diárias, seleção de provedores e consumo/contribuição por grupo. Não há aprovação de economia real, de preço de mercado ou de abertura pública.
+Availability, retention, price and cash support are assumptions. Attestation and quorum are simulated conditions, not deployed consensus or physical verification. Elastic 1/2/4 limits are not integrated. The 24-hour recovery criterion needs a complete evaluator starting when **all** minimum prerequisites return.
+
+The raw field `synthetic_candidate_passed` refers only to implemented gates. The summary explicitly records `full_policy_acceptance_evaluated=false`. The data includes unfunded demand, queues/refusals, payment sources, free/held balances, daily series, provider selection and cohort contribution/consumption.
+
+This study rejects the tested configuration without proving all cooperative designs impossible. It approves neither real economics, market prices nor public opening. [Data restoration](../publication/README.md).

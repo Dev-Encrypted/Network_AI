@@ -1,98 +1,109 @@
-# Instalação, operação e recuperação
+# Installation, operation, and recovery
 
-## Inicializar
+## Prerequisites and initialization
 
-Execute na raiz do repositório, com Node.js 24.13.0, pnpm 10.33.0, Rust 1.93.1 e Docker/Compose disponíveis:
+Run from the repository root with Node.js 24.13.0, pnpm 10.33.0, Rust 1.93.1 and a running Docker installation with Compose. A real compatible inference backend must be prepared separately.
 
-```powershell
+```bash
 pnpm install --frozen-lockfile
 pnpm lab:init
 pnpm lab:start
 ```
 
-`lab:init` cria exclusivamente o projeto Compose `network-ai-private-lab`, seu PostgreSQL e volume. Gera senhas e chaves criptográficas, aplica migrações por checksum e cria o administrador. Repetir o comando preserva identidades e dados; não repete a concessão de bootstrap. O laboratório concede explicitamente 100 LAB_TU para os primeiros testes. Novos usuários começam com zero.
+`lab:init` creates the dedicated `network-ai-private-lab` Compose project, PostgreSQL and volume. It generates credentials and cryptographic keys, applies checksum-tracked migrations, and provisions an administrator. Repeating initialization preserves data and identities and does not repeat the bootstrap grant. The administrator receives an explicit 100 `LAB_TU`; new users start at zero.
 
-O perfil admite uma instalação por computador. Se outro checkout encontrar o banco já existente sem a configuração privada correspondente, a inicialização para antes de gerar novas credenciais ou recriar o container. Restaure a configuração original; não substitua senhas sobre um volume existente.
+The profile permits one installation per computer. If another checkout finds the existing project database without its matching private configuration, initialization stops before generating replacement credentials or recreating the container. Restore the original configuration instead of assigning new passwords to an existing volume.
 
-Todos os segredos ficam em `.runtime/private-lab/`, ignorado pelo Git. No Windows, a pasta recebe ACL para o usuário que executa o comando; no Linux, modo 0700. O arquivo `credentials.txt` contém o acesso inicial. Nunca publique essa pasta, dumps, logs privados ou chaves exibidas pela interface.
+Private material lives in `.runtime/private-lab/`, excluded from Git. Windows initialization restricts the directory ACL to the executing user; Linux uses mode 0700. `credentials.txt` contains initial access details. Keep configuration, dumps, private logs and displayed keys out of public commits.
 
-`lab:start` compila os serviços e inicia processos em segundo plano, sem abrir janelas de terminal. Após uma compilação já validada, `pnpm lab:start --no-build` reutiliza os binários. Para atualizar código com serviços rodando, use primeiro `pnpm lab:stop`, depois compile e inicie. Compilar Next.js sobre a pasta de uma instância em execução pode deixar seus arquivos estáticos inconsistentes.
+`lab:start` builds and launches owned background services. After a validated build, `pnpm lab:start --no-build` reuses binaries. To update application code, first run `pnpm lab:stop`, then build and start. Rebuilding Next.js over a running instance's output can invalidate its assets, so startup guards against this condition.
 
-| Serviço | Endereço local |
+## Local addresses
+
+| Service | Address |
 |---|---|
 | Interface | `http://127.0.0.1:43100` |
-| Controle | `http://127.0.0.1:43101/api/v1` |
-| Gateway | `http://127.0.0.1:43102/v1` |
-| Agente inicial | `http://127.0.0.1:43103` |
+| Control API | `http://127.0.0.1:43101/api/v1` |
+| Inference gateway | `http://127.0.0.1:43102/v1` |
+| Initial node | `http://127.0.0.1:43103` |
 | PostgreSQL | `127.0.0.1:54329` |
 
-Os listeners da aplicação e a publicação da porta do banco usam loopback. A faixa de nós é 43103–43299. Não altere o bind para abrir este perfil na Internet: TLS/WAN, antifraude, proteção de operadores e continuidade distribuída ainda não foram qualificados.
+Application listeners and the published database port bind to loopback. Node ports range from 43103 to 43299. This profile has not qualified public TLS/WAN deployment, open admission, adversarial operators or distributed continuity. Changing the bind address is not a public deployment procedure.
 
-## Operar pela interface
+## Use the interface
 
-1. Entre usando as credenciais privadas.
-2. Em **Conversar**, selecione um modelo disponível. A cotação reserva o teto de custo; o recibo liquida o uso e devolve a diferença.
-3. Em **Sessões**, consulte estado, motivo de interrupção, tokens e cobrança. O histórico não permite reabrir respostas antigas, pois o conteúdo não é retido.
-4. Em **Acesso à API**, crie uma chave individual e salve a cópia exibida uma única vez. Revogar interrompe novas autenticações com ela.
-5. Em **Meus nós**, pause novas admissões ou retome o agente. A execução já iniciada pode terminar.
-6. Em **Administração**, provisione usuários, concessões de teste, domínios físicos, convites e qualificação dos manifestos.
+The current interface is PT-BR. The [beginner guide](../GETTING_STARTED.md) maps navigation labels to English.
 
-## Conectar outro modelo ou agente
+1. Sign in using the generated private credentials.
+2. In Chat, select an available qualified model. Admission holds the maximum charge; settlement charges accepted usage and releases the rest.
+3. In Sessions, inspect state, terminal reason, token counts and billing. Past answer bodies are not retained for replay.
+4. In API access, create a personal key and save the one-time displayed value. Revocation prevents new authentication with that key.
+5. In My nodes, pause or resume new admissions. Previously accepted work may complete.
+6. In Administration, create users, explicit lab grants, physical domains, invitations and qualifications.
 
-Qualquer membro pode registrar um manifesto de texto, com identificador imutável, revisão, SHA-256, licença, origem HTTPS, limites e tarifas. Ele entra como `CANDIDATE`. O administrador registra a evidência e o habilita como `LOCAL_PREVIEW` após conferir o artefato e a engine. O sistema não executa código do repositório do modelo, não baixa pesos e não interpreta ferramentas ou multimodalidade.
+## Register another model or agent
 
-Cadastre um domínio para o recurso físico. Reutilize o mesmo domínio para dois agentes que compartilham a mesma GPU. A capacidade declarada deve ser medida pelo operador; este coordenador não prova a topologia física.
+A member can submit an immutable text manifest with model ID, revision, SHA-256, license, HTTPS origin, limits and rates. It enters as `CANDIDATE`. An administrator records evidence and qualifies it as `LOCAL_PREVIEW` after checking the artifact and engine. A different revision needs a different manifest ID.
 
-Gere um convite na interface, usando a porta local escolhida. Salve a resposta JSON em um arquivo privado com os campos `id` e `invite`. Gere o perfil limitado do operador:
+The product does not download model weights, execute repository code, or enable tools/multimodality. A model above 27B may be proposed under this contract if the configured whole-model backend can serve it, but doing so does not enable automatic distribution across agents. Larger distributed routes require separate integration and qualification.
+
+Create a physical domain for the resource. Agents sharing one GPU should share its domain and measured slot limit. The trusted administrator assigns this topology; the coordinator does not cryptographically prove the physical device.
+
+Create an invitation in the interface for the selected local port. Save its JSON response in a private file containing `id` and `invite`. Generate a limited operator profile:
 
 ```powershell
-node scripts/node-config.mjs --invite-file .runtime/convite.json --backend-model "identificador-exato-no-servidor" --port 43104 --backend-url http://127.0.0.1:1235 --backend-kind lmstudio
+node scripts/node-config.mjs --invite-file .runtime/invite.json --backend-model "exact-backend-model-id" --port 43104 --backend-url http://127.0.0.1:1235 --backend-kind lmstudio
 ```
 
-O comando informa o caminho de um novo `config.json`, sem senhas de banco, senha administrativa ou chave privada do coordenador. Defina `NETWORK_AI_CONFIG` para esse caminho e inicie o agente em um terminal de operação:
+The command prints a new private `config.json` path. This profile excludes database passwords, administrator credentials and the coordinator's private signing authority. Set `NETWORK_AI_CONFIG` to the printed path and launch the agent:
 
 ```powershell
-$env:NETWORK_AI_CONFIG = "CAMINHO_PRIVADO_INFORMADO_PELO_COMANDO"
+$env:NETWORK_AI_CONFIG = "PRIVATE_CONFIG_PATH_PRINTED_BY_THE_COMMAND"
 .\target\debug\network-ai-node.exe
 ```
 
-No Linux, o executável é `./target/debug/network-ai-node`. O backend deve coincidir com o manifesto vinculado ao convite. Um agente atende um modelo configurado e mantém um slot local. Vários modelos usam agentes separados e compartilham o domínio quando disputam o mesmo hardware.
+On Linux, launch `./target/debug/network-ai-node` with the same environment variable. The backend must match the manifest bound to the invitation. One agent serves one configured model and has one local slot. Separate model agents share a physical domain when they compete for the same hardware.
 
-`lmstudio` verifica `loaded_instances`, porque `/v1/models` também pode listar modelos descarregados. `openai` permite testar um servidor compatível via `/v1/models`; essa listagem é uma declaração do backend, não prova de residência em memória ou de capacidade. É necessário validar esse adaptador no servidor utilizado antes de habilitá-lo.
+The `lmstudio` adapter checks `loaded_instances`, because `/v1/models` can list unloaded models. The `openai` adapter checks a compatible backend's `/v1/models` declaration; this is not independent proof of residency or measured capacity. Qualify the actual backend before enabling the profile.
 
-O perfil inicial `qwen-local` corresponde à bancada desta estação, com hash e ressalva de origem/licença no manifesto. Em outro computador, publique seu próprio manifesto em vez de reutilizar esse fingerprint para pesos diferentes. Pesos proprietários, engines comerciais e modelos de terceiros não recebem a licença do NETWORK AI.
+The supplied `qwen-local` manifest corresponds to the original station, including its fingerprint and origin/license qualification caveat. Do not assign that hash to different weights. Third-party models and commercial engines do not receive NETWORK AI's license.
 
-## Estado, parada e recuperação
+## Status, stop, and recovery
 
-```powershell
+```bash
 pnpm lab:status
 node scripts/lab.mjs restart node
 node scripts/lab.mjs restart control
 pnpm lab:stop
 ```
 
-O gerenciador só encerra PIDs cujo comando corresponde ao projeto. `stop` mantém o banco, o volume e os arquivos privados. Não atua em outros projetos Docker. Um reinício abrupto do agente incrementa sua época; o controle invalida tentativas da época anterior e devolve suas reservas. A engine externa recebe a interrupção da conexão; a liberação efetiva de seus recursos depende dela.
+The manager validates owned process commands before stopping their PIDs. Stop retains the database, volume and private configuration. It does not stop other Docker projects.
 
-Durante uma indisponibilidade curta do controle, o nó grava recibos em outbox antes de tentar enviá-los. Retoma o envio sem repetir cobrança. Uma falha de gravação impede novas admissões naquele processo até a correção e o reinício. A janela máxima de execução é 180 segundos e a fila expira em 120 segundos. Fora dessas janelas, o controle devolve a reserva e encerra a tentativa; não tenta continuar uma geração de tokens de onde parou.
+A restarted node advances its epoch. The control service fences earlier attempts and releases their reservations. The external engine sees a disconnected request; its actual internal resource reclamation depends on that engine.
 
-## Backup
+During a short control outage, the node writes receipts to a durable outbox before sending them. Retried delivery does not charge twice. A write failure blocks new admissions in that process until correction and restart. Execution expires after 180 seconds and queueing after 120 seconds. The current product terminates expired work; it does not resume generation from the last interrupted token.
 
-```powershell
+## Backup and restoration
+
+```bash
 pnpm lab:backup
 pnpm test:backup
 ```
 
-O dump vai para `.runtime/private-lab/backups/`. Contém usuários, hashes de acesso e todo o histórico contábil; trate-o como arquivo privado. O verificador restaura em um banco novo dentro do PostgreSQL deste projeto, confere journal, projeção e permissões e remove somente esse banco temporário. Não substitui o banco de trabalho.
+Dumps are written under `.runtime/private-lab/backups/`. They contain account records, access hashes and accounting history and must remain private. The verification script restores into a fresh database in this project's PostgreSQL, checks the journal, projection and permissions, then removes that temporary database. It does not overwrite the working database.
 
-Uma recuperação integral também exige uma cópia protegida de `config.json` e das identidades dos agentes, incluindo outboxes. Um dump sozinho não recupera as chaves Ed25519. A troca do banco de trabalho deve ser uma operação planejada, com serviços parados e o destino verificado. Este inicializador não faz restauração destrutiva automática.
+Complete recovery also requires protected copies of configuration, authority/node identities and pending outboxes. A database dump alone does not recover Ed25519 keys. Replacing a working database requires stopped services and an explicitly verified destination; initialization does not perform destructive automatic recovery.
 
-## Validação
+## Validate a deployment
 
-```powershell
+Build while managed application services are stopped. Start the application before browser or live acceptance tests.
+
+```bash
 pnpm build
 pnpm test:integration
 cargo test --locked
 cargo clippy --locked --all-targets -- -D warnings
+pnpm lab:start --no-build
 pnpm exec playwright install chromium
 pnpm test:e2e
 pnpm test:live
@@ -102,4 +113,6 @@ pnpm test:multi-node
 pnpm test:backup
 ```
 
-Os testes de navegador completos e os três testes `live`, `faults` e `outbox` usam o modelo real já carregado. Os testes de falha reiniciam apenas o serviço indicado deste projeto; execute sem outras sessões de usuário em andamento. A integração cria um banco descartável e testa o PostgreSQL real, sem GPU. A CI executa a integração e as jornadas de navegador que não dependem da engine. Consulte a [cobertura](STATUS.md) antes de interpretar um resultado como qualificação de produção.
+The PostgreSQL integration suite uses a temporary database without a GPU. Full browser, live, fault, outbox and multi-node acceptance require the actual configured model. Fault tests restart only the named project service; run them without unrelated user sessions in progress. CI exercises integration and the browser journeys that do not require a model engine.
+
+Read [validation scope](STATUS.md) before interpreting a passing command as hardware, WAN, economic or public-operation qualification.

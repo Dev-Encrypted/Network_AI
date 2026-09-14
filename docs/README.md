@@ -1,47 +1,32 @@
-# Documentação do NETWORK AI
+# NETWORK AI documentation
 
-Comece pelo [artigo](ARTICLE.md), consulte os [resultados F0](execution/README.md) e siga os [comandos de reprodução](execution/REPRODUCE.md). A regra operacional candidata é a [revisão 6](planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md); os [gates atuais](execution/GATES.md) registram evidências e lacunas.
+The maintained documentation is in English. It explains both the long-term cooperative network and the private software that can run today. Begin with the guide matching your experience, then follow the technical references.
 
-A [aplicação privada v0.2](implementation/README.md) tem interface, controle, banco e agentes integrados. Seus [contratos](implementation/API.md), [guia operacional](implementation/OPERATIONS.md), [contabilidade](implementation/ACCOUNTING.md) e [cobertura](implementation/STATUS.md) descrevem o que pode ser usado hoje.
+## Reading paths
 
-## Cortes históricos
+| Reader | Start here | Continue with |
+|---|---|---|
+| New to AI infrastructure | [Beginner guide](GETTING_STARTED.md) | [Glossary](GLOSSARY.md), [full article](ARTICLE.md) |
+| Interested in models above 27B | [Model scaling](MODEL_SCALING.md) | [Model integration](planning/05_MODELS_AND_DISTRIBUTION.md), [hardware profiles](planning/15_HETEROGENEOUS_HARDWARE_AND_CATALOG.md) |
+| Running a private deployment | [Application overview](implementation/README.md) | [Operations](implementation/OPERATIONS.md), [API](implementation/API.md) |
+| Studying credits and fairness | [Fair distribution](planning/16_TOKEN_ECONOMY_AND_FAIR_DISTRIBUTION.md) | [Candidate v6 policy](planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md), [failed economic study](execution/ECONOMY_V1_RESULTS.md) |
+| Developing the system | [Technical handbook](planning/README.md) | [Implementation status](implementation/STATUS.md), [contribution guide](../CONTRIBUTING.md) |
+| Checking evidence | [F0 results](execution/README.md) | [Reproduction](execution/REPRODUCE.md), [archive provenance](publication/README.md) |
 
-`planning/` preserva os documentos de 13/09/2026. Frases como “não há implementação” descrevem aquele corte; o trabalho posterior está em `execution/`. Os arquivos antigos não foram reescritos para parecer que previram resultados posteriores. Seus hashes continuam conferíveis nos [pacotes históricos](publication/README.md).
+## How to read a claim
 
-## Capítulos técnicos
+**Implemented** means the linked source provides the behavior in the stated private profile. **Measured** means a named experiment exercised it under recorded conditions. **Simulated** means a program evaluated explicit assumptions. **Planned** means implementation or qualification is still required. Arithmetic estimates are labeled separately.
 
-| Documento | Conteúdo |
-|---|---|
-| [00 — Resumo executivo](planning/00_EXECUTIVE_SUMMARY.md) | Visão consolidada do planejamento |
-| [01 — Produto](planning/01_PRODUCT_VISION.md) | Objetivo, limites e experiências |
-| [02 — Pesquisa](planning/02_RESEARCH_AND_COMPARISON.md) | Engines, manutenção e reutilização |
-| [03 — Arquitetura](planning/03_ARCHITECTURE.md) | Planos, modos A/B/C e continuidade |
-| [04 — Tecnologias](planning/04_TECH_STACK_AND_ADRS.md) | Decisões e alternativas |
-| [05 — Modelos](planning/05_MODELS_AND_DISTRIBUTION.md) | Revisões, memória e distribuição |
-| [06 — Protocolo](planning/06_NODE_PROTOCOL_AND_SCHEDULER.md) | Estados, placement, leases e sessões |
-| [07 — Créditos](planning/07_CREDITS_AND_LEDGER.md) | Tarifas, ledger e conciliação |
-| [08 — Segurança](planning/08_SECURITY_AND_TRUST.md) | Ameaças, confiança e isolamento |
-| [09 — Dados e APIs](planning/09_DATA_MODEL_AND_APIS.md) | Entidades e contratos |
-| [10 — Bancada](planning/10_BENCHMARKS_AND_CAPACITY.md) | Experimentos e capacidade |
-| [11 — Operação](planning/11_OPERATIONS_AND_ECONOMICS.md) | Custos, demanda e incidentes |
-| [12 — Roadmap](planning/12_ROADMAP_AND_BACKLOG.md) | Fases, 58 itens e aceite |
-| [13 — Fontes](planning/13_REFERENCES_AND_EVIDENCE.md) | Pesquisa e snapshots |
-| [14 — Cobertura](planning/14_REQUIREMENTS_AND_REVIEW.md) | Rastreabilidade do planejamento |
-| [15 — Hardware](planning/15_HETEROGENEOUS_HARDWARE_AND_CATALOG.md) | GPUs e catálogo heterogêneo |
-| [16 — Distribuição](planning/16_TOKEN_ECONOMY_AND_FAIR_DISTRIBUTION.md) | TU, acesso e custos |
-| [17 — Primeiros cálculos](planning/17_TOKEN_POLICY_SIMULATIONS.md) | Referência histórica |
-| [18 — Rede aberta](planning/18_OPEN_NETWORK_AND_COMPUTE_MARKET.md) | Ofertas e independência |
-| [19 — Mercado](planning/19_OPEN_MARKET_SIMULATIONS.md) | Cenários financeiros hipotéticos |
-| [20 — Cooperação](planning/20_COOPERATIVE_ECONOMY_AND_ELASTIC_LIMITS.md) | Demanda e elasticidade |
-| [21 — Exemplos cooperativos](planning/21_COOPERATIVE_SIMULATIONS.md) | Verificações aritméticas |
-| [22 — Continuidade](planning/22_POLICY_CLOSURE_AND_CONTINUITY.md) | Reservas, consenso candidato e caixa |
-| [23 — Estudo anterior](planning/23_INTEGRATED_ECONOMY_SIMULATIONS.md) | Configuração v4 reprovada |
-| [24 — Consolidação v6](planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md) | Piso, bootstrap e abertura |
+The product targets models above 27B, but the integrated private application has only the recorded local model campaign. A large model in an upstream catalog or a partial tensor load is not distributed inference proof.
 
-## Evidências e participação
+## Documentation map
 
-- [Evidências da pesquisa](planning/evidence/README.md).
-- [Análise econômica F0](execution/ECONOMY_V1_RESULTS.md).
-- [Artefatos e hashes](publication/README.md).
-- [Exemplos interativos históricos](../outputs/explanations/README.md).
-- [Licenciamento](LICENSING.md), [autoria](../AUTHORS.md) e [contribuição](../CONTRIBUTING.md).
+- [Article](ARTICLE.md): motivation, architecture, participation, economics, limitations, and results.
+- [Technical handbook, chapters 00–24](planning/README.md): design decisions and acceptance criteria.
+- [Private implementation](implementation/README.md): executable contracts, operations, accounting, and validation.
+- [Research execution](execution/README.md): measurements, simulations, reproduction, and open gates.
+- [Publication](publication/README.md): English edition provenance and immutable original archives.
+- [Licensing](LICENSING.md): Apache 2.0 code, CC BY 4.0 prose, and Dev-Encrypted attribution.
+- [Language policy](LANGUAGE.md): maintained English material and explicitly preserved historical data.
+
+Original Portuguese planning documents remain available in the immutable Git history and research release archives. Current English chapters are revised explanations that include later findings. The source manifest binds the original document hashes without relabeling English prose as historical evidence.

@@ -1,133 +1,150 @@
 # NETWORK AI
 
-**Inferência de IA descentralizada, capacidade cooperativa e uma economia de tokens de uso verificável.**
+**A cooperative AI inference network designed to make large models accessible through contributed computing power.**
 
-Concepção e direção: [Dev-Encrypted](https://github.com/Dev-Encrypted).
+Created and directed by [Dev-Encrypted](https://github.com/Dev-Encrypted).
 
-[Aplicação privada](docs/implementation/README.md) · [Artigo completo](docs/ARTICLE.md) · [Documentação](docs/README.md) · [Resultados F0](docs/execution/README.md) · [Releases](https://github.com/Dev-Encrypted/Network_AI/releases)
+[Start here](docs/GETTING_STARTED.md) · [Full article](docs/ARTICLE.md) · [Models above 27B](docs/MODEL_SCALING.md) · [Documentation](docs/README.md) · [Private application](docs/implementation/README.md) · [Releases](https://github.com/Dev-Encrypted/Network_AI/releases)
 
-> **Estado: aplicação privada v0.2 executável e pesquisa F0.** Interface, controle, PostgreSQL, gateway e nó já executam inferência real com créditos de laboratório. A rede pública e a economia cooperativa não estão aprovadas. A configuração econômica F0 foi reprovada; LAB_TU não é dinheiro nem promessa de capacidade.
+> **Current release: v0.2 private preview, alongside the F0 research bench.** You can run a local application with real inference, signed nodes, an API, and transactional laboratory credits. The public decentralized network, cooperative credit issuance, and paid marketplace remain under development. See the [implementation matrix](docs/implementation/STATUS.md) for the exact boundary.
 
-## Abrir a aplicação
+## What is NETWORK AI?
 
-Com Node.js 24, pnpm 10.33.0, Rust 1.93.1 e Docker/Compose:
+NETWORK AI is a project for people who want to use AI models that are difficult to run on their own computers. Participants contribute compatible GPUs and other required resources. The network coordinates that capacity, accepts inference requests, and accounts for contributions and consumption.
 
-```powershell
+**Inference** means using an already trained model to generate an answer. Training a new model is outside this project's current scope.
+
+The intended exchange is straightforward: contribute useful capacity when your equipment is available, earn usage credits under an accepted contract, and spend those credits on qualified models available through the network. A participant could contribute to one model and use another. Prices must account for their different resource costs.
+
+The community should be able to propose models, run nodes, and eventually sell qualified capacity to buyers who want a competitively priced API. Publishing a model proposal does not make it executable: the exact model, license, engine, hardware, and route must first be qualified.
+
+## Why the focus on models above 27B parameters?
+
+**The recommended focus of NETWORK AI is models with more than 27 billion parameters**, especially configurations whose memory or service requirements exceed one participant's equipment. Larger models are a central objective. Smaller models remain useful for affordable requests, development, qualification, and contributions from less powerful hardware.
+
+A parameter is a learned numerical value stored in a model. Increasing the number of parameters generally increases the memory needed to store its weights at the same precision. More demanding configurations therefore tend to require more contributed capacity, often from more participants. There is no fixed conversion from billions of parameters to people: one participant may own several GPUs, and another may contribute only part of one GPU.
+
+The 27B boundary is a **project focus**, not a universal hardware limit or a claim that every larger model needs multiple computers. A quantized model above 27B might fit on one suitable machine. A smaller model with a long context and many simultaneous users may need substantial capacity.
+
+### A concrete memory example
+
+The table is arithmetic for idealized model weights, **not a benchmark or a hardware recommendation**. `B` means one billion parameters; `GiB` means 2³⁰ bytes. Real deployment needs additional memory.
+
+| Total parameters | Weights at 16 bits | Weights at 8 bits | Weights at 4 bits |
+|---|---:|---:|---:|
+| 27B | 50.29 GiB | 25.15 GiB | 12.57 GiB |
+| 32B | 59.60 GiB | 29.80 GiB | 14.90 GiB |
+| 70B | 130.39 GiB | 65.19 GiB | 32.60 GiB |
+| 120B | 223.52 GiB | 111.76 GiB | 55.88 GiB |
+| 235B | 437.72 GiB | 218.86 GiB | 109.43 GiB |
+| 405B | 754.37 GiB | 377.19 GiB | 188.59 GiB |
+
+If each compatible device could reserve **20 GiB specifically for weights after all other memory needs were covered**, an idealized 70B model at 4 bits would need at least two such devices by memory alone. A 405B model at the same precision would need at least ten. Those counts do not prove that the engine can split the model across those devices, that the connection is fast enough, or that enough redundancy exists.
+
+The [model scaling guide](docs/MODEL_SCALING.md) explains the formula, quantization overhead, session memory, heterogeneous GPUs, mixture-of-experts models, and the difference between fitting one model and serving more users.
+
+## How contributed machines could work together
+
+A **route** is a complete, compatible set of resources that can finish a request. NETWORK AI distinguishes three execution modes:
+
+| Mode | What happens | Intended role | Current product status |
+|---|---|---|---|
+| A: complete model on one node | One node sends the request to its configured inference engine | Models that fit one suitable host; independent replicas | Implemented in the private local profile |
+| B: a nearby GPU cluster | An operator offers a model served by a tightly connected group of GPUs | Larger models requiring several nearby GPUs | Planned qualification and integration |
+| C: model split across participants | Different nodes execute successive parts of the same model | Models requiring capacity from several participants | Research objective; separate small CPU experiment only |
+
+```mermaid
+flowchart LR
+    Consumer[Chat or API consumer] --> Gateway[Gateway and admission]
+    Gateway --> Route[Qualified execution route]
+    Route --> Whole[Mode A: complete model]
+    Route --> Cluster[Mode B: nearby GPU cluster]
+    Route --> Stages[Mode C: distributed model stages]
+    Whole --> Receipt[Usage evidence and receipt]
+    Cluster --> Receipt
+    Stages --> Receipt
+    Receipt --> Ledger[Reservation and settlement]
+```
+
+This diagram describes the target architecture. Modes B and C are not enabled merely by starting additional private-preview agents. Two agents serving complete models provide more request destinations; they do not automatically become two halves of a larger model.
+
+Dividing a model requires a compatible inference engine and communication between its parts. A slow or unavailable stage can delay the entire route. We plan capacity by measured memory, speed, connectivity, and reliability, rather than adding advertised VRAM figures. [Architecture](docs/planning/03_ARCHITECTURE.md).
+
+## Credits, fairness, and the optional API market
+
+Three units must stay distinct:
+
+| Unit | Meaning | Availability today |
+|---|---|---|
+| Text tokens | Pieces of input and output processed by a model | Reported by the private inference engine |
+| Usage tokens (`TU`) | Proposed internal accounting unit for cooperative contribution and consumption | Design and simulation only |
+| Laboratory usage tokens (`LAB_TU`) | Test balances for holds, settlement, and refunds | Implemented; no cash redemption |
+
+In the proposed cooperative economy, compensation comes from **useful capacity that the network explicitly contracts and verifies**. An accepted readiness window can be compensated even if no request arrives during that window. Opening an application, registering more identities, or downloading weights does not create an unlimited right to credits.
+
+When compatible capacity is idle, temporary usage allowances may increase. These allowances should contract when demand returns, preserve accepted sessions, and stay within funded capacity. They do not create permanent balances or a promise that every model will always be available.
+
+The private preview uses a simpler laboratory mechanism: an explicit initial grant, charges for completed inference, an experimental 80/20 provider/working-account split, and refunds on failure. It does **not** implement cooperative readiness payments or elastic allowances. Its [accounting guide](docs/implementation/ACCOUNTING.md) explains the distinction.
+
+The optional paid API market would have its own payments, liabilities, refunds, and provider payouts. Cheaper API access is an objective to validate against complete operating costs, not an established price advantage. Purchases and payouts have not been activated.
+
+**The tested economic configuration failed.** Across 5,600 simulated 90-day runs, accounting invariants held, but no run passed every implemented economic gate. In the baseline holdout, candidate v6 completed 15.75% of compatible funded demand during the mature period, below the 95% target. These fictional parameters need revision before public use. [Results and causes](docs/execution/ECONOMY_V1_RESULTS.md).
+
+## Run the private application
+
+You need Git, Node.js 24.13.0, pnpm 10.33.0, Rust 1.93.1, and a running Docker installation with Compose. Real inference also needs a separately prepared compatible model server. Models and their licenses are not bundled.
+
+```bash
+git clone https://github.com/Dev-Encrypted/Network_AI.git
+cd Network_AI
 pnpm install --frozen-lockfile
 pnpm lab:init
 pnpm lab:start
 ```
 
-Acesse `http://127.0.0.1:43100`. O inicializador informa onde encontrar as credenciais privadas. O perfil de inferência inicial espera o modelo LM Studio já usado nesta bancada; o sistema não baixa pesos nem descarrega modelos. Para configurar outro servidor, consulte [Instalação e operação](docs/implementation/OPERATIONS.md).
+Open `http://127.0.0.1:43100`. Initialization prints the location of the private credentials file. It creates the project's isolated PostgreSQL service and an explicit 100 `LAB_TU` administrator grant. New user accounts start at zero.
 
-A interface em PT-BR oferece chat com streaming, catálogo, sessões, saldos, chaves de API, usuários e gestão de nós. O gateway e o agente são escritos em Rust; o NestJS controla metadados e o PostgreSQL registra reservas e liquidações. Há idempotência, cancelamento, época de nó, recibos assinados e restauração de backup verificável. Veja [API](docs/implementation/API.md), [contabilidade](docs/implementation/ACCOUNTING.md) e [cobertura real](docs/implementation/STATUS.md).
+The supplied model profile refers to the original lab's LM Studio model. On a different machine, follow [installation and model registration](docs/implementation/OPERATIONS.md) to publish and qualify your own exact artifact. An unavailable backend leaves inference unavailable; the launcher does not silently download or substitute a model.
 
-## A proposta
+The current application interface is in Brazilian Portuguese. Maintained repository documentation is in English; the UI language is reported explicitly so readers know what to expect. The [beginner walkthrough](docs/GETTING_STARTED.md) includes translations of navigation labels.
 
-Participantes poderão publicar ofertas de modelos e contribuir com GPUs compatíveis. A capacidade útil contratada e verificada gera **tokens de uso (TU)**, que permitem consumir inferência na rede. O projeto busca cooperação mesmo sem compradores em dinheiro; vender capacidade por API será uma atividade opcional, com contabilidade financeira separada.
+Use `pnpm lab:status` to inspect services and `pnpm lab:stop` to stop the managed application processes. The database and private configuration are retained. [API reference](docs/implementation/API.md) · [Operations and recovery](docs/implementation/OPERATIONS.md).
 
-GPUs e modelos diferentes exigem perfis diferentes. Uma GPU menor pode atender um modelo compatível, enquanto modelos grandes podem exigir um cluster próximo ou uma execução repartida que tenha sido validada. A soma da VRAM anunciada não demonstra que um modelo pode ser executado.
+## What has actually been demonstrated?
 
-Quando sobra capacidade utilizável em uma rota, limites temporários de uso podem aumentar. Esse benefício depende de compatibilidade, fila e orçamento real; não cria saldo permanente nem disponibilidade ilimitada.
+Evidence recorded on September 14, 2026:
 
-## O que já foi executado
-
-Resultados de 14/09/2026, com escopo e limitações registrados.
-
-| Frente | Evidência | Limite |
+| Workstream | Observed result | Boundary |
 |---|---|---|
-| Inferência local | 30/30 respostas visíveis corretas; TTFT p50 1,09 s e p95 1,87 s | Modelo comunitário Qwen3.8-27B/Q4 no LM Studio; GPU compartilhada |
-| Modelo repartido | BLOOM-560m em dois servidores CPU; 30 comparações com logits idênticos; retomada após falha em 5,50 s | Dois processos no mesmo computador; não é prova de WAN |
-| Transporte | libp2p/QUIC e Iroh/QUIC; rejeição de replay, identidade incorreta, peer não autorizado e payload excessivo | Loopback, identidades efêmeras |
-| Economia | 5.600 simulações de 90 dias; invariantes contábeis preservadas | Zero casos passaram em todos os critérios econômicos implementados |
-| Qwen3-8B | Artefatos oficiais verificados e cargas E01 preparadas | Inferência BF16 ainda não executada |
-| Kimi K3 | Cabeçalhos de seis shards e seis tensores de um expert carregados em CPU | Sem forward do expert ou inferência completa |
+| Private application | Real chat/API inference, signed nodes, transactional accounting, cancellation, outbox recovery, backup restoration | One physical host; trusted private coordinator |
+| Existing local model | 30/30 visible answers correct; first visible token p50 1.09 s, p95 1.87 s | Community `Qwen3.8-27B / Q4` in LM Studio on a shared RTX 4090 |
+| Split-model reference | BLOOM-560m across two CPU processes; 30 matching-logit comparisons and recovery after failure | Same host, separate harness; not a large-model WAN deployment |
+| Authenticated transport | libp2p/QUIC and Iroh/QUIC negative controls | Loopback, separate F0 harness |
+| Official Qwen3-8B | Artifacts verified and exact-token workloads prepared | BF16 inference not executed in the recorded campaign |
+| Kimi K3 inspection | Six expert tensors loaded into CPU memory | No expert computation or complete model inference |
+| Economy | 5,600 event simulations with preserved accounting invariants | Tested parameters rejected; no real market validation |
 
-**A reprovação econômica é um resultado central.** No cenário básico, a variante v6 concluiu 15,75% dos pedidos compatíveis com saldo na fase madura, abaixo da meta de 95%. Os parâmetros eram fictícios. Esse ensaio rejeita a configuração testada; não demonstra que toda forma de cooperação seja inviável. [Análise e dados](docs/execution/ECONOMY_V1_RESULTS.md).
+The 27B local model is a development reference. It does not demonstrate distributed execution of models above 27B. Larger-model qualification remains explicit work in the [roadmap](docs/planning/12_ROADMAP_AND_BACKLOG.md).
 
-A bancada possui 21 testes Python e dois testes Rust que passaram localmente. A automação deste repositório verifica código de bancada; testes sem GPU não qualificam hardware, fraude, privacidade ou operação pública.
+See [private-preview validation](docs/implementation/STATUS.md), [F0 evidence](docs/execution/README.md), and [open launch gates](docs/execution/GATES.md). Local automated checks and public GitHub CI do not certify a public inference network.
 
-## Desenho proposto
+## Find your way around the repository
 
-```mermaid
-flowchart LR
-    U[Consumidor] --> G[Gateway e fila]
-    G --> P[Seleção de rota compatível]
-    P --> N[Nó com modelo completo]
-    P --> C[Cluster próximo]
-    P --> B[Blocos entre participantes]
-    N --> V[Medição e verificação]
-    C --> V
-    B --> V
-    V --> L[Registro cooperativo de TU]
-    L --> G
-```
-
-Este é o desenho de destino. A v0.2 implementa identidade, catálogo e scheduler persistente em um coordenador privado. Consenso distribuído, operadores independentes, todos os modos de execução e faturamento comercial ainda exigem implementação e validação.
-
-## Executar a bancada F0
-
-Pré-requisitos da bancada: Python 3.12 e Rust 1.93.1. Os testes abaixo não baixam modelos nem exigem GPU.
-
-```bash
-git clone git@github.com:Dev-Encrypted/Network_AI.git
-cd Network_AI
-```
-
-No Windows/PowerShell:
-
-```powershell
-py -3.12 -m venv .venv
-.venv\Scripts\python -m pip install -e .
-.venv\Scripts\python -m unittest discover -s benchmarks/tests -v
-cargo test --locked
-```
-
-No Linux:
-
-```bash
-python3.12 -m venv .venv
-.venv/bin/python -m pip install -e .
-.venv/bin/python -m unittest discover -s benchmarks/tests -v
-cargo test --locked
-```
-
-Os passos para engines, inferência, transporte e simulação estão em [Reprodução](docs/execution/REPRODUCE.md). Pesos e runtimes são preparados separadamente, com suas próprias licenças. Os [artefatos da release F0](docs/publication/README.md) permitem conferir os experimentos completos.
-
-## Organização
-
-| Caminho | Conteúdo |
+| If you want to... | Read or inspect |
 |---|---|
-| [docs/ARTICLE.md](docs/ARTICLE.md) | Artigo: proposta, arquitetura, economia, resultados e lacunas |
-| [docs/README.md](docs/README.md) | Índice e sequência de leitura dos capítulos técnicos |
-| [docs/planning/](docs/planning/) | Pesquisa de 13/09/2026, preservada como corte histórico |
-| [docs/execution/](docs/execution/) | Medições, análise econômica, reprodução e critérios pendentes |
-| [benchmarks/python/](benchmarks/python/) | Harness HTTP, cargas, ledger experimental e simulador de eventos |
-| [benchmarks/scripts/](benchmarks/scripts/) | Preparação, execução, verificação e empacotamento |
-| [benchmarks/tests/](benchmarks/tests/) | Testes da bancada Python |
-| [crates/transport-bench/](crates/transport-bench/) | Bancada Rust de transporte autenticado |
-| [apps/](apps/) | Interface Next.js e controle NestJS/Fastify |
-| [crates/gateway/](crates/gateway/) · [crates/node/](crates/node/) | Gateway de inferência e agente Rust |
-| [packages/contracts/](packages/contracts/) | Manifestos, schemas e aritmética inteira compartilhados |
-| [infra/](infra/) | PostgreSQL isolado e migrações versionadas |
-| [scripts/](scripts/) · [tests/](tests/) | Operação do produto e testes de integração / navegador |
-| [docs/implementation/](docs/implementation/) | Contratos, operação e evidências da aplicação privada |
-| [outputs/explanations/](outputs/explanations/) | Ilustrações históricas com números hipotéticos |
+| Understand the idea without a systems background | [Getting started](docs/GETTING_STARTED.md), [glossary](docs/GLOSSARY.md) |
+| Understand the complete argument and its limitations | [Full article](docs/ARTICLE.md) |
+| Understand how larger models need more contributions | [Model scaling](docs/MODEL_SCALING.md) |
+| Study architecture, credits, security, and the roadmap | [English technical handbook](docs/planning/README.md) |
+| Operate the current application | [Private application guides](docs/implementation/README.md) |
+| Reproduce an experiment | [F0 reproduction](docs/execution/REPRODUCE.md), [benchmark code](benchmarks/README.md) |
+| Inspect frontend and control code | [apps/](apps/) |
+| Inspect the gateway and node agent | [crates/gateway/](crates/gateway/), [crates/node/](crates/node/) |
+| Inspect schemas, migrations, and operational scripts | [contracts](packages/contracts/), [infra](infra/), [scripts](scripts/) |
+| Check historical sources and preserved hashes | [Publication and archive provenance](docs/publication/README.md) |
 
-## Próximos critérios de avanço
+## Contribute and credit the author
 
-1. Executar Qwen3-8B em GPU disponível e em um segundo host físico.
-2. Revisar cobertura, demanda financiada e circulação por grupo; validar novos parâmetros com novas sementes.
-3. Medir LAN/WAN, NAT, relay, outras GPUs e restauração de sessões.
-4. Expandir a persistência e a verificação locais para operadores independentes e continuidade distribuída.
-5. Concluir os pilotos e o custeio antes de abrir a operação cooperativa ou comercial.
+Useful contributions include additional hardware profiles, reproducible large-model experiments, fault recovery, engine adapters, and economic studies with independently reserved validation data. Identify a specific problem and measurable acceptance criterion. Start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Consulte os [gates FC01–FC06](docs/execution/GATES.md) e o [plano operacional v6](docs/planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md). TU é uma unidade de uso proposta, não uma criptomoeda lançada ou uma promessa de retorno financeiro.
-
-## Autoria, contribuição e licenças
-
-O projeto foi concebido e dirigido por **Dev-Encrypted**. Consulte [AUTHORS.md](AUTHORS.md), [NOTICE](NOTICE) e [CITATION.cff](CITATION.cff) para atribuição. A implementação foi produzida com assistência de ferramentas de IA; os resultados indicam o que foi efetivamente verificado.
-
-Código original sob [Apache 2.0](LICENSE). Artigo e documentação originais sob [CC BY 4.0](LICENSES/CC-BY-4.0.txt). Componentes, metadados e modelos de terceiros mantêm seus termos: [escopo das licenças](docs/LICENSING.md) e [referências de terceiros](THIRD_PARTY_NOTICES.md).
-
-Contribuições seguem [CONTRIBUTING.md](CONTRIBUTING.md). Relatos de segurança seguem [SECURITY.md](SECURITY.md).
+Original code is licensed under [Apache 2.0](LICENSE). Original article and documentation text are licensed under [CC BY 4.0](LICENSES/CC-BY-4.0.txt). Attribute **Dev-Encrypted** and preserve applicable notices. Third-party models, libraries, and evidence retain their own terms. [Authorship](AUTHORS.md) · [License scope](docs/LICENSING.md) · [Third-party notices](THIRD_PARTY_NOTICES.md) · [Security reporting](SECURITY.md).

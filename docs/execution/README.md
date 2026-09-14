@@ -1,42 +1,48 @@
-# Execução do planejamento
+# F0 research execution and observed results
 
-Iniciada em 14/09/2026 por solicitação do usuário. A autorização atual permite implementação e validação locais. Os ZIPs de planejamento anteriores permanecem imutáveis.
+The F0 campaign began on September 14, 2026. It covers artifact preparation, local inference, economic simulation and authenticated transport experiments. The later [private v0.2 application](../implementation/README.md) is a separate implementation increment.
 
-O trabalho começa pela F0: inventário, resolução de artefatos, harness de medição, simulação econômica v6 e transporte autenticado. A existência de código ou testes de loopback não encerra os critérios que exigem GPU isolada, dois hosts, operadores independentes ou pilotos de 7/30 dias.
+The observed host had an RTX 4090 with about 24 GiB of VRAM, an Intel i9-14900K, roughly 128 GiB of RAM, Windows and Ubuntu/WSL2. The GPU was shared with an existing LM Studio model. Two local processes or WSL environments do not constitute two physical hosts.
 
-Estado inicial observado: RTX 4090 de 24 GB, Intel i9-14900K, aproximadamente 128 GB de RAM, Windows com Ubuntu/WSL2, Python 3.12 disponível, Node 24 e Rust instalados. A GPU está compartilhada com um modelo previamente carregado no LM Studio. Essa sessão não será encerrada como efeito colateral da bancada.
+## Results and limits
 
-**Entregue neste incremento: bancada F0 executável e evidências locais. O planejamento completo ainda não foi executado.** As afirmações de “não executado” do ZIP v6 descrevem o corte histórico de 13/09; este diretório registra os resultados posteriores.
-
-| Frente | Resultado observado | Limite do resultado |
+| Workstream | Observed result | Boundary |
 |---|---|---|
-| Inferência local existente | 30/30 respostas esperadas; TTFT visível p50 1,09 s, p95 1,87 s | Modelo comunitário Qwen3.8-27B/Q4 no LM Studio, GPU compartilhada; não qualifica Qwen3-8B BF16 |
-| Qwen3-8B oficial | 14 arquivos baixados e verificados; 16,38 GB de pesos; vLLM 0.29.0 instalado e CUDA/BF16 reconhecidos | Lançamento na GPU aguarda memória livre; o modelo existente foi preservado |
-| Cargas E01 | 66 fixtures, incluindo warmups, com entradas exatas de 2.048 e 7.168 tokens | Inferência dessas cargas ainda não executada |
-| Transporte | libp2p 0.57.0 e Iroh 1.2.0 compilados e exercitados, inclusive builds release | Loopback; falta matriz NAT, relay e dois hosts reais |
-| Blocos Petals | BLOOM-560m dividido em dois servidores CPU, paridade de logits e geração; falha e reinício exercitados | Dois processos no mesmo computador; não demonstra Kimi ou WAN |
-| Kimi K3 | Seis cabeçalhos de shards inspecionados; seis tensores de um expert carregados em CPU, 17.547.264 bytes | Não houve execução do expert, dequantização, kernel GPU ou inferência completa |
-| Economia v6 | 5.600 execuções de 90 dias, com 20 sementes de calibração e 50 de validação | Configuração fictícia reprovada; nenhum crédito real |
+| Existing local inference | 30/30 expected visible answers; visible TTFT p50 1.09 s, p95 1.87 s | Community `Qwen3.8-27B / Q4` in LM Studio; shared GPU; not official Qwen3-8B BF16 |
+| Official Qwen3-8B | Fourteen files verified; 16.38 GB of weights; vLLM 0.29.0 prepared with CUDA/BF16 recognized | GPU launch not executed in the recorded campaign |
+| E01 workloads | Sixty-six exact-token fixtures, including warmups, at 2,048 and 7,168 input tokens | Prepared workloads, not completed BF16 inference |
+| Transport | libp2p 0.57.0 and Iroh 1.2.0 exercised in release builds | Loopback; physical-host, NAT and relay matrix remains pending |
+| Petals blocks | BLOOM-560m on two CPU servers, matching logits/generation, failure and restart exercised | Two processes on one host; no Kimi or WAN qualification |
+| Kimi K3 inspection | Six shard headers and six expert tensors loaded into CPU memory, 17,547,264 payload bytes | No dequantization, expert forward, GPU kernel or full inference |
+| Economy | 5,600 simulated 90-day cases, with 20 calibration and 50 holdout seeds | Fictional settings rejected; no real credit or payment issued |
 
-O resultado econômico é material: **contabilidade correta não bastou para manter a operação.** No cenário básico, a v6 entregou 15,75% dos pedidos compatíveis com saldo na fase madura, abaixo da meta de 95%. A cobertura contratada e o consumo por grupo não sustentaram a circulação. Consulte o [resultado econômico e suas causas](ECONOMY_V1_RESULTS.md).
+The project's recommended focus is **models above 27B**. These experiments are development references and partial evidence toward that goal, not a completed distributed larger-model service.
 
-Os testes locais incluem 21 testes Python e dois testes Rust, além das execuções reais. `cargo clippy --locked --all-targets -- -D warnings` passou. Quatro testes HTTP adicionais verificam contadores divergentes, stream incompleto e modelo não anunciado nas cargas E01. Isso cobre a bancada e suas invariantes; não equivale a auditoria de uma rede pública.
+## Economic outcome
 
-## Evidências principais
+Accounting consistency did not sustain the tested service. In the baseline, candidate v6 completed 15.75% of compatible funded demand during maturity, below the 95% target. Contracted coverage and cohort consumption did not keep enough TU circulating. No run passed every implemented economic gate. [Results and causes](ECONOMY_V1_RESULTS.md).
 
-- [Inferência LM Studio](../../benchmarks/runs/2026-09-14-lmstudio-visible-256/report.json), [fingerprints de pesos e backend](evidence/lmstudio-fingerprints.json).
-- [Artefatos Qwen3-8B](evidence/qwen3-8b-artifacts.json), [fixtures E01](evidence/e01-fixtures.json), [inventário físico](evidence/hardware-inventory.json).
-- [Transporte release](../../benchmarks/runs/2026-09-14-transport-loopback-release/report.json).
-- [Petals com falha e retomada](../../benchmarks/runs/2026-09-14-petals-private-cpu-v5-recovery/report.json).
-- [Kimi: inspeção](evidence/kimi-k3/inspection.json) e [carregamento parcial CPU](evidence/kimi-k3/cpu-unit-load.json).
-- [Economia: resumo e verificação das 5.600 execuções](evidence/economy-v1-summary.json).
-- [Verificação de integridade e coerência](evidence/execution-validation.json) e [preflight da GPU](evidence/vllm-preflight.json).
-- [Comandos de reprodução](REPRODUCE.md) e [gates ainda abertos](GATES.md).
+The F0 automated bench includes 21 Python tests and two Rust tests. Some checks cover inconsistent HTTP usage, incomplete streams and unavailable fixture models. Their passing scope is code behavior and stated invariants, not public fraud, privacy or operational qualification.
 
-O primeiro smoke LM Studio, limitado a 64 tokens, foi preservado: dez respostas ficaram truncadas no raciocínio. A medição inicial misturava raciocínio e conteúdo visível; seus tempos não devem ser apresentados como TTFT visível. O run de 256 tokens usa a separação correta. Três tentativas iniciais de integrar o cliente Petals também foram preservadas com seus erros de API; os runs v4/v5 seguintes demonstram o resultado corrigido.
+## Evidence links
 
-O Petals foi mantido como referência isolada. Foram observados um `assert` de retomada sempre verdadeiro no upstream e um símbolo de otimizador ausente na biblioteca CPU do bitsandbytes. O teste não usa treinamento/quantização nem qualifica retomada por metadados arbitrários. Esses pontos continuam bloqueando uma adoção pública sem revisão adicional.
+- [Corrected LM Studio run](../../benchmarks/runs/2026-09-14-lmstudio-visible-256/report.json) and [artifact/backend fingerprints](evidence/lmstudio-fingerprints.json).
+- [Official Qwen artifacts](evidence/qwen3-8b-artifacts.json), [E01 fixture manifest](evidence/e01-fixtures.json), [physical inventory](evidence/hardware-inventory.json).
+- [Release transport report](../../benchmarks/runs/2026-09-14-transport-loopback-release/report.json).
+- [Petals failure and recovery](../../benchmarks/runs/2026-09-14-petals-private-cpu-v5-recovery/report.json).
+- [Kimi inspection](evidence/kimi-k3/inspection.json) and [partial CPU load](evidence/kimi-k3/cpu-unit-load.json).
+- [Economic summary and 5,600-run verification](evidence/economy-v1-summary.json).
+- [Historical consistency report](evidence/execution-validation.json) and [GPU preflight](evidence/vllm-preflight.json).
+- [Reproduction](REPRODUCE.md), [open gates](GATES.md), and [release artifacts](../publication/README.md).
 
-O pacote `NETWORK_AI_EXECUCAO_F0_2026-09-14_v1.zip` reúne fontes, fixtures, testes, relatórios, resultados brutos e os seis planejamentos históricos. Seu manifesto contém tamanho e SHA-256 de cada arquivo. Pesos, ambientes instalados e caches de compilação ficam fora do ZIP; sua preparação usa os scripts e locks incluídos. A reprodução em uma instalação limpa ainda não foi executada.
+## Failed attempts remain visible
 
-No incremento F0 registrado acima, não houve publicação, deploy, commit, push, alteração de firewall, desligamento de aplicações do usuário, emissão de TU ou movimentação financeira. A publicação posterior do código e do artigo no GitHub está documentada em [Publicação](../publication/README.md) e não equivale à abertura da rede de inferência.
+The first LM Studio smoke used a 64-token output limit and truncated ten answers during reasoning. Its timing also mixed reasoning with visible content. Do not present that run's timing as visible-answer TTFT. The corrected 256-token run separates these fields.
+
+Initial Petals integration attempts and their API errors remain preserved. Later v4/v5 runs demonstrate the corrected result. The reference environment also exposed an always-true recovery assertion in upstream code and an absent optimizer symbol in the CPU bitsandbytes library. The experiment did not use training/quantization or qualify arbitrary recovery metadata.
+
+## Reproducibility boundary
+
+The immutable F0 ZIP includes sources, fixtures, tests, reports, raw economic results and six planning archives. It excludes weights, installed environments and build caches. The old aggregate runtime installer was not fully exercised on a clean machine in the original campaign.
+
+Public GitHub publication does not open the inference network. Historical records keep their original bytes and language; maintained English explanations identify what they support. [Publication and provenance](../publication/README.md).

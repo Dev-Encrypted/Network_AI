@@ -1,35 +1,41 @@
-# Contribuir com o NETWORK AI
+# Contributing to NETWORK AI
 
-O projeto está em pesquisa e bancada F0. Comece pelos [resultados](docs/execution/README.md) e [critérios pendentes](docs/execution/GATES.md). Preserve a reprovação econômica e o histórico que a sustenta.
+NETWORK AI includes F0 research and an executable private inference application. The recommended focus is models above 27B parameters, with qualified smaller profiles supporting participation and controlled experiments. Start with [implementation status](docs/implementation/STATUS.md), [research results](docs/execution/README.md), and [open gates](docs/execution/GATES.md).
 
-## Fluxo
+## Contribution workflow
 
-1. Descreva problema, hipótese e critério de aceite em uma issue ou pull request.
-2. Faça uma alteração delimitada. Use diretórios novos para novos experimentos.
-3. Execute testes apropriados e informe ambiente, comandos, resultado e limitações.
-4. Explique efeitos sobre contratos, consumo, falhas e compatibilidade.
+1. Describe the problem, hypothesis, affected contract and measurable acceptance criterion in an issue or pull request.
+2. Keep the change scoped. Use a new directory and version for a new experiment.
+3. Run checks appropriate to the change and record environment, commands, outcomes and limitations.
+4. Explain effects on compatibility, resource usage, accounting, failure handling and user behavior.
 
-Após instalar o pacote conforme [Reprodução](docs/execution/REPRODUCE.md):
+Use English for maintained documentation, public contribution descriptions and release notes. Define technical terms for new readers. Preserve exact protocol identifiers and historical evidence rather than translating hash-bound fixtures. [Language policy](docs/LANGUAGE.md).
 
-```bash
-python -m unittest discover -s benchmarks/tests -v
-cargo fmt --all -- --check
-cargo test --locked
-cargo clippy --locked --all-targets -- -D warnings
-```
+## Validation by change type
 
-Medições de GPU e de rede física não são executadas pela automação básica.
+| Change | Relevant checks |
+|---|---|
+| Documentation | `python benchmarks/scripts/verify_repository.py`; inspect links, formulas, code fences and evidence scope |
+| Python bench | `python -m unittest discover -s benchmarks/tests -v` |
+| Rust | `cargo fmt --all -- --check`, `cargo test --locked`, `cargo clippy --locked --all-targets -- -D warnings` |
+| Private application | `pnpm typecheck`, build with managed services stopped, PostgreSQL integration and affected browser journeys |
+| Real inference or recovery | The relevant live acceptance script on a qualified backend, with no unrelated active sessions |
+| Historical consistency | Restore assets, then `python benchmarks/scripts/verify_execution.py --check` |
 
-## Evidência
+A GPU-free CI run does not qualify GPUs, WAN, malicious operators or the economics. The [operator guide](docs/implementation/OPERATIONS.md) explains which tests restart services and which require the actual model.
 
-Separe medição, simulação e projeção. Declare revisão do modelo, engine, driver, contexto, concorrência e número de hosts. Um erro corrigido exige execução nova; não substitua o resultado anterior para aparentar sucesso.
+## Evidence standards
 
-Políticas ajustadas após observar o holdout precisam de novas sementes de validação. Mantenha recusas elegíveis no denominador do SLO e exponha saldos retidos, compromissos e fluxos entre grupos.
+Separate measurement, arithmetic, simulation and projection. Record model revision, engine, driver, precision, context, concurrency, topology and physical host count. A corrected error needs a new run; do not overwrite an earlier failure to make it appear successful.
 
-Não envie credenciais, prompts de terceiros, dados pessoais, pesos ou ambientes instalados. Artefatos grandes de pesquisa vão para releases com seus hashes.
+A larger model or additional contributors require measured complete-route capacity. Do not use an idealized memory lower bound as proof that an engine supports a partition or that residential links meet the intended latency.
 
-## Direitos das contribuições
+Preserve the rejected F0 economic outcome. Policies adjusted after observing holdout results need new validation seeds. Keep compatible capacity refusals in the service denominator and expose cohort liquidity, held balances, future commitments and recurring funding sources.
 
-Envie apenas material que você pode licenciar. Código original segue Apache 2.0; texto original segue CC BY 4.0. Preserve avisos de terceiros e informe a origem. Ao enviar uma contribuição para inclusão, você a oferece sob a licença correspondente, sem cessão automática de titularidade ao mantenedor.
+Do not commit credentials, third-party private prompts, personal data, model weights or installed runtime environments. Large research artifacts belong in versioned releases with hashes.
 
-O responsável pela direção é [Dev-Encrypted](AUTHORS.md). Relatos de segurança seguem [SECURITY.md](SECURITY.md).
+## Contribution rights
+
+Submit only material you have the right to license. Original code uses Apache 2.0; original prose uses CC BY 4.0. Preserve third-party notices and describe provenance. A contribution offered for inclusion is provided under the applicable project license without automatically assigning ownership to the maintainer.
+
+Project direction and attribution remain with [Dev-Encrypted](AUTHORS.md). Security reports follow [SECURITY.md](SECURITY.md).

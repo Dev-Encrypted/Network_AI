@@ -1,32 +1,34 @@
-# Licenças, atribuição e escopo
+# Licenses, attribution, and scope
 
-O responsável pelo NETWORK AI é **Dev-Encrypted**. As licenças abaixo se aplicam somente aos direitos sobre material original que o responsável pode licenciar.
+The project author and director is **Dev-Encrypted**. These licenses apply only to original material the author is entitled to license. Third-party terms remain separate.
 
-| Material | Licença |
+| Material | License |
 |---|---|
-| Código original em `benchmarks/`, `crates/`, scripts e configurações próprios | [Apache License 2.0](../LICENSE) |
-| Texto original do artigo, README, guias e documentação Markdown | [Creative Commons Attribution 4.0 International](../LICENSES/CC-BY-4.0.txt) |
-| Dados sintéticos e relatórios originais da bancada | Apache License 2.0, na medida dos direitos licenciáveis |
-| Engines, bibliotecas, modelos e material upstream reproduzido como evidência | Termos do respectivo titular; ver [terceiros](../THIRD_PARTY_NOTICES.md) |
+| Original application, benchmark, Rust, script and configuration code | [Apache License 2.0](../LICENSE) |
+| Original article, README, guides and Markdown prose | [Creative Commons Attribution 4.0 International](../LICENSES/CC-BY-4.0.txt) |
+| Original synthetic data and benchmark reports | Apache License 2.0 to the extent applicable rights can be licensed |
+| Engines, libraries, models and reproduced upstream evidence | Their respective rights holders' terms; see [third-party notices](../THIRD_PARTY_NOTICES.md) |
 
-Trechos de código originais na documentação seguem Apache 2.0; o texto explicativo segue CC BY 4.0. Os arquivos de licença prevalecem sobre este resumo.
+Original code examples embedded in documentation use Apache 2.0; surrounding explanatory prose uses CC BY 4.0. The full license texts govern over this summary.
 
-## Atribuição
+## Attribution
 
-Preserve os avisos aplicáveis de copyright, autoria e licença ao redistribuir código, incluindo o [NOTICE](../NOTICE) conforme Apache 2.0. Para compartilhar ou adaptar o artigo, atribua **Dev-Encrypted**, forneça o link da licença e indique alterações conforme CC BY 4.0. Exemplo:
+Preserve applicable copyright, authorship and license notices when redistributing code, including [NOTICE](../NOTICE) as required by Apache 2.0. When sharing or adapting the article, attribute **Dev-Encrypted**, link the license and indicate changes under CC BY 4.0. Example:
 
-> Dev-Encrypted. NETWORK AI: uma rede cooperativa de inferência com GPUs heterogêneas. Versão de 14/09/2026. https://github.com/Dev-Encrypted/Network_AI. CC BY 4.0.
+> Dev-Encrypted. NETWORK AI: cooperative inference for models beyond one computer. English edition, September 14, 2026. Original repository: https://github.com/Dev-Encrypted/Network_AI. CC BY 4.0.
 
-Não apresente um derivado como publicação oficial ou endosso do autor. A licença Apache não concede uso de nomes e marcas além das exceções previstas em seu texto. Este documento não afirma que exista registro de marca.
+Do not present a derivative as an official publication or author endorsement. Apache 2.0 provides only the name/trademark permissions stated in its text. This document does not claim a registered trademark.
 
-## Continuidade comercial
+## Ownership and future commercial continuity
 
-Essas licenças não transferem a titularidade do material original. Concedem permissões, inclusive comerciais, nos respectivos termos. Uma mudança futura de licença ou de titular não deve ser apresentada como revogação das permissões das versões já publicadas.
+These licenses grant permissions, including commercial permissions under their terms; they do not transfer ownership of the original material. A future change of license or ownership does not revoke permissions already granted for published versions under those terms.
 
-Contribuições de terceiros mantêm sua própria titularidade e procedência. Não há cessão automática ou presunção de direito de relicenciar contribuições sob condições incompatíveis. Uma eventual aquisição precisa considerar esse histórico e os direitos das dependências.
+Third-party contributions keep their own ownership and provenance. There is no automatic assignment or assumed ability to relicense incompatible contributions. A potential acquisition needs to account for that history and dependency rights; publishing this project does not guarantee any future transaction.
 
-## Snapshots anteriores
+## Historical snapshots and English edition
 
-Os ZIPs históricos não foram reescritos para inserir avisos posteriores, preservando seus hashes. A aplicação atual de Apache 2.0 ao código original e CC BY 4.0 ao texto original abrange também esses materiais originais nos pacotes disponibilizados pelo responsável nesta publicação. Isso não altera os termos de terceiros.
+Original ZIPs were not rewritten to insert later notices, preserving their hashes. The approved Apache 2.0 and CC BY 4.0 grants also cover the corresponding original material in the published historical packages. They do not replace third-party terms.
 
-Textos oficiais: [Apache](https://www.apache.org/licenses/LICENSE-2.0) e [Creative Commons](https://creativecommons.org/licenses/by/4.0/). Este resumo não substitui a análise dos direitos específicos de uma futura transação.
+The maintained English edition keeps the same attribution and license scope. Source provenance is documented in [publication](publication/README.md).
+
+Official texts: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) and [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). This summary does not replace an assessment of the specific rights in a future transaction.

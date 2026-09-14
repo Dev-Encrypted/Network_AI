@@ -1,20 +1,22 @@
-# Segurança
+# Security policy
 
-O NETWORK AI é uma bancada de pesquisa. Os serviços demonstrados têm escopo local ou privado; não houve auditoria completa de rede pública. Os relatórios não autorizam expor os harnesses como serviço de produção.
+NETWORK AI currently provides a private inference application and research benches. Their validation scope is local or private; no complete public-network security qualification has been performed. The loopback deployment is not a public production configuration.
 
-## Relatar um problema
+## Report a vulnerability
 
-Use **Security → Report a vulnerability** no [repositório oficial](https://github.com/Dev-Encrypted/Network_AI/security). Se a opção estiver indisponível, abra uma issue solicitando um canal reservado, sem divulgar credenciais, dados pessoais ou passos de exploração sensíveis.
+Use **Security → Report a vulnerability** in the [official repository](https://github.com/Dev-Encrypted/Network_AI/security) when that option is available. Otherwise, open an issue requesting a private reporting channel without posting credentials, personal data or sensitive exploitation details.
 
-Informe versão ou commit, componente, ambiente, impacto e reprodução mínima. Não teste nós de terceiros sem autorização. Não há prazo contratual de resposta ou programa de recompensa nesta fase.
+Include version/commit, component, environment, impact and minimal reproduction. Test only systems you are authorized to assess. There is no contractual response SLA or bounty program at this stage.
 
-## Limites conhecidos
+## Known boundaries
 
-- Identidades de transporte não provam identidade humana, exclusividade de GPU ou correção de inferência.
-- A proteção de replay é efêmera; não demonstra persistência após reinício.
-- Cancelamento de aplicação libp2p ainda não foi implementado.
-- Desconexão HTTP não prova liberação interna de recursos da engine.
-- O Petals de referência tem limitações upstream registradas no [relatório](docs/execution/README.md).
-- Criptografia em trânsito não garante sigilo contra quem executa a inferência.
+- Node or transport signatures authenticate messages, not unique people, physical GPUs, honest token counts or correct inference.
+- The private product persists nonces and uses node epochs. The separate F0 transport bench uses ephemeral replay state; its results do not prove persistence through restart.
+- Application-level libp2p cancellation is not implemented in the F0 harness.
+- Disconnecting an HTTP request does not independently prove the engine reclaimed internal GPU resources.
+- The Petals reference has upstream integration limits recorded in [F0 results](docs/execution/README.md).
+- Encryption in transit does not hide content from the operator executing it.
+- The PostgreSQL owner and private administrator remain trusted; runtime-role protections are not distributed consensus.
+- Public anti-Sybil, work verification, independent operators and larger-model route recovery require separate qualification.
 
-Consulte os [gates](docs/execution/GATES.md). Uma revisão de arquivos para publicação não equivale a auditoria do produto.
+See [private trust boundaries](docs/implementation/ACCOUNTING.md), [security design](docs/planning/08_SECURITY_AND_TRUST.md), and [launch gates](docs/execution/GATES.md). Reviewing publication files or translating documentation is not a product security audit.

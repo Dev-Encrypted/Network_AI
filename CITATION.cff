@@ -1,7 +1,7 @@
 cff-version: 1.2.0
-message: "Ao citar o NETWORK AI, atribua Dev-Encrypted e informe a versão ou o commit consultado."
+message: "When citing NETWORK AI, credit Dev-Encrypted and identify the consulted version or commit."
 type: software
-title: "NETWORK AI: pesquisa e aplicação privada de inferência cooperativa"
+title: "NETWORK AI: cooperative inference for models beyond one computer"
 authors:
   - family-names: "Dev-Encrypted"
     website: "https://github.com/Dev-Encrypted"
@@ -15,9 +15,12 @@ keywords:
   - decentralized AI
   - cooperative computing
   - heterogeneous GPUs
-  - token economy
+  - large language models
+  - usage tokens
 abstract: >-
-  Pesquisa, bancada F0 e aplicação privada com gateway, nós e contabilidade
-  de laboratório para inferência com GPUs heterogêneas. Inclui evidências locais
-  e um estudo econômico que rejeitou os parâmetros fictícios testados.
-  Não é uma rede pública operacional.
+  Research, an F0 benchmark suite, and a private inference application with
+  signed nodes and transactional laboratory credits. The project prioritizes
+  models above 27 billion parameters and documents memory, hardware, and
+  communication requirements for contributed capacity. Includes local evidence
+  and an economic study that rejected the fictional parameters tested.
+  It is not an operational public decentralized network.

@@ -1,4 +1,4 @@
-name: Bancada e produto privado
+name: Research bench and private application
 
 on:
   push:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   python:
-    name: Python e documentação
+    name: Python and documentation
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -39,7 +39,7 @@ jobs:
       - run: cargo +1.93.1 clippy --locked --all-targets -- -D warnings
 
   product:
-    name: Produto privado e PostgreSQL
+    name: Private application and PostgreSQL
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:

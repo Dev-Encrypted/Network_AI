@@ -1,82 +1,122 @@
-# Contratos da aplicação privada
+# Private API and node protocol
 
-Versão do protocolo: `network-ai.private.v1`. Todos os exemplos pressupõem o perfil local. Nomes de campo, estados e erros são estáveis dentro desta versão privada; ainda podem mudar antes de uma versão pública estável.
+Protocol: `network-ai.private.v1`. All addresses below refer to the local private profile. Fields, states and errors are defined for this private version and may change before a stable public API.
 
-## Autenticação e metadados
+## Authentication
 
-A API de controle começa em `http://127.0.0.1:43101/api/v1`. Chaves `nai_…` usam `Authorization: Bearer <chave>`. São armazenadas como SHA-256, com prefixo para identificação, e retornadas por inteiro somente na criação. Login usa scrypt e cookie HttpOnly, SameSite=Strict, com duração de 12 horas. O cookie é HTTP apenas porque o perfil obriga loopback; mutações por cookie exigem a origem exata da interface.
+Control base URL: `http://127.0.0.1:43101/api/v1`. Personal keys use `Authorization: Bearer <key>`, have an `nai_` prefix, are stored as SHA-256 digests, and are returned in full only when created. Key identifiers and prefixes support later inspection and revocation.
 
-| Método | Rota | Autorização / função |
+Login verifies a scrypt password hash and creates a 12-hour HttpOnly, SameSite=Strict cookie. HTTP cookies are limited to this mandatory loopback profile. Cookie-authenticated mutations require the exact interface origin. Do not carry this local transport configuration into a public deployment.
+
+## Control endpoints
+
+| Method | Route | Authorization and purpose |
 |---|---|---|
-| POST | `/auth/login`, `/auth/logout` | Entrar e sair; limite específico de tentativas de login |
-| GET | `/me` | Identidade da conta autenticada |
-| GET / POST | `/models` | Catálogo com disponibilidade / publicar candidato |
-| POST | `/quotes` | Cotação com reserva máxima e expiração em 60 s |
-| GET | `/wallet` | Saldos e até 100 linhas recentes da própria conta |
-| GET | `/sessions`, `/sessions/:id` | Até 100 sessões próprias / detalhes e eventos |
-| POST | `/sessions/:id/cancel` | Cancelamento de sessão própria |
-| GET / POST | `/keys` | Listar / criar chave da própria conta |
-| DELETE | `/keys/:id` | Revogar chave própria |
-| GET | `/nodes` | Nós do operador; administrador vê todos |
-| POST | `/nodes/:id/state` | Operador ou administrador: READY, PAUSED ou REVOKED |
-| GET / POST | `/admin/users` | Administrador: listar / criar usuário com saldo zero |
-| POST | `/admin/grants` | Administrador: concessão explícita LAB_TU |
-| GET / POST | `/admin/domains` | Administrador: domínio e slots físicos |
-| POST | `/admin/node-invites` | Administrador: convite de 24 h, uso único |
-| POST | `/admin/models/:id/qualify` | Administrador: habilitar teste local ou revogar |
-| GET | `/admin/metrics` | Contagens e soma do ledger |
+| POST | `/auth/login`, `/auth/logout` | Sign in/out; login has a dedicated attempt limit |
+| GET | `/me` | Current authenticated account |
+| GET / POST | `/models` | Catalog and availability / submit immutable candidate |
+| POST | `/quotes` | Maximum cost quote, valid for 60 seconds |
+| GET | `/wallet` | Own balances and up to 100 recent entries |
+| GET | `/sessions`, `/sessions/:id` | Up to 100 own sessions / details and events |
+| POST | `/sessions/:id/cancel` | Cancel an owned session |
+| GET / POST | `/keys` | List/create own personal keys |
+| DELETE | `/keys/:id` | Revoke own key |
+| GET | `/nodes` | Operator's nodes; administrators see all |
+| POST | `/nodes/:id/state` | Owner/admin sets READY, PAUSED or REVOKED |
+| GET / POST | `/admin/users` | Administrator lists/creates users, initially at zero balance |
+| POST | `/admin/grants` | Administrator issues an explicit LAB_TU grant |
+| GET / POST | `/admin/domains` | Administrator manages physical capacity domains |
+| POST | `/admin/node-invites` | Administrator creates a one-use 24-hour invitation |
+| POST | `/admin/models/:id/qualify` | Administrator enables local testing or revokes qualification |
+| GET | `/admin/metrics` | Administrator reads counts and ledger sum |
 
-O manifesto e os schemas executáveis estão em [contracts](../../packages/contracts/src/index.ts). O manifesto não pode ser editado sob o mesmo ID. Uma revisão diferente exige outro identificador. A marcação de qualificação muda sem substituir o conteúdo do manifesto, com evento de auditoria.
+The executable [shared contract](../../packages/contracts/src/index.ts) defines request bodies. A model manifest cannot change under the same ID. Another revision needs another identifier. Qualification state can change separately, with an audit event.
 
-## Inferência
+### Model manifest fields
 
-Gateway: `http://127.0.0.1:43102/v1`. `GET /models` retorna apenas modelos utilizáveis. `POST /chat/completions` aceita o subconjunto de texto:
+| Fields | Meaning |
+|---|---|
+| `schema_version`, `model_id`, `display_name` | Schema and immutable profile identity |
+| `backend_model`, `revision`, `artifact_sha256` | Exact configured backend ID and artifact claim |
+| `license_id`, `source_url` | License identifier and HTTPS source |
+| `modality`, `trust_policy` | Currently `text` and `private_lab` |
+| `max_context_tokens`, `max_output_tokens`, `max_input_bytes` | Bounded request envelope |
+| `input_rate_microtu`, `output_rate_microtu`, `rate_denominator` | Integer price fields |
+| `description` | Operator-provided profile explanation |
+
+Amount fields are decimal strings to preserve integer precision. A recorded hash is not independent proof that an unknown backend loaded the claimed model. Administrator qualification supplies the current private trust decision.
+
+## Inference endpoint
+
+Gateway base URL: `http://127.0.0.1:43102/v1`. Authenticated `GET /models` exposes usable profiles. `POST /chat/completions` accepts this text subset:
 
 ```json
 {
   "model": "qwen-local",
-  "messages": [{"role": "user", "content": "Olá!"}],
+  "messages": [{"role": "user", "content": "Hello!"}],
   "max_tokens": 128,
   "temperature": 0.7,
   "stream": true
 }
 ```
 
-Campos opcionais: `top_p`, `stop`, `n: 1`, `stream_options.include_usage`. Papéis: `system`, `user`, `assistant`, todos com conteúdo string. Campos desconhecidos, ferramentas, arquivos, imagens e múltiplas escolhas são rejeitados. Limite HTTP: 128 KiB; até 64 mensagens, respeitando o limite menor do manifesto. O envelope conservador usa bytes UTF-8 e margem por mensagem; não é um tokenizer independente certificado.
+`qwen-local` is the original lab profile. Use your own qualified ID on another installation. The network's above-27B focus does not mean this endpoint automatically distributes a model among nodes.
 
-Envie `Idempotency-Key` para identificar a tentativa. Sem esse cabeçalho, cada chamada recebe uma identidade nova. A cotação é automática; `X-Quote-Id` permite usar uma cotação previamente criada para o mesmo modelo e limite. A resposta inclui `X-Network-AI-Session-Id`.
+Optional fields include `top_p`, `stop`, `n: 1` and `stream_options.include_usage`. Message roles are `system`, `user` and `assistant`, with string content. Unknown fields, tools, files, images and multiple choices are rejected. The HTTP body limit is 128 KiB and the request supports at most 64 messages, subject to the tighter manifest envelope.
 
-Com streaming, o gateway envia SSE de texto e eventos nomeados `network_ai_status` e `network_ai_receipt`; clientes devem ignorar eventos desconhecidos. `[DONE]` indica conclusão do fluxo da engine. `receipt_pending` informa que a liquidação ainda aguarda o controle. Consulte a sessão para confirmar o estado contábil. Uma resposta parcialmente entregue pode terminar com `error`; conteúdo recebido não equivale a uma sessão concluída.
+The conservative input guard uses UTF-8 bytes and a per-message margin. It is not a certified independent tokenizer. Usage for settlement is reported by the configured engine and checked against the authorized envelope.
 
-Sem streaming, o gateway monta uma resposta `chat.completion` com `usage` e `network_ai.session_id`. Este é um subconjunto compatível de Chat Completions, sem suporte completo a todas as APIs ou opções de SDKs.
+### Request identity and quote
 
-Repetir o mesmo identificador e bytes de requisição retorna HTTP 409 com a sessão existente, sem nova inferência nem cobrança. Alterar o corpo com o mesmo identificador também é conflito. Como respostas não são retidas, esse comportamento não permite recuperar conteúdo anterior. A idempotência pertence à conta inteira, inclusive entre suas chaves de API.
+Send `Idempotency-Key` for a stable logical request identity. Without it, each call obtains a new identity. Quoting is automatic; `X-Quote-Id` can select a previously created quote for the same model/output limit. Responses include `X-Network-AI-Session-Id`.
 
-## Estados e transações
+Example for a shell where `NETWORK_AI_API_KEY` already contains a privately created key:
+
+```bash
+curl http://127.0.0.1:43102/v1/chat/completions \
+  -H "Authorization: Bearer $NETWORK_AI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: first-example-request" \
+  -d '{"model":"qwen-local","messages":[{"role":"user","content":"Hello!"}],"max_tokens":128,"stream":false}'
+```
+
+Repeating the same account/key identity and request bytes returns HTTP 409 with the existing session, without new inference or charge. Reusing the key with a different body is also a conflict. The idempotency namespace belongs to the account across all its API keys. Answer bodies are not retained, so this does not recover a previous response.
+
+### Streaming and completion
+
+Streaming uses SSE text plus named `network_ai_status` and `network_ai_receipt` events. Clients should ignore unknown event types. `[DONE]` ends the engine stream; it is not itself confirmation of finalized billing. `receipt_pending` means control has not yet accepted settlement. Inspect the original session for the accounting result.
+
+A partial response can end with an error. Content received is not proof that the session completed. Without streaming, the gateway builds a `chat.completion` response with usage and `network_ai.session_id`.
+
+This is a bounded Chat Completions subset, not full compatibility with every API or SDK option. An SDK that sends unsupported extra fields can be rejected.
+
+## States and transactions
 
 ```mermaid
 stateDiagram-v2
-  [*] --> QUEUED: cotação e reserva
-  QUEUED --> PREPARING: domínio disponível
-  PREPARING --> AUTHORIZED: prepare confirmado
-  AUTHORIZED --> RUNNING: claim de uso único
-  RUNNING --> COMPLETED: recibo válido
-  RUNNING --> CANCELLING: pedido de cancelamento
-  CANCELLING --> CANCELLED: recibo ou reconciliação
-  QUEUED --> CANCELLED
-  PREPARING --> FAILED
-  AUTHORIZED --> FAILED
-  RUNNING --> FAILED
-  RUNNING --> INTERRUPTED: prazo ou época inválida
+    [*] --> QUEUED: quote and reservation
+    QUEUED --> PREPARING: eligible capacity
+    PREPARING --> AUTHORIZED: preparation confirmed
+    AUTHORIZED --> RUNNING: single-use claim
+    RUNNING --> COMPLETED: valid completed receipt
+    RUNNING --> CANCELLING: cancellation request
+    CANCELLING --> CANCELLED: receipt or reconciliation
+    QUEUED --> CANCELLED
+    PREPARING --> FAILED
+    AUTHORIZED --> FAILED
+    RUNNING --> FAILED
+    RUNNING --> INTERRUPTED: deadline or stale epoch
 ```
 
-Falhas em outras fases também encerram a sessão com motivo explícito. Reserva, projeção de saldo e criação da sessão acontecem em transação serializável. A admissão usa exclusão transacional e capacidade agregada por domínio. Entre filas executáveis, o usuário atendido há mais tempo tem precedência; dentro da conta, vale a ordem de chegada. Cada conta pode manter no máximo quatro sessões ativas. Esse limite e a fila não são uma prova anti-Sybil entre pessoas.
+This diagram highlights the main path; other failures also terminate with explicit reasons. Hold creation, balance projection and session creation are transactional. Admission uses transactional exclusion and aggregate capacity per physical domain. Among executable queues, the least recently served account has priority, with FIFO order inside an account.
 
-## Identidade do agente
+An account can hold at most four active sessions. Queue expiry is 120 seconds and execution expiry 180 seconds. These are private limits, not a measured public SLO or a person-level anti-Sybil mechanism.
 
-Registro: prova Ed25519 sobre `network-ai/register/v1`, hash do convite, nonce, chave pública, boot ID e timestamp. O convite vincula operador, modelo, domínio físico e endpoint; o agente não escolhe esses dados na requisição de registro.
+## Node identity and signatures
 
-Mensagens subsequentes assinam a sequência exata, separada por quebras de linha:
+Registration proves Ed25519 key ownership over `network-ai/register/v1`, invitation hash, nonce, public key, boot ID and timestamp. The invitation binds owner, model, physical domain and endpoint; the registering agent cannot substitute these fields.
+
+Subsequent messages sign this exact newline-separated structure:
 
 ```text
 network-ai/node/v1
@@ -87,8 +127,8 @@ NONCE
 BODY_SHA256
 ```
 
-Cabeçalhos: `X-Node-Timestamp`, `X-Node-Nonce`, `X-Node-Signature`. Janela temporal de 30 s e nonces persistidos por 5 minutos. Novo boot incrementa a época, invalidando tentativas anteriores. Registro revogado não pode ser retomado. Heartbeats chegam a cada 2 s; após 15 s sem presença, o nó perde elegibilidade.
+Headers: `X-Node-Timestamp`, `X-Node-Nonce`, `X-Node-Signature`. The acceptance window is 30 seconds and nonces persist for five minutes. A new boot increments the epoch and fences earlier attempts. A revoked registration cannot resume. Heartbeats occur every two seconds, with eligibility lost after 15 seconds without presence.
 
-O coordenador assina capabilities Ed25519 para `prepare` e `execute`, ligadas a rede, público destinatário, nó, época, sessão, tentativa, manifesto, hash dos bytes da solicitação, limites, prazo e prepare ID. O nó reserva um semáforo local e o controle consome o claim uma única vez antes de chamar a engine. Reenvio de recibo é idempotente; recibo divergente é rejeitado.
+Control signs Ed25519 prepare/execute capabilities bound to network, audience, node, epoch, session, attempt, manifest, raw request hash, limits, deadline and prepare ID. The node reserves a local semaphore and consumes the control claim once before invoking the engine. Identical receipt retries are idempotent; conflicting receipts are rejected.
 
-As rotas `/internal` exigem segredo do gateway e não são expostas pelo proxy da interface. Rotas de heartbeat/claim/recibo aceitam exclusivamente assinaturas do nó cadastrado. Esse protocolo prova identidade e vínculo da mensagem; não prova que um operador desconhecido executou o modelo ou declarou tokens honestamente.
+`/internal` routes require the gateway secret and are not exposed through the browser proxy. Node heartbeat/claim/receipt paths require the registered node's signature. These controls establish message identity and authorization, not independent proof of hardware, correct inference or honest token counting.

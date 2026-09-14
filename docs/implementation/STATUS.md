@@ -1,41 +1,45 @@
-# Cobertura da entrega privada
+# Private-preview implementation and validation status
 
-Esta matriz registra a implementação v0.2 e evita confundir uma bancada funcional com a conclusão de toda a rede proposta. Data da campanha local: 14/09/2026. Um computador físico, uma RTX 4090 compartilhada e o modelo já carregado no LM Studio.
+This matrix records v0.2 behavior and the local campaign of September 14, 2026. The environment was one physical computer with a shared RTX 4090 and the previously loaded LM Studio model. The project targets models above 27B; this campaign does not qualify their distributed execution.
 
-| Frente | Entregue | Limite |
+## Delivered behavior
+
+| Area | Implemented | Boundary |
 |---|---|---|
-| Interface | Login, chat real, modelos, sessões, saldos, chaves, administração e layout móvel | Conversa somente na memória da aba; sem anexos ou ferramentas |
-| Identidade | Senhas com scrypt, chaves individuais revogáveis, cookies e autorização por conta | Acesso privado provisionado; sem MFA, SSO ou recuperação por e-mail |
-| Catálogo | Manifestos imutáveis, origem/licença/hash, candidato e qualificação administrativa | Adaptador de texto; sem instalação automática ou execução de qualquer arquitetura |
-| Agentes | Ed25519 persistente, convite único, heartbeat, pausa, retomada e época | Loopback; inventário e capacidade declarados, sem atestação física |
-| Admissão | Transação serializável, justiça entre filas elegíveis, slots por domínio, prepare e claim | Coordenador único; domínios definidos pelo administrador |
-| Inferência | Gateway e nó Rust, streaming, limite de corpo, timeout e cancelamento | Engine local real; sem transporte WAN integrado ou paralelismo entre hosts |
-| Créditos | LAB_TU inteiro, reserva, liquidação 80/20 experimental, estorno e idempotência | Sem dinheiro, saque, cobertura cooperativa ou parâmetros econômicos aprovados |
-| Registro | Journal balanceado, projeção protegida e histórico sem edição pela role de runtime | Administrador do banco permanece confiável; sem consenso distribuído |
-| Falhas | Restart de nó com fencing da época, devolução, outbox e reconciliação | Geração não é retomada no token interrompido; janela de execução limitada |
-| Operação | Migrações por checksum, processos próprios, logs locais, backup e restauração isolada | Sem HA, serviço Windows instalado, atualização automática ou implantação pública |
+| Interface | Login, real chat, models, sessions, balances, keys, administration, responsive layout | PT-BR; conversation in tab memory; no attachments/tools |
+| Identity | Scrypt passwords, personal revocable keys, cookies and account authorization | Private provisioning; no MFA, SSO or email recovery |
+| Catalog | Immutable source/license/hash manifests and administrative qualification | Text adapter; no automatic model installation or arbitrary architecture execution |
+| Nodes | Persistent Ed25519, one-use invitation, heartbeat, pause/resume and epoch | Loopback; physical inventory and capacity are qualified declarations |
+| Admission | Serializable accounting, eligible-account fairness, domain slots, prepare and claim | Single coordinator; administrator-defined domains |
+| Inference | Rust gateway/node, streaming, bounded bodies, timeout and cancellation | Real local engine; no integrated WAN or cross-host model parallelism |
+| Credits | Integer LAB_TU, hold, experimental 80/20 settlement, refund and idempotency | No cash, withdrawal, cooperative coverage contracts or approved economics |
+| Ledger | Balanced journal, protected projections, no runtime-role history editing | Database owner remains trusted; no distributed consensus |
+| Failure handling | Epoch fencing, refund, durable outbox and reconciliation | No continuation from the interrupted token; bounded execution window |
+| Operations | Checksummed migrations, owned processes, local logs, backup and isolated restore | No public HA deployment, installed Windows service or automatic updates |
 
-## Evidência produzida
+## Automated and live evidence
 
-Os testes de integração usam PostgreSQL real em banco temporário, separado do laboratório. Cobrem saldo inicial, autorização, grants idempotentes, proteção e balanço de journal, concorrência, reserva única, isolamento entre contas, expiração, dois processos no mesmo domínio, justiça entre usuários, replay, claim único, recibo divergente, uso inconsistente e fencing de época.
+The public [validation report](validation.json) records 18 PostgreSQL integration tests, four Rust runtime tests, two Rust F0 tests, 21 Python F0 tests, and four browser journeys. These counts describe the recorded campaign, not a fresh rerun whenever a document changes.
 
-As jornadas no Chromium verificam login, mensagem com resposta real, cobrança, chave criada e revogada, pausa/retomada, catálogo, logout, interface de 390 px sem overflow da página e bloqueio das rotas internas pelo proxy. Inspeção visual foi feita em desktop e celular. A verificação automatizada de acessibilidade tem escopo de página e não constitui certificação WCAG.
+PostgreSQL integration tests use a separate temporary real database. They cover initial balances, authorization, idempotent grants, journal protection and balance, concurrent holds, account isolation, expiry, shared-domain admission, fairness, replay, single claims, conflicting receipts, inconsistent usage and epoch fencing.
 
-Foram conectados dois agentes Rust reais no mesmo domínio físico, usando um perfil de operador sem senhas de banco ou autoridade de assinatura. Duas chamadas simultâneas terminaram sem sobreposição do slot físico único. O agente temporário foi revogado ao final. Essa evidência continua limitada a um computador.
+Chromium journeys exercise login, real responses and charges, key creation/revocation, node pause/resume, catalog, logout, 390-pixel mobile layout without page overflow, and rejection of internal proxy routes. Desktop/mobile visual inspection was performed. Automated accessibility found zero violations across the 26 passed rules on the authenticated chat page; this is not complete WCAG certification.
 
-O teste de inferência percorre a API real e valida tokens, hold, cobrança, replay sem nova execução e cancelamento com devolução. A falha de processo foi injetada no agente deste projeto durante uma execução: o nó voltou em outra época e a sessão anterior foi encerrada sem cobrança. Em outra campanha, o controle ficou indisponível por quatro segundos; o nó entregou o fluxo com recibo pendente, reenviou a outbox e liquidou a sessão original após a recuperação.
+Two real Rust agents shared one physical domain and one slot. Two concurrent requests completed without overlapping execution. The temporary agent used a limited operator profile without database or coordinator authority secrets and was revoked afterward. This remains a same-host result.
 
-O dump foi restaurado em banco novo e conferido quanto a journal, soma dos saldos, projeção e proibição de atualizar saldo pela role de runtime. A cópia do banco em uso permaneceu intacta.
+The live API campaign checked real usage and signed settlement, retry without a second execution/charge, and cancellation with refund. A node process was interrupted during generation; restart advanced its epoch and the original session terminated without charge. During a separate four-second control outage, the node delivered the stream with a pending receipt, retried its outbox and settled the original session after recovery.
 
-As saídas detalhadas de cada execução ficam em `.runtime/private-lab/`. Um [relatório público resumido](validation.json) inclui apenas dados da campanha, sem credenciais, prompts, respostas ou logs privados. Os testes F0 e seus artefatos históricos são independentes desta campanha.
+A dump was restored into another database and checked for journal consistency, zero global balance sum, matching projections and runtime-role restrictions. The working database was preserved.
 
-## Trabalho ainda necessário para a rede de destino
+Detailed private reports live under `.runtime/private-lab/`. The public report contains an allowlisted summary without credentials, prompts, answers or private logs. F0 historical artifacts remain a separate campaign.
 
-1. **Hardware e transporte:** múltiplas GPUs e hosts físicos, LAN/WAN/NAT/relay, orçamento de memória medido, adaptação de carga e integração QUIC/gRPC qualificada.
-2. **Modelos:** execução distribuída no produto, componentes/expert routing, multimodalidade e compatibilidade por engine/revisão, incluindo as pendências Qwen BF16 e Kimi registradas em F0.
-3. **Confiança:** verificação de trabalho e tokenização, operadores adversariais, anti-Sybil, licenças verificadas por oferta, políticas para conteúdo e privacidade em máquinas de terceiros.
-4. **Economia:** corrigir a baixa circulação e a cobertura, incluir todos os limites elásticos e critérios de recuperação, validar novas sementes e custos observados. Concessões LAB_TU e estorno de trabalho parcial não são a solução econômica pública.
-5. **Continuidade:** consenso/federação, failover de coordenadores, rotação de autoridades, restauração conjunta de dados e chaves em outros hosts e pilotos com operadores independentes.
-6. **Mercado:** custódia e contabilidade financeira próprias, cobrança por API, disputas, impostos e operação comercial. Nenhuma venda ou pagamento foi ativado nesta versão.
+## Remaining work for the target network
 
-Esses pontos não são aprovados por passar em testes locais. Os [critérios FC01–FC06](../execution/GATES.md) continuam sendo os requisitos de avanço. A entrega v0.2 permite usar e desenvolver o produto em laboratório sem afirmar que o planejamento inteiro está concluído.
+1. **Capacity and links:** different devices and physical hosts, per-stage memory, LAN/WAN/NAT/relay, and integrated qualified transport.
+2. **Models above 27B:** complete larger-model inference, nearby multi-device routes, integrated cross-participant distribution, state and recovery. Official BF16 and Kimi gaps remain as recorded in F0.
+3. **Public trust:** independent usage/work verification, adversarial operators, anti-Sybil, exact offer licensing, and appropriate content/privacy policies.
+4. **Economics:** fix circulation and coverage, implement the complete elastic and recovery predicates, and evaluate new parameters with fresh holdout seeds and observed costs.
+5. **Continuity:** independent operators, federation/consensus, authority rotation, replacement coordinators, and recovery of keys/data on other hosts.
+6. **Commercial path:** separate payments, liabilities, seller responsibilities, settlement, disputes and payouts. None is activated here.
+
+Passing local tests does not close these requirements. The [FC01–FC06 register](../execution/GATES.md) governs advancement; [the roadmap](../planning/12_ROADMAP_AND_BACKLOG.md) maps the work.

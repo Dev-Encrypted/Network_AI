@@ -1,26 +1,26 @@
-# Componentes e material de terceiros
+# Third-party components and evidence
 
-O NETWORK AI não é autor das engines, bibliotecas ou modelos abaixo. A licença do código original não substitui seus termos. Pesos e ambientes instalados não são distribuídos neste repositório ou nos pacotes F0.
+NETWORK AI does not claim authorship of the engines, libraries or models below. Its original-code license does not replace their terms. Model weights and installed engine environments are not distributed in this repository or the F0 packages.
 
-| Referência | Uso | Procedência |
+| Reference | Use | Provenance |
 |---|---|---|
-| libp2p | Transporte QUIC | [rust-libp2p](https://github.com/libp2p/rust-libp2p), versões em `Cargo.lock` |
-| Iroh | Transporte QUIC | [iroh](https://github.com/n0-computer/iroh), versões em `Cargo.lock` |
-| Petals e Hivemind | Blocos CPU privados | [Petals](https://github.com/bigscience-workshop/petals), [Hivemind](https://github.com/learning-at-home/hivemind), revisões no lock Petals |
-| vLLM, PyTorch, Transformers | Serving, operações numéricas e tokenizer | [vLLM](https://github.com/vllm-project/vllm), [PyTorch](https://github.com/pytorch/pytorch), [Transformers](https://github.com/huggingface/transformers) |
-| Qwen3-8B | Preparação de artefatos e cargas | [Qwen/Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B), revisão nos relatórios |
-| BLOOM-560m | Referência Petals executada | [bigscience/bloom-560m](https://huggingface.co/bigscience/bloom-560m), licença BLOOM RAIL 1.0 na origem |
-| Kimi K3 e outros modelos pesquisados | Configurações, índices e inspeção parcial | [MoonshotAI](https://github.com/MoonshotAI/Kimi-K3), snapshots fixados com termos próprios |
-| LM Studio e modelo comunitário existente | Endpoint da primeira medição | Identificador e fingerprints nos relatórios; não distribuídos |
-| NestJS, Fastify, Next.js e React | Controle e interface do produto privado | Repositórios e licenças dos pacotes fixados em `pnpm-lock.yaml` |
-| PostgreSQL | Persistência e journal | Imagem oficial fixada por digest no Compose; licença PostgreSQL |
-| Axum, Tokio, Reqwest e ed25519-dalek | Gateway, agente e assinaturas | Versões em `Cargo.lock`; licenças próprias dos crates |
-| IBM Plex Sans / Mono | Fontes locais da interface | IBM, SIL Open Font License; pacotes Fontsource em `pnpm-lock.yaml` |
-| Lucide | Ícones da interface | Licença ISC; pacote fixado em `pnpm-lock.yaml` |
-| Playwright e axe-core | Verificação de navegador e regras de acessibilidade | Ferramentas de desenvolvimento, com seus próprios avisos e licenças |
+| libp2p | F0 QUIC transport | [rust-libp2p](https://github.com/libp2p/rust-libp2p); versions in Cargo.lock |
+| Iroh | F0 QUIC transport | [Iroh](https://github.com/n0-computer/iroh); versions in Cargo.lock |
+| Petals and Hivemind | Private CPU block reference | [Petals](https://github.com/bigscience-workshop/petals), [Hivemind](https://github.com/learning-at-home/hivemind); pinned reference environment |
+| vLLM, PyTorch, Transformers | Serving preparation, numerical operations and tokenization | [vLLM](https://github.com/vllm-project/vllm), [PyTorch](https://github.com/pytorch/pytorch), [Transformers](https://github.com/huggingface/transformers) |
+| Qwen3-8B | Official artifact and workload preparation | [Qwen model](https://huggingface.co/Qwen/Qwen3-8B); revision in reports |
+| BLOOM-560m | Executed Petals reference | [BigScience model](https://huggingface.co/bigscience/bloom-560m); upstream BLOOM RAIL 1.0 |
+| Kimi K3 and other researched models | Configurations, indexes and partial inspection | Upstream origins and pinned revisions in the historical evidence |
+| LM Studio and existing community model | First local inference endpoint | Identifiers/fingerprints in reports; not distributed |
+| NestJS, Fastify, Next.js and React | Private control service and interface | Package versions and terms in pnpm-lock.yaml and installed packages |
+| PostgreSQL | Persistence and journal | Official image pinned by digest in Compose; PostgreSQL license |
+| Axum, Tokio, Reqwest and ed25519-dalek | Gateway, node and signatures | Cargo.lock and the respective crate licenses |
+| IBM Plex Sans / Mono | Locally served interface fonts | IBM; SIL Open Font License; Fontsource packages in pnpm-lock.yaml |
+| Lucide | Interface icons | ISC license; pinned package |
+| Playwright and axe-core | Browser and accessibility verification | Development tools with their own licenses and notices |
 
-As [evidências de planejamento](docs/planning/evidence/README.md) contêm metadados, índices e configurações de APIs públicas. Os cabeçalhos safetensors em `docs/execution/evidence/kimi-k3/` são referência upstream. Esses conteúdos não são apresentados como criação de Dev-Encrypted nem recebem uma licença substituta.
+[Historical planning evidence](docs/planning/evidence/README.md) includes metadata, indexes and configurations from public upstream APIs. Safetensors headers under `docs/execution/evidence/kimi-k3/` are upstream reference material. These are not presented as original Dev-Encrypted works or assigned replacement licenses.
 
-Locks registram versões e revisões, mas não são auditoria completa de direitos de redistribuição. Antes de empacotar uma engine, pesos ou binários derivados, verifique os termos da revisão distribuída e seus avisos exigidos.
+Lockfiles identify versions; they are not a complete redistribution-rights audit. Before shipping engines, model weights or derived binaries, check the exact version's terms and required notices. An open model proposal does not override a model's access or use conditions.
 
-Consulte o [escopo das licenças próprias](docs/LICENSING.md), o [NOTICE](NOTICE) e as [fontes de pesquisa](docs/planning/13_REFERENCES_AND_EVIDENCE.md).
+See [original license scope](docs/LICENSING.md), [NOTICE](NOTICE), and [sources](docs/planning/13_REFERENCES_AND_EVIDENCE.md).

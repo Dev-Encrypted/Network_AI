@@ -1,43 +1,51 @@
-# Produto privado v0.2
+# Private application v0.2
 
-**Autoria e direção: Dev-Encrypted.** Esta versão integra interface, controle, PostgreSQL, gateway e agente de nó com uma engine local real. É um ambiente privado executável. A rede pública e a economia cooperativa de destino continuam em validação.
+**Created and directed by Dev-Encrypted.** This release connects the interface, control service, PostgreSQL, Rust gateway, and Rust node to a real local inference engine. It is an executable private environment. Public decentralized operation and the proposed cooperative economy still require qualification.
 
-- [Instalação e operação](OPERATIONS.md)
-- [Contratos da API e protocolo](API.md)
-- [Contabilidade e limites de confiança](ACCOUNTING.md)
-- [Cobertura e critérios pendentes](STATUS.md)
-- [Decisões de implementação](PRIVATE_PREVIEW.md)
-- [Direção e revisão visual](DESIGN.md)
+## Read the manual
 
-## Componentes
+- [Installation, model registration, operation and recovery](OPERATIONS.md)
+- [API and node protocol](API.md)
+- [Laboratory accounting and trust boundaries](ACCOUNTING.md)
+- [Implemented coverage and actual validation](STATUS.md)
+- [Implementation decisions](PRIVATE_PREVIEW.md)
+- [Interface design](DESIGN.md)
+
+## Components and data flow
 
 ```mermaid
 flowchart LR
-  UI[Interface Next.js] --> BFF[Proxy local da interface]
-  SDK[Cliente de API] --> G[Gateway Rust]
-  BFF --> G
-  BFF --> C[Controle NestJS / Fastify]
-  G -->|cotação, reserva, admissão| C
-  G -->|prompt e streaming| N[Agente Rust]
-  N -->|conteúdo| E[Engine local]
-  N -->|heartbeat, claim, recibo assinado| C
-  C --> D[(PostgreSQL)]
+    UI[Next.js interface] --> Proxy[Local browser proxy]
+    Client[API client] --> Gateway[Rust gateway]
+    Proxy --> Gateway
+    Proxy --> Control[NestJS / Fastify control]
+    Gateway -->|quote, hold, admission| Control
+    Gateway -->|prompt and stream| Node[Rust agent]
+    Node -->|content| Engine[Local inference engine]
+    Node -->|heartbeat, claim, signed receipt| Control
+    Control --> Database[(PostgreSQL)]
 ```
 
-O conteúdo da conversa passa pelo proxy da interface, gateway, agente e engine. O controle e o banco recebem metadados, hashes, uso e valores. O navegador mantém a conversa em memória somente enquanto a aba permanece aberta. A política de logs e retenção da engine é responsabilidade do operador; este projeto não a modifica.
+Conversation content passes through the browser proxy, gateway, node and engine. The control service and database receive metadata, digests, usage and amounts. The browser keeps the conversation in tab memory. The operator controls the engine's logging and retention policy.
 
-O controle é um coordenador único neste perfil. Registrar vários agentes no mesmo computador não transforma o laboratório em uma rede de operadores independentes. Os experimentos QUIC e Petals permanecem no [corte F0](../execution/README.md).
+There is one coordinator in this profile. Multiple agents on one host do not establish independent operators or split a model automatically. QUIC and Petals experiments remain separate [F0 research](../execution/README.md).
 
-## Uso local
+## Start locally
 
-Requisitos: Node.js 24, pnpm 10.33.0, Rust 1.93.1, Docker com Compose e uma engine local. No Windows, use PowerShell. A engine já existente não é instalada, substituída nem descarregada pelo inicializador.
+Prepare Node.js 24.13.0, pnpm 10.33.0, Rust 1.93.1 and Docker with Compose. A compatible local inference backend is required for real responses.
 
-```powershell
+```bash
 pnpm install --frozen-lockfile
 pnpm lab:init
 pnpm lab:start
 ```
 
-A interface abre em `http://127.0.0.1:43100`. O inicializador informa o caminho do arquivo privado de credenciais. O perfil incluído identifica o modelo LM Studio observado na bancada; outro ambiente deve configurar seu próprio manifesto e agente conforme o [guia operacional](OPERATIONS.md).
+Open `http://127.0.0.1:43100`. The initializer prints where to find private credentials. The supplied profile identifies the original LM Studio artifact; another installation must register its own exact manifest and node using the [operator guide](OPERATIONS.md).
 
-Código original: [Apache 2.0](../../LICENSE). Documentação original: [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt). Dependências e modelos mantêm suas licenças.
+The current UI is Brazilian Portuguese. The [beginner guide](../GETTING_STARTED.md) translates navigation labels. The repository's maintained public documentation is English.
+
+## Large-model scope
+
+NETWORK AI prioritizes models above 27B, but this release's measured model is the original community 27B/Q4 local profile. Distributed execution of larger models is a [roadmap requirement](../planning/12_ROADMAP_AND_BACKLOG.md), not a delivered feature. Read [model scaling](../MODEL_SCALING.md) before estimating contributors or devices.
+
+Original code: [Apache 2.0](../../LICENSE). Original documentation: [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt). Dependencies and model artifacts retain their own terms.

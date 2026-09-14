@@ -1,27 +1,29 @@
-# Implementação privada após F0
+# Private implementation decisions after F0
 
-Este documento acompanha a implementação iniciada após a publicação `v0.1.0-f0`. Os snapshots e resultados econômicos anteriores permanecem preservados.
+The v0.2 implementation follows the `v0.1.0-f0` research publication. Historical snapshots and rejected economic results retain their original meaning.
 
-## Fronteiras da implementação
+## Implemented boundaries
 
-- Controle NestJS/Fastify e PostgreSQL próprio: identidade, catálogo, permissões, quotes, holds, sessões e journal.
-- Gateway e nó em Rust: conteúdo de prompts e streaming seguem diretamente pelo caminho de dados; o banco recebe apenas metadados e recibos.
-- Interface Next.js em PT-BR: chat, catálogo, sessões, saldo de laboratório, chaves e gestão de nós.
-- Protocolo privado com registro de chave Ed25519, nonce persistente, época de nó, prepare/commit e capabilities ligadas ao digest da requisição.
-- Um domínio físico compartilhado não ganha capacidade por registrar dois processos. A admissão bloqueia o domínio no PostgreSQL.
+The NestJS/Fastify service and dedicated PostgreSQL own identity, model metadata, authorization, quotes, holds, sessions and journals. Rust gateway and node carry request content and streaming through the inference path. The Next.js interface provides chat, catalog, sessions, laboratory credits, API keys and administration.
 
-A unidade `LAB_TU` pertence exclusivamente à bancada privada. Não implementa autorização para emitir TU cooperativo real nem transforma os parâmetros reprovados em política pública. Uma eventual carga de teste é um lançamento explícito do emissor de laboratório, com saldo inicial zero e sem saque.
+The private protocol binds Ed25519 node identities, persistent nonces, node epochs, prepare/execute capabilities, a single-use claim and request digests. Several agents in the same physical domain share a transactionally enforced capacity limit; registering extra processes does not create extra slots.
 
-O perfil inicial usa o modelo efetivamente carregado no LM Studio. Seu identificador e digest são preservados. A oferta é experimental; não é promovida à qualificação do Qwen3-8B BF16 ou de um segundo host.
+`LAB_TU` belongs exclusively to this private environment. Explicit grants do not authorize public cooperative issuance. Its completed-work split and full failure refund are deliberately documented as test policies, including their abuse limitations.
 
-## Decisão de integração
+## Why a local integration first
 
-O protocolo privado usa HTTP limitado em loopback para integrar controle e dados, com autenticação de identidade e capability na aplicação. O módulo QUIC F0 permanece uma bancada independente. HTTP neste perfil não qualifica transporte WAN e não pode ser exposto por simples troca para `0.0.0.0`; conexões entre computadores exigem túnel/TLS controlado e sua própria campanha.
+The available hardware and loaded model allowed an end-to-end implementation of identity, admission, inference, accounting and recovery. The default artifact fingerprint remains the actual observed one. It is not promoted to official Qwen3-8B BF16 qualification or a model-above-27B distributed result.
 
-Esta decisão permite exercitar contratos, banco e interface no hardware disponível. Não encerra o requisito de gRPC/QUIC, NAT, independência de operadores ou consenso federado do plano de destino.
+Bounded loopback HTTP connects the current components with application-level identity and capability checks. The F0 QUIC module remains an independent bench. Cross-host service needs its own transport, trust and operational qualification; changing listeners to a public address does not provide it.
 
-## Aceite da entrega local
+## What acceptance demonstrated
 
-Login e permissões reais; catálogo ligado à presença dos nós; inferência real pelo gateway; pausa e cancelamento; idempotência sem nova cobrança; journal balanceado, imutável para a role de runtime, sem saldo negativo de usuário; recuperação de sessões abandonadas; backup e restauração do banco; testes de concorrência e jornadas no navegador.
+The local campaign exercised real login/authorization, ready-node availability, model inference through the gateway, signed usage settlement, retries, cancellation, node restart fencing, receipt outbox recovery and database restoration. Two real agents sharing one domain served concurrent requests without exceeding the single slot.
 
-Os critérios de abertura e o escopo não implementado devem aparecer no relatório final, sem classificar o projeto inteiro como pronto para produção por passar nesses testes.
+All these results occurred on one physical host. They do not prove WAN performance, independent operators, cooperative sustainability or public fraud resistance. The [status matrix](STATUS.md) and [public report](validation.json) retain that scope.
+
+## How this supports the larger objective
+
+Models above 27B remain a primary goal. The current contracts provide a starting point for qualified engine adapters and complete-route admission, but the model partition, per-stage state, multi-host transport and recovery mechanism still need implementation and tests.
+
+The private software is usable for development while those experiments proceed. Its existence does not convert an untested design assumption into a released public capability.

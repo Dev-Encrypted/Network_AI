@@ -5,6 +5,7 @@ from hashlib import sha256
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 from zipfile import ZipFile
+import argparse
 import json
 import re
 
@@ -44,11 +45,24 @@ def validate():
 
     for name, expected in HISTORICAL.items():
         checked(digest(ROOT / name) == expected, 'Historical archive unchanged: ' + name)
-    with ZipFile(ROOT / next(reversed(HISTORICAL))) as archive:
+    historical_source = read('docs/publication/planning-source-manifest.json')
+    expected_documents = {row['path']: row for row in historical_source['documents']}
+    require(historical_source['archive_sha256'] == HISTORICAL[historical_source['source_archive']],
+            'Historical document manifest must bind the preserved planning archive')
+    with ZipFile(ROOT / historical_source['source_archive']) as archive:
         planning_files = [name for name in archive.namelist() if name.startswith('docs/planning/')]
+        require(set(expected_documents) == {name for name in planning_files if name.endswith('.md')},
+                'Historical document manifest must cover every original Markdown document')
         for name in planning_files:
-            require((ROOT / name).read_bytes() == archive.read(name), 'Historical planning file changed: ' + name)
-    checks.append(f'{len(planning_files)} planning files match the v6 snapshot byte for byte')
+            original = archive.read(name)
+            if name.endswith('.md'):
+                reference = expected_documents[name]
+                require(len(original) == reference['bytes'] and sha256(original).hexdigest() == reference['sha256'],
+                        'Historical Portuguese source hash changed: ' + name)
+                require((ROOT / name).is_file(), 'Current English counterpart is missing: ' + name)
+            else:
+                require((ROOT / name).read_bytes() == original, 'Historical planning evidence changed: ' + name)
+    checks.append(f'{len(planning_files)} original planning files verified; English prose is a separate edition')
 
     fixture_meta = read('docs/execution/evidence/e01-fixtures.json')
     fixture_path = ROOT / fixture_meta['artifact']
@@ -128,7 +142,12 @@ def validate():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--check', action='store_true', help='Validate without rewriting the historical report')
+    args = parser.parse_args()
     result = validate()
     output = ROOT / 'docs/execution/evidence/execution-validation.json'
-    output.write_text(json.dumps(result, indent=2), encoding='utf-8')
-    print(json.dumps({'checks_passed': result['checks_passed'], 'public_launch_approved': False, 'report': str(output)}))
+    if not args.check:
+        output.write_text(json.dumps(result, indent=2), encoding='utf-8')
+    print(json.dumps({'checks_passed': result['checks_passed'], 'public_launch_approved': False,
+                      'report_written': not args.check, 'report': str(output)}))

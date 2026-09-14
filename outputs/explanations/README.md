@@ -1,8 +1,10 @@
-# Ilustrações históricas
+# Historical illustrative visualizations
 
-- [Limites cooperativos](limites-cooperativos.html): divisão ilustrativa de capacidade.
-- [Equilíbrio de créditos](equilibrio-creditos.html): relação hipotética entre emissão e consumo.
+The files below are original September 13, 2026 educational fragments, preserved in Portuguese. Their values are hypothetical, preceding the F0 event study. They are not approved tariffs, measured capacity or evidence that elastic limits work in the current product.
 
-São exemplos didáticos de 13/09/2026, anteriores ao estudo F0. Seus números não são tarifas ou capacidade aprovadas. O segundo usa a nomenclatura antiga `NC`; a proposta consolidada usa `TU`.
+- [Cooperative limits: original fragment](limites-cooperativos.html) illustrates capacity allocation.
+- [Credit balance: original fragment](equilibrio-creditos.html) illustrates issuance and consumption; it uses the earlier `NC` name rather than the later `TU` terminology.
 
-Os fragmentos dependem de variáveis de estilo do ambiente original. O GitHub exibe o código HTML sem executar os controles. Consulte o [artigo atual](../../docs/ARTICLE.md) e os [resultados econômicos](../../docs/execution/ECONOMY_V1_RESULTS.md).
+The fragments depend on styling variables from their original display environment. GitHub shows their HTML source rather than running their controls. Use the maintained English [article](../../docs/ARTICLE.md), [model-scaling guide](../../docs/MODEL_SCALING.md), and [elastic-limit explanation](../../docs/planning/20_COOPERATIVE_ECONOMY_AND_ELASTIC_LIMITS.md) for current reading.
+
+The [economic results](../../docs/execution/ECONOMY_V1_RESULTS.md) supersede any impression of viability from these simple illustrations. See the [language and evidence policy](../../docs/LANGUAGE.md) for why historical records retain their original form.

@@ -1,33 +1,29 @@
-# Verificação aritmética do mercado aberto
+# 19. Historical market calculations
 
-Este documento verifica **somente pagamentos comerciais**, com fundos confirmados. TU cooperativo é outra unidade: pode ser emitido sem compradores sob a política do [20](20_COOPERATIVE_ECONOMY_AND_ELASTIC_LIMITS.md). Os oito casos abaixo usam **UP, unidade fictícia de pagamento apenas para a aritmética**, sem equivalência com TU ou cotação de ativo. Não foram implementados contrato financeiro, blockchain, mercado ou prova de inferência.
+## What is included
 
-| Caso | Entrada fictícia | Resultado calculado | O que permanece fora da prova |
-|---|---|---|---|
-| M01 | Chamada de 100 UP, divisão 90/6/2/2 | Providers 90, gateway 6, operação 2, reserva 2; total 100 | Transferência real e segurança da liquidação |
-| M02 | Pool financiado com 100 UP paga 30 por prontidão verificada | Pool fica com 70, provider com 30; nenhum saldo adicional | Prova de prontidão e confirmação real de fundos |
-| M03 | Pool de 100 UP compromete 70 e tenta contratar mais 40 | Há só 30 livres; segunda proposta de 40 recusada | Corridas entre operadores, escrow e gasto duplo |
-| M04 | Receita de taxas disponível de 6 UP; grant local de até 2% | Convidado recebe 0,12 UP; 5,88 ficam no fundo | Identidade do convidado e regra de outros pools |
-| M05 | Carteira de 200, hold de 120, uso de 80 UP | Libera 40; carteira final 120; destinatários recebem 72/4,8/1,6/1,6 | Medição, contestações e concorrência real |
-| M06 | Depósito de 100, 60 em hold, pedido de retirada de 50 | Apenas 40 podem sair; depósito restante cobre os 60 reservados | Finalidade, saída unilateral e falha de gateway |
-| M07 | Custo 0,40, taxa 10%, margem desejada 20% | Preço mínimo 4/7 ≈0,571429; vender por 0,50 rende margem de 10% | Custos reais, ocupação, energia, qualidade e demanda |
-| M08 | 1.000 nós e 5.000 modelos publicados, sem contraparte financiada | Zero UP de receita financeira; publicação isolada não é contribuição cooperativa contratada | Spam, Sybil e modelos maliciosos |
+The original market package contains eight deterministic payment examples using fictional units and assumptions. It is separate from cooperative TU accounting and does not execute a financial transfer.
 
-O relatório [open-market-simulations.json](evidence/open-market-simulations.json) registra entradas, saídas, condições e hashes. A [política de exemplo](evidence/open-market-policy.json) não seleciona ativo, rede de liquidação ou token nativo. O [script](evidence/simulate_open_market.py) usa somente Python padrão e não acessa a rede.
+- [Historical market policy](evidence/open-market-policy.json)
+- [Reference calculator](evidence/simulate_open_market.py)
+- [Recorded calculations](evidence/open-market-simulations.json)
 
-## Como reproduzir
+The original policy uses a fictional payment unit. Its numbers are not a live token, exchange rate, provider price, or guaranteed margin.
 
-Na raiz do projeto:
+## Purpose
 
-```powershell
-python .\docs\planning\evidence\simulate_token_economy.py
-python .\docs\planning\evidence\simulate_open_market.py
-python .\docs\planning\evidence\simulate_cooperative_elastic.py
-python .\docs\planning\evidence\verify_planning.py
-```
+These examples make cash-flow boundaries reviewable. A buyer's authorized maximum, the amount charged for accepted service, fees, provider payables and refunds must reconcile without double counting. A seller cannot treat the same customer deposit as both a withdrawable liability and free operating revenue.
 
-Os scripts refazem respectivamente 18 casos históricos, oito comerciais e 20 cooperativos atuais; o verificador confere documentos, vínculos e hashes. As unidades e os escopos não se misturam. O caso M08 impede receita monetária sem pagador, mas não impede ganho de TU por contribuição útil aprovada.
+For a distributed model, a route seller also needs funded commitments to required components. A component's accepted readiness obligation cannot disappear merely because a different stage failed. The responsible party and loss budget must be defined in the offer.
 
-## Aceite técnico ainda necessário
+## Limits
 
-Executar os testes de descentralização do 18 e EP10: três operadores independentes, troca de gateway/indexador, criação/publicação sem backend da empresa, saldo segregado, duas tentativas de gasto, falhas/reorganização da liquidação, disputa, retirada sem operador original e modelo comunitário de outra configuração. A rede aberta só estará demonstrada quando esses fluxos funcionarem em implementação real.
+Arithmetic consistency does not prove payment finality, custody safety, dispute resolution, legal eligibility, withdrawal during gateway failure, or sustainable demand. It also does not prove that a proposed model route can execute. Those require separate integration, operational and capacity evidence.
+
+Do not infer a universal revenue split from these fictional cases or from the private preview's 80/20 LAB_TU experiment. The commercial cost model must use the qualified profile's complete measured costs and explicit provisions.
+
+## Next validation
+
+Keep new adapter experiments in separate versions with exact test contracts and capped test funding. Exercise concurrent authorizations, replay, process restart, partial delivery, refunds, dispute funding and exit. A successful payment test still needs a qualified inference route before an offer becomes usable.
+
+See [market architecture](18_OPEN_NETWORK_AND_COMPUTE_MARKET.md), [operating costs](11_OPERATIONS_AND_ECONOMICS.md), and [FC04](../execution/GATES.md). Commercial integration remains optional and disabled in the current private application.
