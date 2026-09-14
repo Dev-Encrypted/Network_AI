@@ -1,0 +1,18 @@
+{
+  "evidence_type": "REAL_MODEL_INSTALLED_ROUTE_AFTER_RESTART",
+  "observed_at": "2026-09-14T23:35:22.939Z",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "mode": "CPU",
+  "model": "qwen3-32b-route-private",
+  "artifact_sha256": "efd971561896866f0e910cce52761ca77b1b138090c7f15fe284676d57d1f689",
+  "state": "COMPLETED",
+  "billing_state": "SETTLED",
+  "input_tokens": 17,
+  "output_tokens": 7,
+  "charged_microtu": "38000",
+  "participant_count": 3,
+  "all_stage_receipts": true,
+  "browser_proxy_request": true,
+  "public_operation_approved": false
+}

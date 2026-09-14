@@ -128,8 +128,10 @@ export class Nodes {
     ).rows[0];
     need(row, 409, "epoch_fenced", "Época ou identidade do nó inválida.");
     const cancelled = await this.db.pool.query(
-      `SELECT id FROM sessions WHERE node_id=$1 AND state='CANCELLING'`,
-      [id],
+      `SELECT s.id FROM sessions s WHERE s.id=ANY($2::uuid[])
+        AND (s.node_id=$1 OR EXISTS(SELECT 1 FROM session_participants p WHERE p.session_id=s.id AND p.node_id=$1))
+        AND s.state IN ('CANCELLING','COMPLETED','FAILED','CANCELLED','INTERRUPTED')`,
+      [id, data.running_sessions],
     );
     return {
       ...row,

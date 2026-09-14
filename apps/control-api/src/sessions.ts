@@ -6,6 +6,8 @@ import {
   modelManifestSchema,
   chargeFor,
   receiptSchema,
+  stageReceiptSchema,
+  splitByBps,
   sha256,
   terminalStates,
   uuid,
@@ -47,7 +49,13 @@ export class Sessions {
       "SELECT sequence,kind,metadata,created_at FROM events WHERE session_id=$1 ORDER BY sequence",
       [id],
     );
-    return { ...row, events: events.rows };
+    const participants = await this.db.pool.query(
+      `SELECT p.node_id,p.provider_id,p.resource_domain_id,p.ordinal,p.role,p.share_bps,
+      p.node_epoch,p.claimed_at,p.paid_microtu,r.payload AS receipt FROM session_participants p
+      LEFT JOIN stage_receipts r ON r.session_id=p.session_id AND r.node_id=p.node_id WHERE p.session_id=$1 ORDER BY p.ordinal`,
+      [id],
+    );
+    return { ...row, events: events.rows, participants: participants.rows };
   }
   async create(user: User, body: unknown) {
     const data = z
@@ -174,7 +182,17 @@ export class Sessions {
       [id, kind, metadata],
     );
   }
-  cap(session: Row, quote: Row, node: Row, scope: "prepare" | "execute") {
+  cap(
+    session: Row,
+    quote: Row,
+    node: Row,
+    scope:
+      | "prepare"
+      | "execute"
+      | "stage_prepare"
+      | "stage_execute"
+      | "stage_finish",
+  ) {
     const manifest = modelManifestSchema.parse(quote.manifest);
     return capability(this.config.capability_private_key_pem, {
       network: "network-ai-private-lab",
@@ -191,8 +209,11 @@ export class Sessions {
       max_output_tokens: quote.max_output_tokens,
       max_context_tokens: manifest.max_context_tokens,
       max_input_bytes: manifest.max_input_bytes,
-      prepare_id: scope === "execute" ? session.prepare_id : null,
+      prepare_id: scope.endsWith("prepare") ? null : session.prepare_id,
       exp: Math.floor(new Date(session.execution_deadline).getTime() / 1000),
+      ...(session.route_id
+        ? { route_id: session.route_id, route_sha256: session.route_sha256 }
+        : {}),
     });
   }
   async admit(id: string) {
@@ -221,35 +242,86 @@ export class Sessions {
       );
       const next = (
         await tx.query(`SELECT s.id FROM sessions s JOIN users u ON u.id=s.user_id
-        JOIN models m ON m.id=s.model_id AND m.state='LOCAL_PREVIEW'
         WHERE s.state='QUEUED' AND s.queue_deadline>now() AND EXISTS (
-          SELECT 1 FROM nodes n JOIN resource_domains d ON d.id=n.resource_domain_id
-          WHERE n.model_id=s.model_id AND n.state='READY' AND n.desired_state='READY' AND n.last_seen>now()-interval '15 seconds'
-          AND n.loaded_backend_models ? (m.manifest->>'backend_model')
-          AND (SELECT count(*) FROM sessions a WHERE a.resource_domain_id=d.id AND a.state IN ('PREPARING','AUTHORIZED','RUNNING','CANCELLING')) < d.slots)
+          SELECT 1 FROM ready_execution_offers o WHERE o.model_id=s.model_id AND NOT EXISTS (
+            SELECT 1 FROM resource_domains d WHERE d.id=ANY(o.domain_ids)
+            AND (SELECT count(*) FROM active_session_domains a WHERE a.resource_domain_id=d.id)>=d.slots))
         ORDER BY u.last_admitted_at,s.created_at,s.id LIMIT 1`)
       ).rows[0];
       if (!next || next.id !== id)
         return { state: "QUEUED", retry_after_ms: 300 };
-      const node = (
+      const offer = (
         await tx.query(
-          `SELECT n.* FROM nodes n JOIN models m ON m.id=n.model_id JOIN resource_domains d ON d.id=n.resource_domain_id
-        WHERE n.model_id=$1 AND n.state='READY' AND n.desired_state='READY' AND n.last_seen>now()-interval '15 seconds'
-        AND n.loaded_backend_models ? (m.manifest->>'backend_model')
-        AND (SELECT count(*) FROM sessions a WHERE a.resource_domain_id=d.id AND a.state IN ('PREPARING','AUTHORIZED','RUNNING','CANCELLING'))<d.slots
-        ORDER BY n.last_seen DESC,n.id LIMIT 1 FOR UPDATE OF d,n`,
+          `SELECT o.* FROM ready_execution_offers o WHERE o.model_id=$1 AND NOT EXISTS (
+            SELECT 1 FROM resource_domains d WHERE d.id=ANY(o.domain_ids)
+            AND (SELECT count(*) FROM active_session_domains a WHERE a.resource_domain_id=d.id)>=d.slots)
+          ORDER BY o.last_seen DESC,o.offer_key LIMIT 1`,
           [s.model_id],
         )
       ).rows[0];
-      if (!node) return { state: "QUEUED", retry_after_ms: 300 };
+      if (!offer) return { state: "QUEUED", retry_after_ms: 300 };
+      await tx.query(
+        "SELECT id FROM resource_domains WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE",
+        [offer.domain_ids],
+      );
+      const node = (
+        await tx.query("SELECT * FROM nodes WHERE id=$1 FOR UPDATE", [
+          offer.root_node_id,
+        ])
+      ).rows[0];
+      const route = offer.route_id
+        ? (
+            await tx.query("SELECT * FROM execution_routes WHERE id=$1", [
+              offer.route_id,
+            ])
+          ).rows[0]
+        : null;
       const attempt = randomUUID();
       const updated = (
         await tx.query(
           `UPDATE sessions SET state='PREPARING',node_id=$2,resource_domain_id=$3,attempt_id=$4,node_epoch=$5,
-        execution_deadline=now()+interval '180 seconds' WHERE id=$1 RETURNING *`,
-          [id, node.id, node.resource_domain_id, attempt, node.epoch],
+        execution_deadline=now()+interval '180 seconds',route_id=$6,route_sha256=$7 WHERE id=$1 RETURNING *`,
+          [
+            id,
+            node.id,
+            node.resource_domain_id,
+            attempt,
+            node.epoch,
+            route?.id ?? null,
+            route?.route_sha256 ?? null,
+          ],
         )
       ).rows[0];
+      for (const domain of offer.domain_ids)
+        await tx.query(
+          "INSERT INTO session_domains(session_id,resource_domain_id) VALUES($1,$2)",
+          [id, domain],
+        );
+      let members: Row[] = [];
+      if (route) {
+        members = (
+          await tx.query(
+            `SELECT m.*,n.epoch,n.base_url FROM route_members m JOIN nodes n ON n.id=m.node_id
+          WHERE m.route_id=$1 ORDER BY m.ordinal FOR SHARE OF n`,
+            [route.id],
+          )
+        ).rows;
+        for (const p of members)
+          await tx.query(
+            `INSERT INTO session_participants(session_id,node_id,provider_id,resource_domain_id,ordinal,role,share_bps,node_epoch)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,
+            [
+              id,
+              p.node_id,
+              p.provider_id,
+              p.resource_domain_id,
+              p.ordinal,
+              p.role,
+              p.share_bps,
+              p.epoch,
+            ],
+          );
+      }
       await tx.query("UPDATE users SET last_admitted_at=now() WHERE id=$1", [
         s.user_id,
       ]);
@@ -257,6 +329,8 @@ export class Sessions {
         node_id: node.id,
         resource_domain_id: node.resource_domain_id,
         attempt_id: attempt,
+        route_id: route?.id ?? null,
+        resource_domain_ids: offer.domain_ids,
       });
       const quote = (
         await tx.query("SELECT * FROM quotes WHERE id=$1", [s.quote_id])
@@ -266,13 +340,45 @@ export class Sessions {
         node_url: node.base_url,
         capability: this.cap(updated, quote, node, "prepare"),
         attempt_id: attempt,
+        ...(route
+          ? {
+              route_id: route.id,
+              route_sha256: route.route_sha256,
+              participants: members.map((p) => ({
+                node_id: p.node_id,
+                node_url: p.base_url,
+                role: p.role,
+                ordinal: p.ordinal,
+                capability: this.cap(
+                  updated,
+                  quote,
+                  { id: p.node_id, epoch: p.epoch },
+                  p.role === "ROOT" ? "prepare" : "stage_prepare",
+                ),
+              })),
+            }
+          : {}),
       };
     });
   }
   async authorize(id: string, body: unknown) {
     uuid.parse(id);
     const data = z
-      .object({ prepare_id: z.string().regex(/^[A-Za-z0-9_-]{20,100}$/) })
+      .object({
+        prepare_id: z.string().regex(/^[A-Za-z0-9_-]{20,100}$/),
+        participants: z
+          .array(
+            z
+              .object({
+                node_id: uuid,
+                prepare_id: z.string().regex(/^[A-Za-z0-9_-]{20,100}$/),
+              })
+              .strict(),
+          )
+          .min(1)
+          .max(15)
+          .optional(),
+      })
       .strict()
       .parse(body);
     return this.db.transaction(async (tx) => {
@@ -299,6 +405,40 @@ export class Sessions {
         "node_changed",
         "O nó mudou durante a preparação.",
       );
+      const members = s.route_id
+        ? await this.currentParticipants(tx, s, true)
+        : [];
+      if (s.route_id) {
+        const stages = members.filter((p) => p.role === "STAGE");
+        need(
+          data.participants?.length === stages.length &&
+            new Set(data.participants.map((p) => p.node_id)).size ===
+              stages.length &&
+            stages.every((p) =>
+              data.participants!.some((v) => v.node_id === p.node_id),
+            ),
+          409,
+          "route_prepare_incomplete",
+          "Todas as partes da rota precisam confirmar a preparação.",
+        );
+        for (const p of members) {
+          p.prepare_id =
+            p.role === "ROOT"
+              ? data.prepare_id
+              : data.participants!.find((v) => v.node_id === p.node_id)!
+                  .prepare_id;
+          await tx.query(
+            "UPDATE session_participants SET prepare_id=$3 WHERE session_id=$1 AND node_id=$2",
+            [id, p.node_id, p.prepare_id],
+          );
+        }
+      } else
+        need(
+          !data.participants,
+          400,
+          "unexpected_stages",
+          "Esta sessão não possui etapas distribuídas.",
+        );
       await tx.query(
         "UPDATE sessions SET state='AUTHORIZED',prepare_id=$2 WHERE id=$1",
         [id, data.prepare_id],
@@ -315,6 +455,28 @@ export class Sessions {
           node,
           "execute",
         ),
+        ...(s.route_id
+          ? {
+              participants: members
+                .filter((p) => p.role === "STAGE")
+                .map((p) => ({
+                  node_id: p.node_id,
+                  node_url: p.base_url,
+                  capability: this.cap(
+                    { ...s, prepare_id: p.prepare_id },
+                    quote,
+                    { id: p.node_id, epoch: p.node_epoch },
+                    "stage_execute",
+                  ),
+                  finish_capability: this.cap(
+                    { ...s, prepare_id: p.prepare_id },
+                    quote,
+                    { id: p.node_id, epoch: p.node_epoch },
+                    "stage_finish",
+                  ),
+                })),
+            }
+          : {}),
       };
     });
   }
@@ -328,19 +490,237 @@ export class Sessions {
       })
       .strict()
       .parse(body);
-    const result = await this.db.pool.query(
-      `UPDATE sessions s SET state='RUNNING',started_at=now()
+    return this.db.transaction(async (tx) => {
+      const session = (
+        await tx.query("SELECT * FROM sessions WHERE id=$1 FOR UPDATE", [
+          data.session_id,
+        ])
+      ).rows[0];
+      if (session?.route_id) {
+        const members = await this.currentParticipants(tx, session, true);
+        need(
+          members.filter((p) => p.role === "STAGE").every((p) => p.claimed_at),
+          409,
+          "route_unclaimed",
+          "Todas as etapas precisam reservar sua execução antes do nó principal.",
+        );
+      }
+      const result = await tx.query(
+        `UPDATE sessions s SET state='RUNNING',started_at=now()
       WHERE s.id=$1 AND s.node_id=$2 AND s.attempt_id=$3 AND s.node_epoch=$4 AND s.prepare_id=$5 AND s.state='AUTHORIZED' AND s.execution_deadline>now()
       AND EXISTS(SELECT 1 FROM nodes n WHERE n.id=s.node_id AND n.epoch=s.node_epoch AND n.desired_state='READY') RETURNING s.id`,
-      [data.session_id, nodeId, data.attempt_id, data.epoch, data.prepare_id],
-    );
+        [data.session_id, nodeId, data.attempt_id, data.epoch, data.prepare_id],
+      );
+      need(
+        result.rowCount,
+        409,
+        "claim_rejected",
+        "Autorização expirada, consumida ou cancelada.",
+      );
+      if (session.route_id)
+        await tx.query(
+          "UPDATE session_participants SET claimed_at=now() WHERE session_id=$1 AND node_id=$2",
+          [data.session_id, nodeId],
+        );
+      return { accepted: true };
+    });
+  }
+
+  private async currentParticipants(
+    tx: PoolClient,
+    s: Row,
+    preparing = false,
+  ): Promise<Row[]> {
+    const rows = (
+      await tx.query(
+        `SELECT p.*,n.base_url,n.epoch AS current_epoch,n.desired_state,n.state,n.last_seen,
+      n.owner_id AS current_owner,n.resource_domain_id AS current_domain,u.disabled
+      FROM session_participants p JOIN nodes n ON n.id=p.node_id JOIN users u ON u.id=p.provider_id
+      WHERE p.session_id=$1 ORDER BY p.ordinal FOR SHARE OF n`,
+        [s.id],
+      )
+    ).rows;
     need(
-      result.rowCount,
+      rows.length >= 2 &&
+        rows.every(
+          (p) =>
+            p.node_epoch === p.current_epoch &&
+            !p.disabled &&
+            p.current_owner === p.provider_id &&
+            p.current_domain === p.resource_domain_id &&
+            p.desired_state !== "REVOKED" &&
+            (!preparing ||
+              (p.state === "READY" &&
+                p.desired_state === "READY" &&
+                p.last_seen > new Date(Date.now() - 15000))),
+        ),
       409,
-      "claim_rejected",
-      "Autorização expirada, consumida ou cancelada.",
+      "route_node_changed",
+      "Uma etapa da rota mudou ou está indisponível.",
     );
-    return { accepted: true };
+    return rows;
+  }
+
+  async stageClaim(nodeId: string, body: unknown) {
+    const data = z
+      .object({
+        session_id: uuid,
+        attempt_id: uuid,
+        epoch: z.number().int().positive(),
+        prepare_id: z.string().regex(/^[A-Za-z0-9_-]{20,100}$/),
+      })
+      .strict()
+      .parse(body);
+    return this.db.transaction(async (tx) => {
+      const s = (
+        await tx.query("SELECT * FROM sessions WHERE id=$1 FOR UPDATE", [
+          data.session_id,
+        ])
+      ).rows[0];
+      need(
+        s?.route_id &&
+          s.state === "AUTHORIZED" &&
+          s.attempt_id === data.attempt_id &&
+          new Date(s.execution_deadline).getTime() > Date.now(),
+        409,
+        "stage_claim_rejected",
+        "Reserva da etapa expirada, cancelada ou já em execução.",
+      );
+      const members = await this.currentParticipants(tx, s, true);
+      const p = members.find((p) => p.node_id === nodeId && p.role === "STAGE");
+      need(
+        p &&
+          Number(p.node_epoch) === data.epoch &&
+          p.prepare_id === data.prepare_id &&
+          !p.claimed_at,
+        409,
+        "stage_claim_rejected",
+        "Esta etapa não possui uma autorização disponível.",
+      );
+      await tx.query(
+        "UPDATE session_participants SET claimed_at=now() WHERE session_id=$1 AND node_id=$2",
+        [s.id, nodeId],
+      );
+      await this.event(tx, s.id, "stage_claimed", {
+        node_id: nodeId,
+        ordinal: p.ordinal,
+      });
+      return { accepted: true };
+    });
+  }
+
+  async stageReceipt(nodeId: string, body: unknown) {
+    const data = stageReceiptSchema.parse(body),
+      digest = hash(canonical(data));
+    return this.db.transaction(async (tx) => {
+      const s = (
+        await tx.query("SELECT * FROM sessions WHERE id=$1 FOR UPDATE", [
+          data.session_id,
+        ])
+      ).rows[0];
+      const p = (
+        await tx.query(
+          "SELECT * FROM session_participants WHERE session_id=$1 AND node_id=$2 AND role='STAGE'",
+          [data.session_id, nodeId],
+        )
+      ).rows[0];
+      need(
+        s?.route_id &&
+          p &&
+          s.attempt_id === data.attempt_id &&
+          s.route_sha256 === data.route_sha256 &&
+          Number(p.node_epoch) === data.epoch,
+        409,
+        "stage_receipt_identity",
+        "Recibo não pertence a esta etapa e tentativa.",
+      );
+      const old = (
+        await tx.query(
+          "SELECT digest FROM stage_receipts WHERE session_id=$1 AND node_id=$2",
+          [s.id, nodeId],
+        )
+      ).rows[0];
+      if (old) {
+        need(
+          old.digest === digest,
+          409,
+          "receipt_conflict",
+          "Recibo da etapa conflitante.",
+        );
+        return { accepted: true, duplicate: true };
+      }
+      if (terminal(s.state))
+        return { accepted: false, terminal: true, state: s.state };
+      if (new Date(s.execution_deadline).getTime() <= Date.now()) {
+        await this.finalize(tx, s, "INTERRUPTED", 0n, "execution_timeout");
+        return { accepted: false, terminal: true, state: "INTERRUPTED" };
+      }
+      need(
+        p.claimed_at &&
+          ["AUTHORIZED", "RUNNING", "CANCELLING"].includes(s.state) &&
+          (data.state !== "COMPLETED" || s.started_at),
+        409,
+        "stage_receipt_state",
+        "A execução correspondente ainda não foi iniciada.",
+      );
+      await this.currentParticipants(tx, s);
+      await tx.query(
+        "INSERT INTO stage_receipts(session_id,node_id,digest,payload) VALUES($1,$2,$3,$4)",
+        [s.id, nodeId, digest, data],
+      );
+      await this.event(tx, s.id, "stage_receipt", {
+        node_id: nodeId,
+        state: data.state,
+        completed_commands: data.completed_commands,
+      });
+      return this.settleRoute(tx, s);
+    });
+  }
+
+  private async settleRoute(tx: PoolClient, s: Row) {
+    const stages = (
+      await tx.query(
+        `SELECT p.node_id,r.payload FROM session_participants p LEFT JOIN stage_receipts r
+      ON r.session_id=p.session_id AND r.node_id=p.node_id WHERE p.session_id=$1 AND p.role='STAGE' ORDER BY p.ordinal`,
+        [s.id],
+      )
+    ).rows;
+    const failed = stages.some(
+      (p) =>
+        p.payload &&
+        (p.payload.state !== "COMPLETED" ||
+          p.payload.completed_commands < 1 ||
+          BigInt(p.payload.request_bytes) === 0n ||
+          BigInt(p.payload.response_bytes) === 0n),
+    );
+    if (s.state === "CANCELLING" || failed) {
+      const state = s.state === "CANCELLING" ? "CANCELLED" : "FAILED";
+      await this.finalize(
+        tx,
+        s,
+        state,
+        0n,
+        failed ? "route_stage_failed" : "cancelled",
+      );
+      return { accepted: true, state, charged_microtu: "0" };
+    }
+    const root = (
+      await tx.query("SELECT payload FROM receipts WHERE session_id=$1", [s.id])
+    ).rows[0]?.payload;
+    if (!root || stages.some((p) => !p.payload))
+      return { accepted: true, receipt_pending: true, state: s.state };
+    await this.currentParticipants(tx, s);
+    const quote = (
+      await tx.query("SELECT * FROM quotes WHERE id=$1", [s.quote_id])
+    ).rows[0];
+    const model = modelManifestSchema.parse(quote.manifest);
+    const charge = chargeFor(model, root.prompt_tokens, root.completion_tokens);
+    await this.finalize(tx, s, "COMPLETED", charge, null);
+    return {
+      accepted: true,
+      state: "COMPLETED",
+      charged_microtu: charge.toString(),
+    };
   }
   async finalize(
     tx: PoolClient,
@@ -363,14 +743,32 @@ export class Sessions {
       [availableAccount(s.user_id), hold - charge],
     ];
     if (charge > 0n) {
-      const node = (
-        await tx.query("SELECT owner_id FROM nodes WHERE id=$1", [s.node_id])
-      ).rows[0];
       const fee = (charge * 2000n) / 10000n;
-      lines.push(
-        [availableAccount(node.owner_id), charge - fee],
-        ["lab:working", fee],
-      );
+      if (s.route_id) {
+        const members = (
+          await tx.query(
+            "SELECT * FROM session_participants WHERE session_id=$1 ORDER BY ordinal",
+            [s.id],
+          )
+        ).rows;
+        const payments = splitByBps(
+          charge - fee,
+          members.map((p) => p.share_bps),
+        );
+        for (let i = 0; i < members.length; i++) {
+          lines.push([availableAccount(members[i].provider_id), payments[i]!]);
+          await tx.query(
+            "UPDATE session_participants SET paid_microtu=$3 WHERE session_id=$1 AND node_id=$2",
+            [s.id, members[i].node_id, payments[i]!.toString()],
+          );
+        }
+      } else {
+        const node = (
+          await tx.query("SELECT owner_id FROM nodes WHERE id=$1", [s.node_id])
+        ).rows[0];
+        lines.push([availableAccount(node.owner_id), charge - fee]);
+      }
+      lines.push(["lab:working", fee]);
     }
     if (hold > 0n)
       await post(
@@ -383,6 +781,13 @@ export class Sessions {
           state,
           charge_microtu: charge.toString(),
           fee_bps: 2000,
+          ...(s.route_id
+            ? {
+                route_id: s.route_id,
+                route_sha256: s.route_sha256,
+                payout_policy: "ordinal-prefix-v1",
+              }
+            : {}),
         },
       );
     await tx.query(
@@ -435,6 +840,10 @@ export class Sessions {
       }
       if (terminal(s.state))
         return { accepted: false, terminal: true, state: s.state };
+      if (new Date(s.execution_deadline).getTime() <= Date.now()) {
+        await this.finalize(tx, s, "INTERRUPTED", 0n, "execution_timeout");
+        return { accepted: false, terminal: true, state: "INTERRUPTED" };
+      }
       need(
         ["RUNNING", "CANCELLING"].includes(s.state),
         409,
@@ -490,6 +899,7 @@ export class Sessions {
         "UPDATE sessions SET prompt_tokens=$2,completion_tokens=$3,elapsed_ms=$4 WHERE id=$1",
         [s.id, data.prompt_tokens, data.completion_tokens, data.elapsed_ms],
       );
+      if (s.route_id && valid && !cancelled) return this.settleRoute(tx, s);
       await this.finalize(
         tx,
         s,
@@ -544,7 +954,7 @@ export class Sessions {
     uuid.parse(id);
     const s = (
       await this.db.pool.query(
-        "SELECT id,state,error_code FROM sessions WHERE id=$1",
+        "SELECT id,state,billing_state,charged_microtu,error_code FROM sessions WHERE id=$1",
         [id],
       )
     ).rows[0];
@@ -557,7 +967,9 @@ export class Sessions {
         await tx.query(`SELECT s.* FROM sessions s LEFT JOIN nodes n ON n.id=s.node_id
         WHERE s.state NOT IN ('COMPLETED','FAILED','CANCELLED','INTERRUPTED') AND
         ((s.state='QUEUED' AND s.queue_deadline<now()) OR s.execution_deadline<now() OR
-         (s.node_id IS NOT NULL AND (n.epoch<>s.node_epoch OR n.desired_state='REVOKED')))
+         (s.node_id IS NOT NULL AND (n.epoch<>s.node_epoch OR n.desired_state='REVOKED')) OR
+         EXISTS(SELECT 1 FROM session_participants p JOIN nodes pn ON pn.id=p.node_id JOIN users pu ON pu.id=p.provider_id
+           WHERE p.session_id=s.id AND (pn.epoch<>p.node_epoch OR pn.desired_state='REVOKED' OR pu.disabled)))
         ORDER BY s.id LIMIT 100 FOR UPDATE OF s SKIP LOCKED`);
       for (const s of expired.rows)
         await this.finalize(

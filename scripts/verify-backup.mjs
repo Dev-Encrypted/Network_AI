@@ -76,6 +76,42 @@ try {
     await restored.query(`SELECT l.id FROM availability_leases l JOIN ledger_accounts a ON a.id=l.escrow_account
     WHERE a.balance<>CASE WHEN l.state IN ('ACTIVE','OFFERED') THEN l.budget_microtu-l.paid_microtu ELSE 0 END`);
   assert.equal(escrowMismatch.rowCount, 0);
+  const routeTables = [
+    "execution_routes",
+    "route_members",
+    "route_acceptances",
+    "session_domains",
+    "session_participants",
+    "stage_receipts",
+  ];
+  const routeCounts = {};
+  for (const table of routeTables) {
+    // Table identifiers come exclusively from this fixed allowlist.
+    const beforeRoute = await source.query(
+      `SELECT count(*)::int AS n FROM nai.${table}`,
+    );
+    const afterRoute = await restored.query(
+      `SELECT count(*)::int AS n FROM ${table}`,
+    );
+    assert.equal(afterRoute.rows[0].n, beforeRoute.rows[0].n);
+    routeCounts[table] = afterRoute.rows[0].n;
+  }
+  const routeProjection =
+    await restored.query(`SELECT s.id FROM sessions s JOIN session_participants p ON p.session_id=s.id
+    WHERE s.route_id IS NOT NULL GROUP BY s.id HAVING sum(p.paid_microtu) <>
+    CASE WHEN s.billing_state='SETTLED' THEN s.charged_microtu-floor(s.charged_microtu::numeric*2000/10000) ELSE 0 END`);
+  assert.equal(routeProjection.rowCount, 0);
+  await assert.rejects(
+    () => restored.query("UPDATE execution_routes SET terms=terms"),
+    { code: "42501" },
+  );
+  await assert.rejects(
+    () => restored.query("UPDATE session_participants SET share_bps=share_bps"),
+    { code: "42501" },
+  );
+  await assert.rejects(() => restored.query("DELETE FROM stage_receipts"), {
+    code: "42501",
+  });
   await assert.rejects(
     () =>
       restored.query(
@@ -100,6 +136,9 @@ try {
     availability_contracts: leases.rows[0].n,
     availability_escrow_mismatches: 0,
     runtime_contract_term_write_denied: true,
+    route_tables: routeCounts,
+    route_payout_mismatches: 0,
+    runtime_route_term_and_receipt_writes_denied: true,
     backup_sha256: createHash("sha256")
       .update(await readFile(path))
       .digest("hex"),

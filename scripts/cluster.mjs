@@ -21,6 +21,7 @@ const { values: a } = parseArgs({
       "workers",
       "port",
       "rpc-port",
+      "rpc-forward-port",
       "threads",
     ].map((k) => [k, { type: "string" }]),
   ),
@@ -32,14 +33,20 @@ if (!a["engine-dir"] || !a["model-dir"] || !a.manifest || !a.directory)
 const workers = Number(a.workers ?? "2"),
   port = Number(a.port ?? "43220"),
   rpc = Number(a["rpc-port"] ?? "43820"),
+  rpcForward = Number(a["rpc-forward-port"] ?? a["rpc-port"] ?? "43820"),
   threads = Number(a.threads ?? "8");
 if (
   ![0, 2].includes(workers) ||
-  ![port, rpc, rpc + 1].every(
+  ![port, rpc, rpc + 1, rpcForward, rpcForward + 1].every(
     (p) => Number.isInteger(p) && p >= 1024 && p <= 65535,
   ) ||
   port === rpc ||
   port === rpc + 1 ||
+  port === rpcForward ||
+  port === rpcForward + 1 ||
+  (a["rpc-forward-port"] &&
+    (workers !== 2 ||
+      [rpc, rpc + 1].some((p) => p === rpcForward || p === rpcForward + 1))) ||
   !Number.isInteger(threads) ||
   threads < 1 ||
   threads > 32
@@ -188,7 +195,7 @@ try {
     ...(workers
       ? [
           "--rpc",
-          `127.0.0.1:${rpc},127.0.0.1:${rpc + 1}`,
+          `127.0.0.1:${rpcForward},127.0.0.1:${rpcForward + 1}`,
           "--split-mode",
           "layer",
           "--tensor-split",
@@ -198,6 +205,9 @@ try {
         ]
       : ["--device", "none", "--gpu-layers", "0"]),
   );
+  // Guarded stages require a session capability for every compute command.
+  // Loading weights is separate from paid execution; suppress engine warmup.
+  if (a["rpc-forward-port"]) args.push("--no-warmup");
   launch("engine", "llama-server", args);
   const readyAt = Date.now();
   await waitFor(async () => {
@@ -235,6 +245,7 @@ try {
         slots: 1,
         threads_per_worker: threads,
         cpu_repack: false,
+        rpc_guarded: Boolean(a["rpc-forward-port"]),
         ready_ms: Date.now() - readyAt,
         pids: children.map((p) => p.pid),
       },

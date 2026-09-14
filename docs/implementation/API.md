@@ -26,6 +26,10 @@ Login verifies a scrypt password hash and creates a 12-hour HttpOnly, SameSite=S
 | GET / POST | `/keys` | List/create own personal keys |
 | DELETE | `/keys/:id` | Revoke own key |
 | GET | `/nodes` | Operator's nodes; administrators see all |
+| GET / POST | `/routes` | Inspect visible routes / root owner proposes immutable complete-route terms |
+| POST | `/routes/:id/accept` | Listed provider accepts the exact `route_sha256` |
+| POST | `/routes/:id/withdraw` | Provider withdraws from future admissions |
+| POST | `/admin/routes/:id/qualify` | Administrator records local qualification or revocation |
 | POST | `/nodes/:id/state` | Owner/admin sets READY, PAUSED or REVOKED |
 | GET / POST | `/admin/users` | Administrator lists/creates users, initially at zero balance |
 | POST | `/admin/grants` | Administrator issues an explicit LAB_TU grant |
@@ -35,6 +39,8 @@ Login verifies a scrypt password hash and creates a 12-hour HttpOnly, SameSite=S
 | GET | `/admin/metrics` | Administrator reads counts and ledger sum |
 
 The executable [shared contract](../../packages/contracts/src/index.ts) defines request bodies. A model manifest cannot change under the same ID. Another revision needs another identifier. Qualification state can change separately, with an audit event.
+
+Route bodies and their lifecycle are detailed in the [complete-route guide](COMPLETE_ROUTES.md). A proposal contains `name`, `model_id`, UUID `idempotency_key` and 2–16 ordered `{node_id, share_bps}` members, starting with the root and totaling 10,000 basis points. Node invitations accept `node_kind` as `INFERENCE` (default), `ROUTE_ROOT` or `RPC_STAGE`. Qualified roots/stages cannot be selected as standalone complete-model offers. `/sessions/:id` includes frozen participants, accepted stage receipts and individual `paid_microtu` values. `/capacity/:model` reports conservative complete-route packing over shared domains; it is not a sum of advertised stage slots.
 
 ### Model manifest fields
 
@@ -136,3 +142,5 @@ Headers: `X-Node-Timestamp`, `X-Node-Nonce`, `X-Node-Signature`. The acceptance 
 Control signs Ed25519 prepare/execute capabilities bound to network, audience, node, epoch, session, attempt, manifest, raw request hash, limits, deadline and prepare ID. The node reserves a local semaphore and consumes the control claim once before invoking the engine. Identical receipt retries are idempotent; conflicting receipts are rejected.
 
 `/internal` routes require the gateway secret and are not exposed through the browser proxy. Node heartbeat/claim/receipt paths require the registered node's signature. These controls establish message identity and authorization, not independent proof of hardware, correct inference or honest token counting.
+
+Stages additionally send signed `POST /nodes/:id/stage-claim` and `/nodes/:id/stage-receipts`. Stage HTTP listeners accept `/prepare`, `/release`, `/stage/start` and `/stage/finish`, each under its specific coordinator capability. A stage receipt reports session/attempt/epoch/route hash, terminal state, completed graph commands, observed request/response bytes, transcript SHA-256, elapsed time and `metering_source: rpc_observed`. Those observations are distinct from the root's engine token usage. The normal browser proxy cannot invoke these signed internal node operations.

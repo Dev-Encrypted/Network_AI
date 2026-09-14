@@ -22,6 +22,7 @@ import { Market } from "./market.js";
 import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
+import { Routes } from "./routes.js";
 import { ApiController } from "./controller.js";
 import { AppError } from "./errors.js";
 
@@ -38,6 +39,7 @@ const availability = new Availability(db);
     { provide: Nodes, useValue: new Nodes(db) },
     { provide: Sessions, useValue: sessions },
     { provide: Availability, useValue: availability },
+    { provide: Routes, useValue: new Routes(db, auth) },
   ],
 })
 class AppModule {}

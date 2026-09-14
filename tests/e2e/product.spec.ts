@@ -5,6 +5,116 @@ import { randomUUID } from "node:crypto";
 const config = JSON.parse(
   await readFile(".runtime/private-lab/config.json", "utf8"),
 );
+
+test("route proposal, consent, qualification and withdrawal work in the browser", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
+  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await page.getByRole("button", { name: "Meus nós", exact: true }).click();
+  const auth = { headers: { Origin: config.web_origin } };
+  const me = await (await page.request.get("/api/v1/me")).json();
+  const ns = (await (await page.request.get("/api/v1/nodes")).json()).data;
+  const original = ns.find((n: any) => n.id === config.node_id);
+  const label = `Browser route ${randomUUID().slice(0, 8)}`;
+  const ids: string[] = [];
+  let routeId: string | undefined;
+  try {
+    for (let i = 0; i < 2; i++) {
+      const r = await page.request.post("/api/v1/admin/node-invites", {
+        ...auth,
+        data: {
+          name: `${label} ${i}`,
+          owner_id: me.id,
+          resource_domain_id: original.resource_domain_id,
+          model_id: original.model_id,
+          base_url: `http://127.0.0.1:${43294 + i}`,
+          node_kind: i === 0 ? "ROUTE_ROOT" : "RPC_STAGE",
+        },
+      });
+      expect(r.ok()).toBe(true);
+      ids.push((await r.json()).id);
+    }
+    // This browser journey verifies the control workflow, with OFFLINE nodes.
+    // It makes no claim that these fixture identities executed any inference.
+    await page.reload();
+    await page.getByRole("button", { name: "Meus nós", exact: true }).click();
+    const section = page.locator(".routes-section");
+    await section
+      .getByRole("button", { name: "Propor rota", exact: true })
+      .click();
+    await section.getByLabel("Nome da rota", { exact: true }).fill(label);
+    await section
+      .getByLabel("Nó principal", { exact: true })
+      .selectOption(ids[0], { timeout: 10000 });
+    await section
+      .getByLabel("Identificador da etapa 1", { exact: true })
+      .fill(ids[1]);
+    await section
+      .getByRole("button", { name: "Registrar proposta", exact: true })
+      .click();
+    const card = section
+      .locator(".route-card")
+      .filter({ has: page.getByRole("heading", { name: label, exact: true }) });
+    await expect(card).toContainText("Pendente");
+    const rs = (await (await page.request.get("/api/v1/routes")).json()).data;
+    routeId = rs.find((r: any) => r.name === label).id;
+    await card
+      .getByRole("button", { name: "Aceitar termos", exact: true })
+      .click();
+    await expect(
+      card.getByRole("cell", { name: "Aceito", exact: true }),
+    ).toHaveCount(2);
+    await card
+      .getByLabel(`Registro de qualificação — ${label}`)
+      .fill(
+        "Browser workflow fixture only; offline nodes do not qualify real hardware.",
+      );
+    await card
+      .getByRole("button", { name: "Qualificar para teste local", exact: true })
+      .click();
+    await expect(card).toContainText("Aguardando capacidade");
+    await card
+      .getByRole("button", { name: "Retirar participação", exact: true })
+      .click();
+    await expect(
+      card.getByRole("cell", { name: "Retirado", exact: true }),
+    ).toHaveCount(2);
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await card.screenshot({
+      path: ".runtime/private-lab/screenshots/route-mobile.png",
+    });
+    await card
+      .getByRole("button", { name: "Encerrar rota", exact: true })
+      .click();
+    await expect(card.getByText("Encerrada", { exact: true })).toBeVisible();
+  } finally {
+    if (routeId)
+      await page.request
+        .post(`/api/v1/admin/routes/${routeId}/qualify`, {
+          ...auth,
+          data: {
+            state: "REVOKED",
+            note: "Browser fixture cleanup; preserve historical workflow evidence.",
+          },
+        })
+        .catch(() => {});
+    for (const id of ids)
+      await page.request
+        .post(`/api/v1/nodes/${id}/state`, {
+          ...auth,
+          data: { state: "REVOKED" },
+        })
+        .catch(() => {});
+  }
+});
 test("availability funding, operator acceptance and closure work in the browser", async ({
   page,
 }) => {

@@ -16,6 +16,7 @@ import { Market } from "./market.js";
 import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
+import { Routes } from "./routes.js";
 import { capacity } from "./capacity.js";
 import { need } from "./errors.js";
 import { same } from "./security.js";
@@ -28,6 +29,7 @@ export class ApiController {
     @Inject(Nodes) readonly nodes: Nodes,
     @Inject(Sessions) readonly sessions: Sessions,
     @Inject(Availability) readonly availability: Availability,
+    @Inject(Routes) readonly routes: Routes,
   ) {}
   internal(req: FastifyRequest) {
     need(
@@ -83,6 +85,35 @@ export class ApiController {
   ) {
     const user = await this.auth.authenticate(req);
     return capacity(this.auth.db.pool, model, user.id);
+  }
+  @Get("routes") async listRoutes(@Req() req: FastifyRequest) {
+    return { data: await this.routes.list(await this.auth.authenticate(req)) };
+  }
+  @Post("routes") async publishRoute(
+    @Req() req: FastifyRequest,
+    @Body() body: unknown,
+  ) {
+    return this.routes.publish(await this.auth.authenticate(req), body);
+  }
+  @Post("routes/:id/accept") async acceptRoute(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.routes.accept(await this.auth.authenticate(req), id, body);
+  }
+  @Post("routes/:id/withdraw") async withdrawRoute(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.routes.withdraw(await this.auth.authenticate(req), id);
+  }
+  @Post("admin/routes/:id/qualify") async qualifyRoute(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.routes.qualify(await this.auth.authenticate(req), id, body);
   }
   @Get("availability/leases") async leases(@Req() req: FastifyRequest) {
     return {
@@ -265,6 +296,22 @@ export class ApiController {
   ) {
     await this.nodes.signed(req, id);
     return this.sessions.receipt(id, body);
+  }
+  @Post("nodes/:id/stage-claim") async stageClaim(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    await this.nodes.signed(req, id);
+    return this.sessions.stageClaim(id, body);
+  }
+  @Post("nodes/:id/stage-receipts") async stageReceipt(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    await this.nodes.signed(req, id);
+    return this.sessions.stageReceipt(id, body);
   }
   @Post("internal/sessions") async create(
     @Req() req: FastifyRequest,

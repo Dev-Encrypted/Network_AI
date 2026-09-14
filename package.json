@@ -1,6 +1,6 @@
 {
   "name": "network-ai",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -30,7 +30,9 @@
     "lab:link-config": "node scripts/link-config.mjs",
     "model:acquire": "node scripts/artifacts.mjs",
     "model:cluster": "node scripts/cluster.mjs",
-    "lab:install-cpu-cluster": "node scripts/install-cpu-cluster.mjs"
+    "lab:install-cpu-cluster": "node scripts/install-cpu-cluster.mjs",
+    "lab:install-cpu-route": "node scripts/install-cpu-route.mjs",
+    "test:route": "node scripts/route-acceptance.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

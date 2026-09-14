@@ -7,7 +7,10 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use futures_util::StreamExt;
+use futures_util::{
+    StreamExt,
+    future::{join_all, try_join_all},
+};
 use network_ai_runtime::{Chat, Config, Error, Result, Sse, client, event, hash, reqwest};
 use serde_json::{Value, json};
 use std::{convert::Infallible, sync::Arc, time::Duration};
@@ -242,54 +245,230 @@ async fn dispatch(
         anyhow::ensure!(value["state"] == "QUEUED", "Session ended in queue");
         tokio::time::sleep(Duration::from_millis(300)).await;
     };
-    let node = admission["node_url"]
+    let node = participant_url(&admission)?;
+    let mut stages = Vec::new();
+    if let Some(parts) = admission.get("participants") {
+        let parts = parts
+            .as_array()
+            .ok_or_else(|| anyhow::anyhow!("Invalid route"))?;
+        anyhow::ensure!((2..=16).contains(&parts.len()), "Route size");
+        let mut ids = std::collections::BTreeSet::new();
+        let mut roots = 0;
+        for p in parts {
+            let id = p["node_id"]
+                .as_str()
+                .ok_or_else(|| anyhow::anyhow!("Node identity"))?;
+            uuid::Uuid::parse_str(id)?;
+            anyhow::ensure!(ids.insert(id), "Duplicate route node");
+            participant_url(p)?;
+            if p["role"] == "ROOT" {
+                roots += 1;
+                anyhow::ensure!(p["node_url"] == admission["node_url"], "Root binding");
+            } else {
+                anyhow::ensure!(p["role"] == "STAGE", "Unknown route role");
+                stages.push(p.clone());
+            }
+        }
+        anyhow::ensure!(roots == 1, "Missing unique route root");
+    }
+    let routed = !stages.is_empty();
+    let mut authorization: Option<Value> = None;
+    let outcome: anyhow::Result<()> = async {
+        let prepared_stages = try_join_all(stages.iter().map(|p| async {
+            let prepared = node_post(app, p, "/prepare", "capability", &json!({})).await?;
+            Ok::<Value, anyhow::Error>(
+                json!({"node_id":p["node_id"],"prepare_id":prepared["prepare_id"]}),
+            )
+        }))
+        .await?;
+        let prepared = node_post(app, &admission, "/prepare", "capability", &json!({})).await?;
+        let mut request = json!({"prepare_id":prepared["prepare_id"]});
+        if routed {
+            request["participants"] = json!(prepared_stages);
+        }
+        authorization = Some(
+            control(
+                app,
+                &format!("/internal/sessions/{id}/authorize"),
+                Some(&request),
+                headers,
+                true,
+            )
+            .await
+            .map_err(|_| anyhow::anyhow!("Authorization failed"))?,
+        );
+        let auth = authorization.as_ref().expect("assigned above");
+        if routed {
+            let parts = auth["participants"]
+                .as_array()
+                .ok_or_else(|| anyhow::anyhow!("Stage authorizations missing"))?;
+            anyhow::ensure!(
+                parts.len() == stages.len()
+                    && parts.iter().all(|p| stages
+                        .iter()
+                        .any(|s| s["node_id"] == p["node_id"] && s["node_url"] == p["node_url"])),
+                "Stage authorization binding"
+            );
+            let empty = json!({});
+            try_join_all(
+                parts
+                    .iter()
+                    .map(|p| node_post(app, p, "/stage/start", "capability", &empty)),
+            )
+            .await?;
+        }
+        let response = app
+            .http
+            .post(format!("{node}/execute"))
+            .bearer_auth(auth["capability"].as_str().unwrap_or_default())
+            .header("content-type", "application/json")
+            .body(body)
+            .send()
+            .await?
+            .error_for_status()?;
+        let mut stream = response.bytes_stream();
+        let mut total = 0usize;
+        let mut parser = Sse::default();
+        let mut done = false;
+        let mut failed = false;
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            total += chunk.len();
+            anyhow::ensure!(total <= 4 * 1024 * 1024, "Output limit");
+            if routed {
+                // The route is complete only after the workers have persisted
+                // their own receipts. Hold the root's final marker until then.
+                for data in parser.push(&chunk)? {
+                    if data == "[DONE]" {
+                        done = true;
+                        continue;
+                    }
+                    let value: Value = serde_json::from_str(&data)?;
+                    failed |= value.get("error").is_some();
+                    tx.send(Ok(Bytes::from(event(&value)))).await?;
+                }
+            } else {
+                tx.send(Ok(chunk)).await?;
+            }
+        }
+        anyhow::ensure!(!routed || (done && !failed), "Incomplete route root stream");
+        Ok(())
+    }
+    .await;
+    let mut durable = true;
+    if routed {
+        if let Some(parts) = authorization
+            .as_ref()
+            .and_then(|a| a["participants"].as_array())
+        {
+            let finish = json!({"state":if outcome.is_ok(){"COMPLETED"}else{"FAILED"}});
+            for result in join_all(
+                parts
+                    .iter()
+                    .map(|p| node_post(app, p, "/stage/finish", "finish_capability", &finish)),
+            )
+            .await
+            {
+                durable &= result.as_ref().is_ok_and(|v| {
+                    v["durable"] == true
+                        && v["state"] != "FAILED"
+                        && v["state"] != "CANCELLED"
+                        && v["state"] != "INTERRUPTED"
+                });
+            }
+        } else {
+            durable = false;
+        }
+    }
+    if outcome.is_err() || !durable {
+        // Release unclaimed local preparations. Cancellation resolves any stage
+        // that claimed but whose finish response was lost; no execution retry.
+        let mut prepared_parts = stages;
+        prepared_parts.push(admission);
+        let empty = json!({});
+        let _ = join_all(
+            prepared_parts
+                .iter()
+                .map(|p| node_post(app, p, "/release", "capability", &empty)),
+        )
+        .await;
+        let _ = control(
+            app,
+            &format!("/sessions/{id}/cancel"),
+            Some(&empty),
+            headers,
+            false,
+        )
+        .await;
+        outcome?;
+        anyhow::bail!("A stage receipt was not durably confirmed");
+    }
+    outcome?;
+    if routed {
+        let status = control(
+            app,
+            &format!("/internal/sessions/{id}"),
+            None,
+            headers,
+            true,
+        )
+        .await
+        .unwrap_or_else(|_| json!({"receipt_pending":true}));
+        anyhow::ensure!(
+            status["state"] != "FAILED"
+                && status["state"] != "CANCELLED"
+                && status["state"] != "INTERRUPTED",
+            "Route did not settle"
+        );
+        tx.send(Ok(Bytes::from(format!(
+            "event: network_ai_receipt\ndata: {status}\n\n"
+        ))))
+        .await?;
+        tx.send(Ok(Bytes::from_static(b"data: [DONE]\n\n"))).await?;
+    }
+    Ok(())
+}
+fn participant_url(part: &Value) -> anyhow::Result<String> {
+    let node = part["node_url"]
         .as_str()
         .ok_or_else(|| anyhow::anyhow!("Missing node"))?;
     let url = reqwest::Url::parse(node)?;
     anyhow::ensure!(
         url.scheme() == "http"
             && url.host_str() == Some("127.0.0.1")
+            && url.username().is_empty()
+            && url.password().is_none()
+            && url.query().is_none()
+            && url.fragment().is_none()
+            && url.path() == "/"
             && url.port().is_some_and(|p| (43103..=43299).contains(&p)),
         "Endpoint policy"
     );
-    let prepared: Value = app
+    Ok(node.to_owned())
+}
+async fn node_post(
+    app: &App,
+    part: &Value,
+    path: &str,
+    key: &str,
+    body: &Value,
+) -> anyhow::Result<Value> {
+    let node = participant_url(part)?;
+    let token = part[key]
+        .as_str()
+        .filter(|s| s.len() <= 8192)
+        .ok_or_else(|| anyhow::anyhow!("Missing participant capability"))?;
+    Ok(app
         .http
-        .post(format!("{node}/prepare"))
-        .bearer_auth(admission["capability"].as_str().unwrap_or_default())
+        .post(format!("{node}{path}"))
+        .bearer_auth(token)
         .timeout(Duration::from_secs(8))
-        .json(&json!({}))
+        .json(body)
         .send()
         .await?
         .error_for_status()?
         .json()
-        .await?;
-    let authorization = control(
-        app,
-        &format!("/internal/sessions/{id}/authorize"),
-        Some(&json!({"prepare_id":prepared["prepare_id"]})),
-        headers,
-        true,
-    )
-    .await
-    .map_err(|_| anyhow::anyhow!("Authorization failed"))?;
-    let response = app
-        .http
-        .post(format!("{node}/execute"))
-        .bearer_auth(authorization["capability"].as_str().unwrap_or_default())
-        .header("content-type", "application/json")
-        .body(body)
-        .send()
-        .await?
-        .error_for_status()?;
-    let mut stream = response.bytes_stream();
-    let mut total = 0usize;
-    while let Some(chunk) = stream.next().await {
-        let chunk = chunk?;
-        total += chunk.len();
-        anyhow::ensure!(total <= 4 * 1024 * 1024, "Output limit");
-        tx.send(Ok(chunk)).await?;
-    }
-    Ok(())
+        .await?)
 }
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

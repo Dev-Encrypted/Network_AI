@@ -59,7 +59,7 @@ jobs:
       - run: cargo +1.93.1 build --locked -p network-ai-node -p network-ai-gateway
       - run: pnpm lab:start --no-build
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm exec playwright test --grep 'mobile layout|browser proxy'
+      - run: pnpm exec playwright test --grep 'route proposal|mobile layout|browser proxy'
       - run: node scripts/verify-backup.mjs
       - if: always()
         run: pnpm lab:stop

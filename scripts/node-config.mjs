@@ -27,6 +27,9 @@ const invitation = z
     operator: z
       .object({
         schema_version: z.literal(1),
+        node_kind: z
+          .enum(["INFERENCE", "ROUTE_ROOT", "RPC_STAGE"])
+          .default("INFERENCE"),
         capability_public_key: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
         control_port: z.number().int().min(1024).max(65535),
         gateway_port: z.number().int().min(1024).max(65535),
@@ -68,6 +71,7 @@ const value = {
   gateway_port: c.gateway_port,
   capability_public_key: c.capability_public_key,
   node_id: invitation.id,
+  node_kind: c.node_kind ?? "INFERENCE",
   node_invite: invitation.invite,
   node_name: "Operador convidado",
   node_port: port,

@@ -1,0 +1,61 @@
+{
+  "version": "0.4.0-private-route-preview",
+  "observed_on": "2026-09-14",
+  "scope": "Private Windows application; real 32B CPU model on one physical host, one operator account, three agent identities and one coordinator.",
+  "physical_hosts": 1,
+  "independent_operators": 0,
+  "operator_accounts": 1,
+  "tests": {
+    "postgres_integration": 34,
+    "artifact_acquisition": 3,
+    "rpc_socket_protocol": 4,
+    "rust_runtime": 4,
+    "rust_f0": 2,
+    "rust_private_link": 3,
+    "python_f0": 21,
+    "browser": 6
+  },
+  "route_campaign": {
+    "completed_requests": 3,
+    "stage_count": 2,
+    "domain_count": 1,
+    "shared_domain_slots": 1,
+    "all_receipts_required": true,
+    "participant_pool_conserved": true,
+    "concurrent_request_execution_did_not_overlap": true,
+    "killed_stage_outcome": "FAILED",
+    "killed_stage_billing": "REFUNDED",
+    "killed_stage_charge_microtu": "0",
+    "client_cancel_injected": false,
+    "default_unreserved_startup_rejected": true,
+    "explicit_nonbillable_startup_commands_per_worker": 1,
+    "startup_allowance_closed_before_requests": true,
+    "report": "evidence/qwen3-32b-complete-route.json"
+  },
+  "managed_installation": {
+    "whole_group_stop_start_verified": true,
+    "post_restart_real_browser_proxy_inference": true,
+    "post_restart_state": "COMPLETED",
+    "post_restart_billing": "SETTLED",
+    "post_restart_participants": 3,
+    "report": "evidence/qwen3-32b-managed-route.json"
+  },
+  "isolated_restore": {
+    "balanced_projection": true,
+    "route_table_counts_match": true,
+    "participant_payout_projection_matches": true,
+    "runtime_term_and_receipt_mutation_denied": true,
+    "report": "evidence/routes-backup-restore.json"
+  },
+  "approval": {
+    "public_network": false,
+    "independent_provider_partition": false,
+    "heterogeneous_gpu_route": false,
+    "wan_relay_nat_rpc": false,
+    "independent_work_verification": false,
+    "cooperative_economics": false,
+    "distributed_consensus": false,
+    "cash_payments_and_payouts": false,
+    "production": false
+  }
+}

@@ -19,6 +19,8 @@ The maintained documentation is in English. It explains both the long-term coope
 
 The product targets models above 27B. Version 0.3 executed an official 32.8B Q4_K_M model locally and across two trusted CPU worker processes, then completed and settled a request through the application and private QUIC bridge. All of this evidence comes from one physical host. Read the [measured allocations, numerical comparison and boundaries](implementation/MODEL_ARTIFACTS.md) before treating the experiment as evidence for independent contributors or WAN operation.
 
+Version 0.4 adds [complete routes and participant settlement](implementation/COMPLETE_ROUTES.md): signed stage claims, all-domain reservations, provider consent, real guarded 32B computation and refund after stage loss. Its evidence still uses one computer and one operator account.
+
 ## Documentation map
 
 - [Article](ARTICLE.md): motivation, architecture, participation, economics, limitations, and results.

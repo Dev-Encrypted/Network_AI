@@ -66,6 +66,8 @@ The same distinction applies to physical inventory. Ten node identities are not 
 
 **Mode C** distributes parts of one model among participants. The route needs a partition map, compatible tensor interfaces, per-stage memory budgets, communication, session-state handling, and recovery. It is a central research objective for larger models, not a feature automatically provided by installing multiple agents.
 
+The version 0.4 implementation is a concrete local step toward this mode: an official 32B model runs through a root and two guarded CPU stage agents. The route requires all providers' acceptance, reserves its complete resource set, collects separate signed receipts and divides one provider pool. Actual generation, serialized concurrent calls and refund after stage loss were observed on one computer with one operator account. Independent participants and WAN qualification remain open. The [complete-route manual](implementation/COMPLETE_ROUTES.md) explains the boundaries and payment example.
+
 ```mermaid
 flowchart TB
     Request[Consumer chooses a model and service profile] --> Admission[Check identity, balance, limits, and qualified capacity]

@@ -82,6 +82,8 @@ pnpm lab:stop
 
 The manager validates owned process commands before stopping their PIDs. Stop retains the database, volume and private configuration. It does not stop other Docker projects. If the optional CPU cluster is installed, `lab:start` waits for its backend and launches its node; `lab:stop` requests graceful shutdown of its supervisor and both workers. Existing external engines, including LM Studio, remain separately managed. A stop/start cycle can take longer because the CPU model's bytes are verified and loaded again.
 
+Version 0.4 can install the [managed complete CPU route](COMPLETE_ROUTES.md#install-the-measured-profile). When present, `cpu-route.json` takes precedence over the retained old CPU profile so the two groups do not load duplicate 32B weights. The manager starts both stage guards before the engine and root. `--skip-cpu` starts core services only and leaves any already running CPU group untouched. Use a full stop/start cycle to recover a failed route as a group; restarting one stage alone invalidates its old session epoch and engine connection.
+
 A restarted node advances its epoch. The control service fences earlier attempts and releases their reservations. The external engine sees a disconnected request; its actual internal resource reclamation depends on that engine.
 
 During a short control outage, the node writes receipts to a durable outbox before sending them. Retried delivery does not charge twice. A write failure blocks new admissions in that process until correction and restart. Execution expires after 180 seconds and queueing after 120 seconds. The current product terminates expired work; it does not resume generation from the last interrupted token.

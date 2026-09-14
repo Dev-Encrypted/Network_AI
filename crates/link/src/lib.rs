@@ -49,14 +49,25 @@ impl Role {
         match self {
             Self::Node => {
                 (method == "GET" && path == "/health")
-                    || (method == "POST" && matches!(path, "/prepare" | "/execute"))
+                    || (method == "POST"
+                        && matches!(
+                            path,
+                            "/prepare" | "/execute" | "/release" | "/stage/start" | "/stage/finish"
+                        ))
             }
             Self::Control => {
                 method == "POST"
                     && (path == "/api/v1/nodes/register"
-                        || ["resume", "heartbeat", "claim", "receipts"]
-                            .iter()
-                            .any(|action| path == format!("/api/v1/nodes/{node}/{action}")))
+                        || [
+                            "resume",
+                            "heartbeat",
+                            "claim",
+                            "receipts",
+                            "stage-claim",
+                            "stage-receipts",
+                        ]
+                        .iter()
+                        .any(|action| path == format!("/api/v1/nodes/{node}/{action}")))
             }
         }
     }

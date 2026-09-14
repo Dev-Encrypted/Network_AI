@@ -2,6 +2,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AvailabilityPanel } from "./availability";
+import { RoutesPanel } from "./routes";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -56,6 +57,7 @@ type Node = {
   domain_name: string;
   slots: number;
   model_id: string;
+  node_kind: string;
   inventory: { gpu_name?: string };
   last_seen: string;
 };
@@ -70,6 +72,15 @@ type Session = {
   prompt_tokens: number | null;
   completion_tokens: number | null;
   error_code: string | null;
+  route_id?: string | null;
+  participants?: {
+    node_id: string;
+    role: string;
+    ordinal: number;
+    share_bps: number;
+    paid_microtu: string;
+    receipt?: { state: string; completed_commands: number } | null;
+  }[];
   events?: {
     sequence: string;
     kind: string;
@@ -1145,6 +1156,12 @@ export default function Home() {
                 request={api}
                 onChange={refresh}
               />
+              <RoutesPanel
+                user={user}
+                nodes={nodes}
+                request={api}
+                onChange={refresh}
+              />
             </>
           )}
           {view === "sessions" && (
@@ -1242,6 +1259,40 @@ export default function Home() {
                     <p className="muted">
                       Motivo: <code>{detail.error_code}</code>
                     </p>
+                  )}
+                  {!!detail.participants?.length && (
+                    <div className="table-wrap">
+                      <table aria-label="Divisão da sessão">
+                        <thead>
+                          <tr>
+                            <th>Participante</th>
+                            <th>Parte dos operadores</th>
+                            <th>Recibo</th>
+                            <th>Pago em LAB_TU</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {detail.participants.map((p) => (
+                            <tr key={p.node_id}>
+                              <td>
+                                {p.role === "ROOT"
+                                  ? "Nó principal"
+                                  : `Etapa ${p.ordinal}`}
+                              </td>
+                              <td>{p.share_bps / 100}%</td>
+                              <td>
+                                {p.role === "ROOT"
+                                  ? "Uso do modelo"
+                                  : p.receipt
+                                    ? `${stateLabel[p.receipt.state] ?? p.receipt.state} · ${p.receipt.completed_commands} comandos`
+                                    : "Aguardando"}
+                              </td>
+                              <td>{formatTU(p.paid_microtu)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                   <ol className="timeline">
                     {detail.events?.map((event) => (
@@ -1835,6 +1886,7 @@ function Admin({
                   resource_domain_id: domain?.id,
                   model_id: data.get("model"),
                   base_url: data.get("url"),
+                  node_kind: data.get("node_kind"),
                 },
               );
               setInvite(JSON.stringify(result, null, 2));
@@ -1843,6 +1895,18 @@ function Admin({
           }
         >
           <h2>Convidar um nó</h2>
+          <label>
+            Função do nó
+            <select
+              name="node_kind"
+              aria-label="Função do nó"
+              defaultValue="INFERENCE"
+            >
+              <option value="INFERENCE">Modelo completo</option>
+              <option value="ROUTE_ROOT">Nó principal de uma rota</option>
+              <option value="RPC_STAGE">Etapa de computação</option>
+            </select>
+          </label>
           <label>
             Nome do nó
             <input name="name" required maxLength={100} />

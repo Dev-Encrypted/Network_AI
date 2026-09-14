@@ -6,7 +6,7 @@ Created and directed by [Dev-Encrypted](https://github.com/Dev-Encrypted).
 
 [Start here](docs/GETTING_STARTED.md) · [Full article](docs/ARTICLE.md) · [Models above 27B](docs/MODEL_SCALING.md) · [Documentation](docs/README.md) · [Private application](docs/implementation/README.md) · [Releases](https://github.com/Dev-Encrypted/Network_AI/releases)
 
-> **Current software: v0.3 private network preview, alongside the preserved F0 research bench.** The application includes real inference, signed nodes, authenticated private QUIC links, funded availability contracts, temporary admission quotas, and verified model acquisition. Public decentralized operation, cooperative issuance, independent multi-host qualification and the paid marketplace remain under development. See the [implementation matrix](docs/implementation/STATUS.md).
+> **Current software: v0.4 private route preview, alongside the preserved F0 research bench.** The application includes real inference, signed nodes, authenticated private QUIC links, funded availability contracts, temporary admission quotas, and verified model acquisition. An official 32B model now runs through a complete route with two guarded CPU stages, atomic capacity reservations and participant settlement on one computer. Public decentralized operation, cooperative issuance, independent multi-host qualification and the paid marketplace remain under development. See the [implementation matrix](docs/implementation/STATUS.md).
 
 ## What is NETWORK AI?
 
@@ -51,7 +51,7 @@ A **route** is a complete, compatible set of resources that can finish a request
 |---|---|---|---|
 | A: complete model on one node | One node sends the request to its configured inference engine | Models that fit one suitable host; independent replicas | Implemented in the private local profile |
 | B: a nearby GPU cluster | An operator offers a model served by a tightly connected group of GPUs | Larger models requiring several nearby GPUs | Trusted two-process CPU prototype executed; multi-GPU qualification remains |
-| C: model split across participants | Different nodes execute successive parts of the same model | Models requiring capacity from several participants | Research objective; separate small CPU experiment only |
+| C: model split across participants | Different nodes execute successive parts of the same model | Models requiring capacity from several participants | Real 32B route with separately signed stage agents on one host; independent-provider qualification remains |
 
 ```mermaid
 flowchart LR
@@ -67,6 +67,8 @@ flowchart LR
 ```
 
 This diagram describes the target architecture. Modes B and C are not enabled merely by starting additional private-preview agents. Two agents serving complete models provide more request destinations; they do not automatically become two halves of a larger model.
+
+The [complete-route guide](docs/implementation/COMPLETE_ROUTES.md) explains the implemented local configuration, operator consent, shared physical capacity, stage receipts and payout arithmetic. The measured campaign completed three requests and refunded a fourth after a deliberate stage failure. Its one operator account and one physical host are explicitly recorded.
 
 Dividing a model requires a compatible inference engine and communication between its parts. A slow or unavailable stage can delay the entire route. We plan capacity by measured memory, speed, connectivity, and reliability, rather than adding advertised VRAM figures. [Architecture](docs/planning/03_ARCHITECTURE.md).
 

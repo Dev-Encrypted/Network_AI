@@ -23,6 +23,8 @@ Current English chapters preserve the same paths for navigation. The execution v
 |---|---|---|
 | [v0.1.0-f0](https://github.com/Dev-Encrypted/Network_AI/releases/tag/v0.1.0-f0) | Original research, bench and preserved artifacts | [English release description](releases/v0.1.0-f0.md) |
 | [v0.2.0-private-preview](https://github.com/Dev-Encrypted/Network_AI/releases/tag/v0.2.0-private-preview) | Executable private inference application | [English release description](releases/v0.2.0-private-preview.md) |
+| [v0.3.0-private-network-preview](https://github.com/Dev-Encrypted/Network_AI/releases/tag/v0.3.0-private-network-preview) | Authenticated private links, funded availability and real 32B CPU cluster | [English release description](releases/v0.3.0-private-network-preview.md) |
+| [v0.4.0-private-route-preview](https://github.com/Dev-Encrypted/Network_AI/releases/tag/v0.4.0-private-route-preview) | Complete route consent, stage claims, guarded computation and participant settlement | [English release description](releases/v0.4.0-private-route-preview.md) |
 
 Historical tags stay fixed. Their source archives retain the documentation language at the tagged commit. English release descriptions link readers to the maintained documentation on `main` and identify the original release scope.
 

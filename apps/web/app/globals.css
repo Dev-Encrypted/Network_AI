@@ -1902,3 +1902,50 @@ td small,
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Complete routes reuse the existing private operator interface. */
+.routes-section {
+  margin-top: 36px;
+}
+.route-card,
+.route-proposal {
+  border: 1px solid var(--border, #dbe4e8);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+}
+.route-card h3 {
+  margin: 0;
+}
+.route-proposal,
+.route-qualification {
+  display: grid;
+  gap: 16px;
+}
+.route-qualification {
+  margin-top: 18px;
+}
+.route-member-input {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.route-member-input > label {
+  flex: 1;
+  min-width: 180px;
+}
+.route-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.route-hash {
+  overflow-wrap: anywhere;
+}
+.route-card details {
+  margin-top: 14px;
+}
+.route-card summary {
+  cursor: pointer;
+}

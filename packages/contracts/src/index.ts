@@ -157,6 +157,50 @@ export const receiptSchema = z
   })
   .strict();
 
+// An RPC stage observes compute traffic; it does not claim to count text tokens
+// or independently prove that the engine computed the declared model correctly.
+export const stageReceiptSchema = z
+  .object({
+    session_id: uuid,
+    attempt_id: uuid,
+    epoch: z.number().int().positive(),
+    route_sha256: sha256,
+    state: z.enum(terminalStates),
+    completed_commands: z.number().int().min(0).max(1_000_000),
+    request_bytes: amount,
+    response_bytes: amount,
+    transcript_sha256: sha256,
+    elapsed_ms: z.number().int().min(0).max(3_600_000),
+    metering_source: z.literal("rpc_observed"),
+    error_code: z
+      .string()
+      .regex(/^[a-z0-9_]{1,60}$/)
+      .nullable(),
+  })
+  .strict();
+
+/** Partition an existing pool exactly, with immutable ordinal prefix rounding. */
+export function splitByBps(total: bigint, shares: number[]): bigint[] {
+  if (
+    total < 0n ||
+    total > MAX_AMOUNT ||
+    shares.length < 1 ||
+    shares.length > 16 ||
+    shares.some((n) => !Number.isInteger(n) || n < 1 || n > 10000) ||
+    shares.reduce((a, b) => a + b, 0) !== 10000
+  )
+    throw new RangeError("Invalid payout shares");
+  let cumulative = 0n,
+    previous = 0n;
+  return shares.map((share) => {
+    cumulative += BigInt(share);
+    const boundary = (total * cumulative) / 10000n;
+    const value = boundary - previous;
+    previous = boundary;
+    return value;
+  });
+}
+
 export function ceilDiv(numerator: bigint, denominator: bigint): bigint {
   if (numerator < 0n || denominator <= 0n)
     throw new RangeError("Invalid unsigned division");
@@ -180,5 +224,10 @@ export function quoteMaximum(model: ModelManifest, output: number): bigint {
 }
 export function formatTU(value: string | bigint): string {
   const number = BigInt(value);
-  return `${number / MICROTU},${(number % MICROTU).toString().padStart(6, "0").slice(0, 3)}`;
+  const absolute = number < 0n ? -number : number;
+  const fraction = (absolute % MICROTU)
+    .toString()
+    .padStart(6, "0")
+    .replace(/0{1,3}$/, "");
+  return `${number < 0n ? "-" : ""}${absolute / MICROTU},${fraction}`;
 }

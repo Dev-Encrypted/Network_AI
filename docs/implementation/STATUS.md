@@ -1,6 +1,16 @@
 # Private-preview implementation and validation status
 
-## Version 0.3 additions
+## Version 0.4 additions
+
+The official 32.8B Q4_K_M model now executes through a complete route containing one root and two signed stage agents. The coordinator freezes every participant's epoch, resource domain and share; reserves all domains atomically; requires all claims before root execution; and settles only after the root and both stage receipts arrive. The browser exposes proposal, consent, withdrawal and private qualification, with participant amounts in session details. A managed installer and start/stop support the whole local CPU group.
+
+The September 14 real-model campaign completed three short requests, with 18 input and 6 output tokens each. Every worker observed six completed graph commands. Two concurrent submissions executed without overlapping the single shared physical slot. Deliberately terminating one stage produced `FAILED / REFUNDED`, zero charge, with the consumer stream left connected. Each stage needed one nonbillable initialization computation; the explicit startup budget closed before consumer requests. [Protocol, results and limitations](COMPLETE_ROUTES.md), [raw allowlisted result](evidence/qwen3-32b-complete-route.json).
+
+This evidence uses one physical host and one operator account. Separate signatures establish agent identity within the trusted private profile. They do not establish independent providers, correct work by malicious nodes, heterogeneous GPU suitability, WAN usability or viable market pricing. Public launch gates remain open.
+
+Automated coverage for this version includes 34 real-PostgreSQL tests, seven artifact/RPC socket tests, nine Rust tests, 21 preserved Python F0 checks and six browser journeys. Isolated restoration preserved the journal, route tables, participant payout projection and restrictive permissions. The installed 32B route also completed a real browser-proxy request after a full group stop/start. [Version 0.4 evidence summary](validation-v0.4.json).
+
+## Preserved version 0.3 campaign
 
 The current increment adds an authenticated Iroh/QUIC bridge for the actual private node protocol, portable operator invitations, fully funded availability contracts, temporary 1/2/4 admission quotas, verified artifact acquisition and a trusted local CPU cluster adapter. The [link guide](PRIVATE_LINK.md), [availability guide](AVAILABILITY.md) and [model guide](MODEL_ARTIFACTS.md) explain their executable boundaries.
 

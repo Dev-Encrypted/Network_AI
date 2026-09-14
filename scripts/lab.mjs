@@ -410,7 +410,7 @@ export async function launch(name, program, args, port, health, options = {}) {
     throw new Error(`Port ${port} is already occupied by an untracked process`);
   }
   if (options.shutdownFile) {
-    const expected = join(runtime, "cpu-cluster", "engine", "stop.request");
+    const expected = managedShutdownPath(name);
     if (resolve(options.shutdownFile) !== expected)
       throw new Error("Unexpected managed shutdown path");
     await unlink(expected).catch((e) => {
@@ -528,7 +528,19 @@ export async function start(options = {}) {
     43100,
     c.web_origin,
   );
-  if (await exists(join(runtime, "cpu-cluster.json"))) {
+  if (
+    !options.skipCpu &&
+    !process.argv.includes("--skip-cpu") &&
+    (await exists(join(runtime, "cpu-route.json")))
+  ) {
+    await startCpuRoute(
+      JSON.parse(await readFile(join(runtime, "cpu-route.json"), "utf8")),
+    );
+  } else if (
+    !options.skipCpu &&
+    !process.argv.includes("--skip-cpu") &&
+    (await exists(join(runtime, "cpu-cluster.json")))
+  ) {
     const cpu = JSON.parse(
       await readFile(join(runtime, "cpu-cluster.json"), "utf8"),
     );
@@ -546,20 +558,44 @@ export async function start(options = {}) {
     `NETWORK AI disponível em ${c.web_origin}. Login no arquivo privado de credenciais.`,
   );
 }
+function managedShutdownPath(name) {
+  if (name === "cpu_cluster")
+    return join(runtime, "cpu-cluster", "engine", "stop.request");
+  if (name === "route_cluster")
+    return join(runtime, "cpu-route", "engine", "stop.request");
+  throw new Error("Unknown managed supervisor identity");
+}
+export async function stopCpu() {
+  return stopNames([
+    "route_root",
+    "cpu_node",
+    "route_cluster",
+    "route_stage_1",
+    "route_stage_2",
+    "cpu_cluster",
+  ]);
+}
 export async function stop() {
-  const processes = await readProcesses();
-  for (const name of [
+  return stopNames([
     "web",
     "gateway",
+    "route_root",
     "cpu_node",
     "node",
+    "route_cluster",
+    "route_stage_1",
+    "route_stage_2",
     "cpu_cluster",
     "control",
-  ]) {
+  ]);
+}
+async function stopNames(names) {
+  const processes = await readProcesses();
+  for (const name of names) {
     const entry = processes[name];
     if (await owned(entry)) {
-      if (name === "cpu_cluster") {
-        const expected = join(runtime, "cpu-cluster", "engine", "stop.request");
+      if (name === "cpu_cluster" || name === "route_cluster") {
+        const expected = managedShutdownPath(name);
         if (entry.options?.shutdownFile !== expected)
           throw new Error("Missing managed cluster shutdown identity");
         await writeFile(expected, "stop\n", { mode: 0o600 });
@@ -607,6 +643,69 @@ export async function startCpuCluster(cpu) {
       healthKeyFile: join(directory, "engine-api-key.txt"),
       shutdownFile: join(directory, "stop.request"),
     },
+  );
+}
+export async function startCpuRoute(profile) {
+  const directory = join(runtime, "cpu-route");
+  for (let i = 1; i <= 2; i++)
+    await launch(
+      `route_stage_${i}`,
+      process.execPath,
+      [
+        join(root, "scripts/stage-agent.mjs"),
+        "--config",
+        join(directory, `operator-${i}`, "config.json"),
+        "--rpc-listen-port",
+        String(43841 + i),
+        "--rpc-target-port",
+        String(43839 + i),
+        "--startup-compute-commands",
+        "4",
+      ],
+      43124 + i,
+      `http://127.0.0.1:${43124 + i}/health`,
+    );
+  const engine = join(directory, "engine");
+  await launch(
+    "route_cluster",
+    process.execPath,
+    [
+      join(root, "scripts/cluster.mjs"),
+      "--engine-dir",
+      profile.engine_dir,
+      "--model-dir",
+      profile.model_dir,
+      "--manifest",
+      profile.manifest,
+      "--directory",
+      engine,
+      "--workers",
+      "2",
+      "--port",
+      "43224",
+      "--rpc-port",
+      "43840",
+      "--rpc-forward-port",
+      "43842",
+      "--threads",
+      "8",
+    ],
+    43224,
+    "http://127.0.0.1:43224/health",
+    {
+      healthSeconds: 600,
+      healthKeyFile: join(engine, "engine-api-key.txt"),
+      shutdownFile: join(engine, "stop.request"),
+    },
+  );
+  const suffix = process.platform === "win32" ? ".exe" : "";
+  await launch(
+    "route_root",
+    join(root, `target/debug/network-ai-node${suffix}`),
+    [],
+    43124,
+    "http://127.0.0.1:43124/health",
+    { configPath: join(directory, "operator-0", "config.json") },
   );
 }
 export async function restart(name, downtimeMs = 0) {

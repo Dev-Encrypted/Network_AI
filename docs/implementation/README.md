@@ -1,4 +1,4 @@
-# Private network preview v0.3
+# Private route preview v0.4
 
 **Created and directed by Dev-Encrypted.** This release connects the interface, control service, PostgreSQL, Rust gateway, and Rust node to a real local inference engine. It is an executable private environment. Public decentralized operation and the proposed cooperative economy still require qualification.
 
@@ -13,6 +13,7 @@
 - [Authenticated private node links](PRIVATE_LINK.md)
 - [Funded availability and temporary quotas](AVAILABILITY.md)
 - [Verified model artifacts and the trusted CPU cluster adapter](MODEL_ARTIFACTS.md)
+- [Complete routes, stage agents, consent and participant settlement](COMPLETE_ROUTES.md)
 
 ## Components and data flow
 
@@ -50,5 +51,7 @@ The current UI is Brazilian Portuguese. The [beginner guide](../GETTING_STARTED.
 ## Large-model scope
 
 NETWORK AI prioritizes models above 27B. The original integrated profile is a community 27B/Q4 model; version 0.3 adds a pinned official Qwen3-32B GGUF manifest, verified acquisition and a trusted CPU cluster experiment. Consult the [current evidence](STATUS.md) for measured outcomes. Independent multi-participant execution remains a [roadmap requirement](../planning/12_ROADMAP_AND_BACKLOG.md). Read [model scaling](../MODEL_SCALING.md) before estimating contributors or devices.
+
+Version 0.4 adds a complete signed-agent route around two real CPU workers, including all-stage preparation and claims, atomic shared-domain admission, participant consent and receipt-dependent payouts. Its managed installer keeps one model copy active. The real campaign covers completed requests, concurrent admission and stage loss on the same computer; it does not close the independent-participant requirement.
 
 Original code: [Apache 2.0](../../LICENSE). Original documentation: [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt). Dependencies and model artifacts retain their own terms.

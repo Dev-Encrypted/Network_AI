@@ -241,6 +241,18 @@ async fn prepare(State(app): State<Arc<App>>, headers: HeaderMap) -> Result<Json
     );
     Ok(Json(json!({"prepare_id":id})))
 }
+async fn release(State(app): State<Arc<App>>, headers: HeaderMap) -> Result<Json<Value>> {
+    let cap = app.cap(&headers, "prepare")?;
+    let mut prepared = app.prepared.lock().await;
+    if prepared
+        .get(&cap.session_id)
+        .is_some_and(|p| p.cap.attempt_id == cap.attempt_id)
+    {
+        prepared.remove(&cap.session_id);
+    }
+    // An already claimed execution owns a separate permit and is unaffected.
+    Ok(Json(json!({"released":true})))
+}
 async fn execute(State(app): State<Arc<App>>, headers: HeaderMap, body: Bytes) -> Result<Response> {
     let cap = app.cap(&headers, "execute")?;
     let chat = Chat::parse(&body)?;
@@ -525,6 +537,7 @@ async fn main() -> anyhow::Result<()> {
     let router = Router::new()
         .route("/health", get(health))
         .route("/prepare", post(prepare))
+        .route("/release", post(release))
         .route("/execute", post(execute))
         .layer(DefaultBodyLimit::max(131072))
         .with_state(app);

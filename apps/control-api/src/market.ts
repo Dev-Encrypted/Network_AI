@@ -24,9 +24,7 @@ export class Market {
     return (
       await this.db.pool
         .query(`SELECT m.id,m.manifest,m.manifest_sha256,m.state,m.qualification_note,
-      count(n.id)::int AS ready_nodes FROM models m LEFT JOIN nodes n ON n.model_id=m.id
-      AND n.state='READY' AND n.desired_state='READY' AND n.last_seen>now()-interval '15 seconds'
-      AND n.loaded_backend_models ? (m.manifest->>'backend_model')
+      count(n.root_node_id)::int AS ready_nodes FROM models m LEFT JOIN ready_execution_offers n ON n.model_id=m.id
       GROUP BY m.id ORDER BY m.created_at`)
     ).rows.map((row) => ({
       ...row,
@@ -247,6 +245,9 @@ export class Market {
         resource_domain_id: uuid,
         model_id: z.string().max(80),
         base_url: z.url(),
+        node_kind: z
+          .enum(["INFERENCE", "ROUTE_ROOT", "RPC_STAGE"])
+          .default("INFERENCE"),
       })
       .strict()
       .parse(body);
@@ -265,7 +266,7 @@ export class Market {
         "Domínio físico não pertence ao operador informado.",
       );
       await tx.query(
-        "INSERT INTO nodes(id,owner_id,name,resource_domain_id,model_id,base_url) VALUES($1,$2,$3,$4,$5,$6)",
+        "INSERT INTO nodes(id,owner_id,name,resource_domain_id,model_id,base_url,node_kind) VALUES($1,$2,$3,$4,$5,$6,$7)",
         [
           id,
           data.owner_id,
@@ -273,6 +274,7 @@ export class Market {
           data.resource_domain_id,
           data.model_id,
           url,
+          data.node_kind,
         ],
       );
       await tx.query(
@@ -286,6 +288,7 @@ export class Market {
       expires_in: 86400,
       operator: {
         schema_version: 1,
+        node_kind: data.node_kind,
         capability_public_key: this.auth.config.capability_public_key,
         control_port: this.auth.config.control_port,
         gateway_port: this.auth.config.gateway_port,

@@ -1,0 +1,22 @@
+{
+  "evidence_type": "ISOLATED_POSTGRES_RESTORE",
+  "observed_at": "2026-09-14T23:32:46.985Z",
+  "journal_entries": 94,
+  "balance_sum": "0",
+  "projection_mismatches": 0,
+  "runtime_balance_write_denied": true,
+  "availability_contracts": 6,
+  "availability_escrow_mismatches": 0,
+  "runtime_contract_term_write_denied": true,
+  "route_tables": {
+    "execution_routes": 3,
+    "route_members": 8,
+    "route_acceptances": 3,
+    "session_domains": 5,
+    "session_participants": 12,
+    "stage_receipts": 6
+  },
+  "route_payout_mismatches": 0,
+  "runtime_route_term_and_receipt_writes_denied": true,
+  "backup_sha256": "353690c5f683b5fc698d2be4ce55c8ef6da2447f2f49d38c06da0d3bc4f6b561"
+}
