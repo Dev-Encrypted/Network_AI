@@ -27,8 +27,11 @@ Private material lives in `.runtime/private-lab/`, excluded from Git. Windows in
 | Inference gateway | `http://127.0.0.1:43102/v1` |
 | Initial node | `http://127.0.0.1:43103` |
 | PostgreSQL | `127.0.0.1:54329` |
+| Optional installed 32B CPU node | `http://127.0.0.1:43123` |
+| Optional CPU inference backend | `http://127.0.0.1:43220` (private API key required) |
+| Optional trusted CPU workers | `127.0.0.1:43820` and `127.0.0.1:43821` (RPC, not HTTP) |
 
-Application listeners and the published database port bind to loopback. Node ports range from 43103 to 43299. This profile has not qualified public TLS/WAN deployment, open admission, adversarial operators or distributed continuity. Changing the bind address is not a public deployment procedure.
+Application listeners and the published database port bind to loopback. Node ports range from 43103 to 43299; choose unused ports and preserve the optional backend's port when enabled. Version 0.3 can connect an invited node through the [private QUIC bridge](PRIVATE_LINK.md) while retaining these local HTTP listeners. Distinct hosts, relays/CGNAT, public admission, adversarial operators and distributed continuity still need qualification. Changing the bind address is not a public deployment procedure.
 
 ## Use the interface
 
@@ -38,18 +41,18 @@ The current interface is PT-BR. The [beginner guide](../GETTING_STARTED.md) maps
 2. In Chat, select an available qualified model. Admission holds the maximum charge; settlement charges accepted usage and releases the rest.
 3. In Sessions, inspect state, terminal reason, token counts and billing. Past answer bodies are not retained for replay.
 4. In API access, create a personal key and save the one-time displayed value. Revocation prevents new authentication with that key.
-5. In My nodes, pause or resume new admissions. Previously accepted work may complete.
+5. In My nodes, pause or resume new admissions. Previously accepted work may complete. The availability section lets a sponsor fund a bounded readiness offer, its provider accept it, and either party close it with the unused balance returned. See [contract terms and temporary request limits](AVAILABILITY.md).
 6. In Administration, create users, explicit lab grants, physical domains, invitations and qualifications.
 
 ## Register another model or agent
 
 A member can submit an immutable text manifest with model ID, revision, SHA-256, license, HTTPS origin, limits and rates. It enters as `CANDIDATE`. An administrator records evidence and qualifies it as `LOCAL_PREVIEW` after checking the artifact and engine. A different revision needs a different manifest ID.
 
-The product does not download model weights, execute repository code, or enable tools/multimodality. A model above 27B may be proposed under this contract if the configured whole-model backend can serve it, but doing so does not enable automatic distribution across agents. Larger distributed routes require separate integration and qualification.
+Submitting a catalog entry does not install a model. The separate `pnpm model:acquire` command downloads explicitly selected, revision-pinned artifacts and verifies their size and SHA-256. Follow the [artifact and CPU cluster guide](MODEL_ARTIFACTS.md) for acquisition, engine preparation, the measured official 32B profile, and optional managed installation. Repository code execution, tools and multimodality are not enabled by a manifest. A whole-model backend or trusted cluster must serve the qualified profile; catalog submission does not partition a model across independent participants.
 
 Create a physical domain for the resource. Agents sharing one GPU should share its domain and measured slot limit. The trusted administrator assigns this topology; the coordinator does not cryptographically prove the physical device.
 
-Create an invitation in the interface for the selected local port. Save its JSON response in a private file containing `id` and `invite`. Generate a limited operator profile:
+Create an invitation in the interface for the selected local port. Save its complete JSON response in a private file, including `id`, `invite` and the portable public `operator` section. The latter lets the participant generate a profile without the coordinator's private configuration. Generate a limited operator profile:
 
 ```powershell
 node scripts/node-config.mjs --invite-file .runtime/invite.json --backend-model "exact-backend-model-id" --port 43104 --backend-url http://127.0.0.1:1235 --backend-kind lmstudio
@@ -77,7 +80,7 @@ node scripts/lab.mjs restart control
 pnpm lab:stop
 ```
 
-The manager validates owned process commands before stopping their PIDs. Stop retains the database, volume and private configuration. It does not stop other Docker projects.
+The manager validates owned process commands before stopping their PIDs. Stop retains the database, volume and private configuration. It does not stop other Docker projects. If the optional CPU cluster is installed, `lab:start` waits for its backend and launches its node; `lab:stop` requests graceful shutdown of its supervisor and both workers. Existing external engines, including LM Studio, remain separately managed. A stop/start cycle can take longer because the CPU model's bytes are verified and loaded again.
 
 A restarted node advances its epoch. The control service fences earlier attempts and releases their reservations. The external engine sees a disconnected request; its actual internal resource reclamation depends on that engine.
 
@@ -101,6 +104,7 @@ Build while managed application services are stopped. Start the application befo
 ```bash
 pnpm build
 pnpm test:integration
+pnpm test:unit
 cargo test --locked
 cargo clippy --locked --all-targets -- -D warnings
 pnpm lab:start --no-build
@@ -110,6 +114,7 @@ pnpm test:live
 pnpm test:faults
 pnpm test:outbox
 pnpm test:multi-node
+pnpm test:link
 pnpm test:backup
 ```
 

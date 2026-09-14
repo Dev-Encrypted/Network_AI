@@ -17,7 +17,7 @@ The maintained documentation is in English. It explains both the long-term coope
 
 **Implemented** means the linked source provides the behavior in the stated private profile. **Measured** means a named experiment exercised it under recorded conditions. **Simulated** means a program evaluated explicit assumptions. **Planned** means implementation or qualification is still required. Arithmetic estimates are labeled separately.
 
-The product targets models above 27B, but the integrated private application has only the recorded local model campaign. A large model in an upstream catalog or a partial tensor load is not distributed inference proof.
+The product targets models above 27B. Version 0.3 executed an official 32.8B Q4_K_M model locally and across two trusted CPU worker processes, then completed and settled a request through the application and private QUIC bridge. All of this evidence comes from one physical host. Read the [measured allocations, numerical comparison and boundaries](implementation/MODEL_ARTIFACTS.md) before treating the experiment as evidence for independent contributors or WAN operation.
 
 ## Documentation map
 

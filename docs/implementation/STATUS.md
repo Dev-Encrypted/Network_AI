@@ -50,7 +50,7 @@ Detailed private reports live under `.runtime/private-lab/`. The public report c
 ## Remaining work for the target network
 
 1. **Capacity and links:** different devices and physical hosts, per-stage memory, LAN/WAN/NAT/relay, and integrated qualified transport.
-2. **Models above 27B:** complete larger-model inference, nearby multi-device routes, integrated cross-participant distribution, state and recovery. Official BF16 and Kimi gaps remain as recorded in F0.
+2. **Models above 27B:** broaden quality/context qualification beyond the executed official 32B Q4_K_M profile, then validate distinct-device routes, integrated cross-participant distribution, state and recovery. Official BF16 and Kimi gaps remain as recorded in F0.
 3. **Public trust:** independent usage/work verification, adversarial operators, anti-Sybil, exact offer licensing, and appropriate content/privacy policies.
 4. **Economics:** fix circulation and coverage, implement the complete elastic and recovery predicates, and evaluate new parameters with fresh holdout seeds and observed costs.
 5. **Continuity:** independent operators, federation/consensus, authority rotation, replacement coordinators, and recovery of keys/data on other hosts.
