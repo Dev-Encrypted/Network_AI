@@ -11,7 +11,7 @@ import { canonical, hash } from "./security.js";
 import { RouteAvailability } from "./route-availability.js";
 
 type Row = Record<string, any>;
-export const cooperativePolicy = "private-cooperative-floor-first-v1";
+export const cooperativePolicy = "private-cooperative-floor-first-v2";
 const positive = amount.refine((n) => BigInt(n) > 0n);
 const key = z.string().regex(/^[a-z][a-z0-9_-]{0,39}$/);
 const min = (a: bigint, b: bigint) => (a < b ? a : b);
@@ -50,8 +50,10 @@ export async function cooperativeSnapshot(tx: PoolClient, p: Row) {
     EXISTS(SELECT 1 FROM cooperative_routes cr JOIN ready_execution_offers o ON o.route_id=cr.route_id
       WHERE cr.pool_id=g.pool_id AND cr.group_key=g.group_key) AS ready,
     coalesce((SELECT sum(l.budget_microtu-l.paid_microtu) FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
-      WHERE cw.pool_id=g.pool_id AND cw.group_key=g.group_key AND l.state IN ('OFFERED','ACTIVE','DRAINING')
-      AND (l.ends_ms>extract(epoch FROM now())*1000 OR (l.state='OFFERED' AND l.offer_expires_at>now()))),0)::text AS held
+      WHERE cw.pool_id=g.pool_id AND cw.group_key=g.group_key AND cw.coverage_kind='ESSENTIAL' AND l.state IN ('OFFERED','ACTIVE','DRAINING')
+      AND (l.ends_ms>extract(epoch FROM now())*1000 OR (l.state='OFFERED' AND l.offer_expires_at>now()))),0)::text AS held,
+    coalesce((SELECT sum(l.budget_microtu-l.paid_microtu) FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
+      WHERE cw.pool_id=g.pool_id AND cw.group_key=g.group_key AND cw.coverage_kind='EXPANSION' AND l.state IN ('OFFERED','ACTIVE','DRAINING')),0)::text AS expansion_held
     FROM cooperative_groups g WHERE g.pool_id=$1 ORDER BY g.group_key`,
       [p.id],
     )
@@ -61,6 +63,10 @@ export async function cooperativeSnapshot(tx: PoolClient, p: Row) {
     0n,
   );
   const held = groups.reduce((s, g) => s + BigInt(g.held), 0n);
+  const expansionHeld = groups.reduce(
+    (s, g) => s + BigInt(g.expansion_held),
+    0n,
+  );
   const accounts = (
     await tx.query(
       "SELECT id,balance FROM ledger_accounts WHERE id=ANY($1::text[])",
@@ -120,7 +126,9 @@ export async function cooperativeSnapshot(tx: PoolClient, p: Row) {
     floor,
     workingTarget,
     reserveTarget,
-    held,
+    held: held + expansionHeld,
+    essentialHeld: held,
+    expansionHeld,
     minimum,
     state,
     healthySince,
@@ -334,7 +342,7 @@ export class Cooperative {
         compensation: "READINESS_ONLY",
         recycling: "FLOOR_RESERVE_WORKING_BURN",
         funding: "COMMITTED_LAB_CREDITS_NO_REDEMPTION",
-        expansion: "NOT_QUALIFIED",
+        expansion: "PRIVATE_DEMAND_BACKED_SEPARATE_AUTHORIZATION",
         issuance: "NONE",
         governance: "SINGLE_PRIVATE_COORDINATOR",
       };
@@ -534,13 +542,18 @@ export class Cooperative {
       reason: string;
       idempotency_key: string;
     },
-    options?: { eligibleRoutes?: string[]; renewal?: Record<string, unknown> },
+    options?: {
+      eligibleRoutes?: string[];
+      renewal?: Record<string, unknown>;
+      expansion?: Record<string, any>;
+    },
   ) {
     const request = hash(
       canonical({
         pool_id: id,
         ...data,
         ...(options?.renewal ? { renewal: options.renewal } : {}),
+        ...(options?.expansion ? { expansion: options.expansion } : {}),
       }),
     );
     // Match the standalone sponsor lock order before the pool and ledger locks.
@@ -578,6 +591,14 @@ export class Cooperative {
     }
     const s = await cooperativeSnapshot(tx, p),
       g = s.groups.find((v) => v.group_key === data.group_key);
+    const kind = options?.expansion ? "EXPANSION" : "ESSENTIAL";
+    need(
+      kind !== "EXPANSION" ||
+        p.policy.expansion === "PRIVATE_DEMAND_BACKED_SEPARATE_AUTHORIZATION",
+      409,
+      "expansion_policy",
+      "A política original deste fundo não permite expansão. Crie um novo plano com os novos termos.",
+    );
     need(g, 404, "group_missing", "Grupo não encontrado.");
     need(
       !p.paused &&
@@ -590,8 +611,8 @@ export class Cooperative {
     const occupied = (
       await tx.query(
         `SELECT 1 FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
-        WHERE cw.pool_id=$1 AND cw.group_key=$2 AND l.state IN ('OFFERED','ACTIVE','DRAINING')`,
-        [id, g.group_key],
+        WHERE cw.pool_id=$1 AND cw.group_key=$2 AND cw.coverage_kind=$3 AND l.state IN ('OFFERED','ACTIVE','DRAINING')`,
+        [id, g.group_key, kind],
       )
     ).rowCount;
     need(
@@ -617,6 +638,16 @@ export class Cooperative {
     );
     const budget =
       BigInt(g.rate_microtu_per_second) * BigInt(g.duration_seconds);
+    if (kind === "EXPANSION")
+      need(
+        data.source === "WORKING" &&
+          s.working >= s.floor + budget &&
+          s.reserve >= s.reserveTarget &&
+          s.state === "NORMAL",
+        409,
+        "expansion_liquidity",
+        "A expansão precisa preservar o piso essencial, a reserva e a recuperação estável.",
+      );
     let incident: string | null = null;
     if (data.source === "RESERVE") {
       need(
@@ -663,6 +694,13 @@ export class Cooperative {
       support_until: new Date(p.support_until).toISOString(),
       compensation: "READINESS_ONLY",
       ...(options?.renewal ? { renewal: options.renewal } : {}),
+      ...(options?.expansion
+        ? {
+            coverage_kind: "EXPANSION",
+            expansion: options.expansion,
+            expansion_sha256: hash(canonical(options.expansion)),
+          }
+        : {}),
     };
     const lease = await new RouteAvailability(this.db).offerTransaction(
       tx,
@@ -682,8 +720,8 @@ export class Cooperative {
       },
     );
     await tx.query(
-      "INSERT INTO cooperative_windows(lease_id,pool_id,group_key,funding_source,incident_id) VALUES($1,$2,$3,$4,$5)",
-      [lease.id, id, g.group_key, data.source, incident],
+      "INSERT INTO cooperative_windows(lease_id,pool_id,group_key,funding_source,incident_id,coverage_kind) VALUES($1,$2,$3,$4,$5,$6)",
+      [lease.id, id, g.group_key, data.source, incident, kind],
     );
     await this.event(tx, id, user.id, "window_funded", {
       lease_id: lease.id,
@@ -808,7 +846,7 @@ export async function recycleSettlement(
       snap.reserveTarget,
     );
   const allocation = {
-    policy: cooperativePolicy,
+    policy: p.policy.version,
     before: strings({ working: snap.working, reserve: snap.reserve }),
     targets: strings({
       floor: snap.floor,

@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { randomUUID } from "node:crypto";
+import { spawn } from "node:child_process";
 import { join } from "node:path";
 import { Auth, type User } from "../../apps/control-api/src/auth.js";
 import { Database } from "../../apps/control-api/src/db.js";
@@ -12,6 +13,7 @@ import { Market } from "../../apps/control-api/src/market.js";
 import { Nodes } from "../../apps/control-api/src/nodes.js";
 import { Routes } from "../../apps/control-api/src/routes.js";
 import { Renewals } from "../../apps/control-api/src/renewals.js";
+import { Economics } from "../../apps/control-api/src/economics.js";
 import { Availability } from "../../apps/control-api/src/availability.js";
 import { RouteAvailability } from "../../apps/control-api/src/route-availability.js";
 import { Sessions } from "../../apps/control-api/src/sessions.js";
@@ -20,8 +22,13 @@ import {
   recycle,
 } from "../../apps/control-api/src/cooperative.js";
 import { capacity } from "../../apps/control-api/src/capacity.js";
-import { createAccounts } from "../../apps/control-api/src/ledger.js";
 import {
+  createAccounts,
+  post,
+  availableAccount,
+} from "../../apps/control-api/src/ledger.js";
+import {
+  canonical,
   hash,
   passwordHash,
   secret,
@@ -2214,5 +2221,749 @@ test("renewals: immutable usage projects limits and runtime cannot edit terms, c
     (await db.pool.query("SELECT sum(balance)::text AS n FROM ledger_accounts"))
       .rows[0].n,
     "0",
+  );
+});
+
+const economics = () => new Economics(db);
+const economicEvidence = () => ({
+  evidence_sha256: hash(
+    "Isolated fixture declaration, not real ownership or operating support",
+  ),
+  source_reference:
+    "Isolated PostgreSQL contract fixture; no real ownership assertion",
+  idempotency_key: randomUUID(),
+});
+async function classify(users: User[], name: string) {
+  const party = await economics().party(admin, { ...economicEvidence(), name });
+  const affiliations = [];
+  for (const user of users)
+    affiliations.push(
+      await economics().affiliate(admin, {
+        ...economicEvidence(),
+        user_id: user.id,
+        party_id: party.id,
+        expires_at: new Date(Date.now() + 3600000).toISOString(),
+      }),
+    );
+  return { party, affiliations };
+}
+async function expansionFixture(
+  t: TestContext,
+  options: { sameDomains?: boolean; mandates?: boolean } = {},
+) {
+  const f = await fixture(t),
+    parts: any[] = [];
+  for (let i = 0; i < 3; i++) {
+    const domain = options.sameDomains
+      ? { id: f.parts[i].domainId }
+      : await market.domain(admin, {
+          name: "Isolated alternate physical domain",
+          owner_id: f.providers[i]!.id,
+          slots: 1,
+        });
+    const node = await market.invite(admin, {
+      name: `Isolated expansion part ${i}`,
+      owner_id: f.providers[i]!.id,
+      resource_domain_id: domain.id,
+      model_id: f.modelId,
+      base_url: `http://127.0.0.1:${43270 + i}`,
+      node_kind: i === 0 ? "ROUTE_ROOT" : "RPC_STAGE",
+    });
+    await ready(node.id);
+    parts.push({ nodeId: node.id, domainId: domain.id });
+  }
+  const alternative = await routes.publish(f.root, {
+    name: "Isolated complete expansion route",
+    model_id: f.modelId,
+    idempotency_key: randomUUID(),
+    participants: parts.map((p, i) => ({
+      node_id: p.nodeId,
+      share_bps: i === 0 ? 1000 : 4500,
+    })),
+  });
+  for (const provider of f.providers)
+    await routes.accept(provider, alternative.id, {
+      route_sha256: alternative.route_sha256,
+    });
+  await routes.qualify(admin, alternative.id, {
+    state: "LOCAL_PREVIEW",
+    note: "Fabricated database readiness and distinct domains, not physical validation",
+  });
+  const p = await coop().create(f.buyer, {
+    name: "Isolated demand-backed expansion fund",
+    support_until: new Date(Date.now() + 3600000).toISOString(),
+    idempotency_key: randomUUID(),
+    groups: [
+      {
+        key: "essential",
+        route_ids: [f.route.id, alternative.id],
+        duration_seconds: 60,
+        rate_microtu_per_second: "100",
+      },
+    ],
+  });
+  for (const [destination, value] of [
+    ["WORKING", "3000000"],
+    ["RESERVE", "25920000"],
+  ])
+    await coop().fund(f.buyer, p.id, {
+      destination,
+      amount_microtu: value,
+      policy_sha256: p.policy_sha256,
+      consent: "COMMITTED_LAB_CREDITS_NO_REDEMPTION",
+      idempotency_key: randomUUID(),
+    });
+  const operators = await classify(f.providers, "Isolated provider party"),
+    manager = await classify([f.buyer], "Isolated pool manager");
+  const consumers = [await member(), await member()];
+  for (const user of consumers) await fund(user);
+  const buyers = [];
+  for (const user of consumers)
+    buyers.push(await classify([user], "Isolated external consumer party"));
+  const support = await economics().support(admin, p.id, {
+    ...economicEvidence(),
+    policy_sha256: p.policy_sha256,
+    scope:
+      "Isolated in-kind support fixture, with no claim about real money or operating resources",
+    expires_at: new Date(Date.now() + 3600000).toISOString(),
+    consent: "PRIVATE_IN_KIND_SUPPORT_NO_VERIFIED_CASH_CLAIM",
+  });
+  const core = await db.transaction((tx) =>
+    coop().offerTransaction(
+      tx,
+      f.buyer,
+      p.id,
+      {
+        group_key: "essential",
+        source: "WORKING",
+        reason: "Isolated essential contract precedes optional expansion",
+        idempotency_key: randomUUID(),
+      },
+      { eligibleRoutes: [f.route.id] },
+    ),
+  );
+  for (const user of f.providers)
+    await coverage().accept(user, core.id, { terms_sha256: core.terms_sha256 });
+  const previous = await settleCoop({ ...f, buyer: consumers[0]! }, p);
+  await elapsedCoverage(core.id, 1000);
+  await coverage().reconcile();
+  const queued = [];
+  for (const user of consumers)
+    queued.push(await job({ ...f, buyer: user }, f.modelId, p.id));
+  // Isolated clock setup: no real production elapsed time or hardware evidence is inferred.
+  await owner.query(
+    "UPDATE sessions SET created_at=created_at-interval '20 seconds' WHERE id=ANY($1::uuid[])",
+    [queued.map((q) => q.id)],
+  );
+  const a = await renewals().authorize(
+    f.buyer,
+    p.id,
+    authorityTerms(p, {
+      coverage_kind: "EXPANSION",
+      operating_support_id: support.id,
+    }),
+  );
+  const ms = [];
+  if (options.mandates !== false)
+    for (const user of f.providers)
+      ms.push(
+        await renewals().mandate(
+          user,
+          p.id,
+          mandateTerms(p, alternative.id, {
+            coverage_kind: "EXPANSION",
+            consent: "READINESS_ONLY_BOUNDED_EXPANSION",
+          }),
+        ),
+      );
+  async function fresh() {
+    for (const part of [...f.parts, ...parts]) await ready(part.nodeId);
+    await owner.query(
+      "UPDATE cooperative_pools SET state='NORMAL',healthy_since=now()-interval '25 hours',sample_at=clock_timestamp() WHERE id=$1",
+      [p.id],
+    );
+  }
+  await fresh();
+  t.after(async () => {
+    await renewals().revoke(admin, a.id, false);
+    for (const m of ms) await renewals().revoke(admin, m.id, true);
+    await owner.query(
+      "UPDATE route_availability_leases SET started_ms=started_ms-3600000,ends_ms=ends_ms-3600000 WHERE route_id=$1",
+      [alternative.id],
+    );
+    await coverage().reconcile();
+  });
+  const facts = async () =>
+    (await renewals().view(f.buyer, p.id)).expansion[0]!;
+  return {
+    f,
+    p,
+    a,
+    ms,
+    parts,
+    alternative,
+    core,
+    previous,
+    queued,
+    consumers,
+    operators,
+    manager,
+    buyers,
+    support,
+    fresh,
+    facts,
+  };
+}
+
+test("expansion: administrative affiliation is bounded, idempotent and cannot rewrite prior evidence", async (t) => {
+  const user = await member(),
+    partyBody = { ...economicEvidence(), name: "Isolated classified party" };
+  await assert.rejects(economics().party(user, partyBody), /administrativa/);
+  const p = await economics().party(admin, partyBody);
+  assert.equal((await economics().party(admin, partyBody)).id, p.id);
+  const body = {
+    ...economicEvidence(),
+    user_id: user.id,
+    party_id: p.id,
+    expires_at: new Date(Date.now() + 3600000).toISOString(),
+  };
+  const a = await economics().affiliate(admin, body);
+  assert.equal((await economics().affiliate(admin, body)).id, a.id);
+  await assert.rejects(
+    economics().affiliate(admin, { ...body, idempotency_key: randomUUID() }),
+    /Revogue/,
+  );
+  await assert.rejects(
+    db.pool.query(
+      "UPDATE economic_affiliations SET created_at=now()-interval '1 day' WHERE id=$1",
+      [a.id],
+    ),
+    { code: "42501" },
+  );
+  await economics().revoke(admin, a.id, false);
+  await assert.rejects(
+    db.pool.query(
+      "UPDATE economic_affiliations SET revoked_at=NULL WHERE id=$1",
+      [a.id],
+    ),
+    /final/,
+  );
+  assert.equal(
+    (await economics().affiliate(admin, body)).id,
+    a.id,
+    "Lost-response retries retain terminal history",
+  );
+});
+
+test("expansion: current funded pressure activates one whole extra route while preserving essential funds", async (t) => {
+  const x = await expansionFixture(t),
+    before = await x.facts();
+  assert.deepEqual(before.blocked_by, []);
+  assert.equal(before.eligible_funded_parties, 2);
+  assert.equal(before.spare_covered_slots, 1);
+  assert.equal(before.additional_complete_routes, 1);
+  const r = await renewals().attempt(x.a.id);
+  assert.equal(r.status, "RENEWED");
+  assert.equal(r.coverage_kind, "EXPANSION");
+  const l = await coverageRow(x.f, r.lease_id as string);
+  assert.equal(l.state, "ACTIVE");
+  assert.equal(l.route_id, x.alternative.id);
+  assert.equal(l.terms.cooperative.coverage_kind, "EXPANSION");
+  const after = await x.facts();
+  assert.equal(before.essential_floor_microtu, after.essential_floor_microtu);
+  assert.equal(
+    BigInt(before.free_working_microtu) - BigInt(after.free_working_microtu),
+    6000n,
+  );
+  assert.equal(after.free_reserve_microtu, before.free_reserve_microtu);
+  assert.equal((await authorityRow(x.a.id)).working_committed_microtu, "6000");
+  const demand = (
+    await db.pool.query(
+      "SELECT * FROM cooperative_expansion_demand WHERE lease_id=$1",
+      [l.id],
+    )
+  ).rows[0];
+  assert.ok(x.queued.some((q) => q.id === demand.session_id));
+  assert.equal(demand.evidence_sha256, l.terms.cooperative.expansion_sha256);
+  assert.equal((await coverageRow(x.f, x.core.id)).state, "ACTIVE");
+});
+
+test("expansion: optional contracts require separate provider consent and never use the protected reserve", async (t) => {
+  const x = await expansionFixture(t, { mandates: false });
+  for (const user of x.f.providers)
+    await renewals().mandate(user, x.p.id, mandateTerms(x.p, x.alternative.id));
+  assert.deepEqual((await x.facts()).blocked_by, []);
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "WAITING_FOR_OPERATORS",
+  );
+  await assert.rejects(
+    renewals().mandate(
+      x.f.root,
+      x.p.id,
+      mandateTerms(x.p, x.alternative.id, { coverage_kind: "EXPANSION" }),
+    ),
+    /consentimento/,
+  );
+  await assert.rejects(
+    renewals().authorize(
+      x.f.buyer,
+      x.p.id,
+      authorityTerms(x.p, {
+        coverage_kind: "EXPANSION",
+        operating_support_id: x.support.id,
+        maximum_reserve_microtu: "6000",
+      }),
+    ),
+    /reserva/,
+  );
+  assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+});
+
+test("expansion: aliases of provider parties cannot justify more capacity", async (t) => {
+  const x = await expansionFixture(t);
+  for (let i = 0; i < 2; i++) {
+    await economics().revoke(admin, x.buyers[i]!.affiliations[0].id, false);
+    await economics().affiliate(admin, {
+      ...economicEvidence(),
+      user_id: x.consumers[i]!.id,
+      party_id: x.operators.party.id,
+      expires_at: new Date(Date.now() + 3600000).toISOString(),
+    });
+  }
+  const f = await x.facts();
+  assert.equal(f.eligible_funded_parties, 0);
+  assert.ok(f.blocked_by.includes("funded_pressure"));
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_FUNDED_PRESSURE",
+  );
+  assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+});
+
+test("expansion: unknown consumers or operators fail closed without reclassifying earlier flow", async (t) => {
+  const x = await expansionFixture(t);
+  await economics().revoke(admin, x.operators.affiliations[0].id, false);
+  assert.equal((await x.facts()).eligible_funded_parties, 0);
+  assert.equal((await x.facts()).net_recycled_microtu, "160000");
+  await economics().affiliate(admin, {
+    ...economicEvidence(),
+    user_id: x.f.providers[0]!.id,
+    party_id: x.operators.party.id,
+    expires_at: new Date(Date.now() + 3600000).toISOString(),
+  });
+  for (const b of x.buyers)
+    await economics().revoke(admin, b.affiliations[0].id, false);
+  assert.equal((await x.facts()).eligible_funded_parties, 0);
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_FUNDED_PRESSURE",
+  );
+  assert.equal((await authorityRow(x.a.id)).working_committed_microtu, "0");
+});
+
+test("expansion: floor and full reserve are required even when one optional window is affordable", async (t) => {
+  const x = await expansionFixture(t),
+    before = await x.facts();
+  const original = BigInt(before.free_working_microtu);
+  const lower = BigInt(before.essential_floor_microtu) + 5999n;
+  async function move(account: string, value: bigint) {
+    await db.transaction((tx) =>
+      post(
+        tx,
+        `isolated-expansion:${randomUUID()}`,
+        "ISOLATED_FIXTURE_TRANSFER",
+        [
+          [account, -value],
+          [availableAccount(x.f.buyer.id), value],
+        ],
+        { fixture_only: true },
+      ),
+    );
+  }
+  await move(x.p.working_account, original - lower);
+  assert.ok((await x.facts()).blocked_by.includes("working_floor"));
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_WORKING_FLOOR",
+  );
+  await move(x.p.working_account, -(original - lower));
+  await move(x.p.reserve_account, 1n);
+  assert.ok((await x.facts()).blocked_by.includes("protected_reserve"));
+  await renewals().attempt(x.a.id);
+  assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+  await move(x.p.reserve_account, -1n);
+  await x.fresh();
+  assert.equal((await renewals().attempt(x.a.id)).status, "RENEWED");
+});
+
+test("expansion: recovery, fresh observations, support and the whole essential set precede growth", async (t) => {
+  const x = await expansionFixture(t);
+  await owner.query(
+    "UPDATE cooperative_pools SET healthy_since=now()-interval '23 hours' WHERE id=$1",
+    [x.p.id],
+  );
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_NORMAL_RECOVERY",
+  );
+  await x.fresh();
+  await owner.query(
+    "UPDATE cooperative_pools SET sample_at=now()-interval '7 seconds' WHERE id=$1",
+    [x.p.id],
+  );
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_NORMAL_RECOVERY",
+  );
+  await x.fresh();
+  await owner.query(
+    "UPDATE cooperative_operating_support SET expires_at=now()+interval '20 seconds' WHERE id=$1",
+    [x.support.id],
+  );
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_OPERATING_SUPPORT",
+  );
+  await owner.query(
+    "UPDATE cooperative_operating_support SET expires_at=now()+interval '1 hour' WHERE id=$1",
+    [x.support.id],
+  );
+  await finishCoverage(x.core.id);
+  await x.fresh();
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_ESSENTIAL_COVERAGE",
+  );
+  assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+});
+
+test("expansion: refunds, grants and retrospective classification cannot manufacture recurring flow", async (t) => {
+  const x = await expansionFixture(t);
+  await coop().refund(admin, x.previous.id, {
+    reason: "Isolated reversal of formerly qualifying consumption",
+  });
+  const f = await x.facts();
+  assert.equal(f.net_recycled_microtu, "0");
+  assert.ok(BigInt(f.normal_cost_microtu) > 0n);
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_RECURRING_FLOW",
+  );
+  await fund(x.consumers[0]!);
+  await coop().fund(x.f.buyer, x.p.id, {
+    destination: "WORKING",
+    amount_microtu: "100000",
+    policy_sha256: x.p.policy_sha256,
+    consent: "COMMITTED_LAB_CREDITS_NO_REDEMPTION",
+    idempotency_key: randomUUID(),
+  });
+  assert.equal((await x.facts()).net_recycled_microtu, "0");
+  await sessions.cancel(x.consumers[0]!, x.queued[0].id);
+  await sessions.cancel(x.consumers[1]!, x.queued[1].id);
+  const later = await settleCoop({ ...x.f, buyer: x.consumers[0]! }, x.p);
+  // Owner-only isolated chronology: a classification made after consumption cannot qualify it.
+  await owner.query(
+    `UPDATE economic_affiliations SET created_at=(SELECT created_at+interval '1 millisecond'
+    FROM cooperative_settlements WHERE session_id=$2) WHERE id=$1`,
+    [x.buyers[0]!.affiliations[0].id, later.id],
+  );
+  assert.equal((await x.facts()).net_recycled_microtu, "0");
+  assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+});
+
+test("expansion: a second name for occupied physical domains supplies no additional capacity", async (t) => {
+  const x = await expansionFixture(t, { sameDomains: true });
+  const f = await x.facts();
+  assert.equal(f.spare_covered_slots, 1);
+  assert.equal(f.additional_complete_routes, 0);
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_ADDITIONAL_COMPLETE_ROUTE",
+  );
+  assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+});
+
+test("expansion: a claimed request cannot buy repeated growth, and concurrent attempts commit once", async (t) => {
+  const x = await expansionFixture(t);
+  const r = await Promise.all([
+    renewals().attempt(x.a.id),
+    renewals().attempt(x.a.id),
+  ]);
+  assert.deepEqual(r.map((v) => v.status).sort(), [
+    "RENEWED",
+    "WAITING_FOR_WINDOW",
+  ]);
+  const lease = r.find((v) => v.status === "RENEWED")!.lease_id as string;
+  assert.equal((await authorityRow(x.a.id)).windows_used, 1);
+  await finishCoverage(lease);
+  await x.fresh();
+  assert.equal((await x.facts()).eligible_funded_parties, 1);
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_FUNDED_PRESSURE",
+  );
+  assert.equal((await authorityRow(x.a.id)).working_committed_microtu, "6000");
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT 1 FROM cooperative_expansion_demand WHERE lease_id=$1",
+        [lease],
+      )
+    ).rowCount,
+    1,
+  );
+});
+
+test("expansion: late evidence failure rolls back escrow, demand, domain claims and both counters", async (t) => {
+  const x = await expansionFixture(t),
+    before = await x.facts();
+  await owner.query(`CREATE FUNCTION reject_expansion_fixture() RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN RAISE EXCEPTION 'injected expansion evidence failure'; END $$;
+    CREATE TRIGGER reject_expansion_fixture BEFORE INSERT ON cooperative_expansion_demand
+      FOR EACH ROW EXECUTE FUNCTION reject_expansion_fixture()`);
+  try {
+    await assert.rejects(
+      renewals().attempt(x.a.id),
+      /injected expansion evidence failure/,
+    );
+    assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+    assert.equal(
+      (await x.facts()).free_working_microtu,
+      before.free_working_microtu,
+    );
+    assert.equal(
+      (
+        await db.pool.query(
+          "SELECT 1 FROM cooperative_renewal_runs WHERE authorization_id=$1",
+          [x.a.id],
+        )
+      ).rowCount,
+      0,
+    );
+    assert.equal(
+      (
+        await db.pool.query(
+          "SELECT 1 FROM cooperative_provider_mandates WHERE id=ANY($1::uuid[]) AND windows_used<>0",
+          [x.ms.map((m) => m.id)],
+        )
+      ).rowCount,
+      0,
+    );
+    assert.equal(
+      (
+        await db.pool.query(
+          "SELECT 1 FROM availability_domain_claims WHERE resource_domain_id=ANY($1::uuid[])",
+          [x.parts.map((p) => p.domainId)],
+        )
+      ).rowCount,
+      0,
+    );
+  } finally {
+    await owner.query(
+      "DROP TRIGGER reject_expansion_fixture ON cooperative_expansion_demand; DROP FUNCTION reject_expansion_fixture()",
+    );
+  }
+  await x.fresh();
+  assert.equal((await renewals().attempt(x.a.id)).status, "RENEWED");
+});
+
+test("expansion: revoking support preserves accepted pay and essential renewals", async (t) => {
+  const x = await expansionFixture(t);
+  const r = await renewals().attempt(x.a.id),
+    lease = r.lease_id as string;
+  const essential = await renewals().authorize(
+    x.f.buyer,
+    x.p.id,
+    authorityTerms(x.p),
+  );
+  for (const u of x.f.providers)
+    await renewals().mandate(u, x.p.id, mandateTerms(x.p, x.f.route.id));
+  await economics().revoke(admin, x.support.id, true);
+  await elapsedCoverage(lease, 1000);
+  await coverage().reconcile();
+  assert.ok(BigInt((await coverageRow(x.f, lease)).paid_microtu) > 0n);
+  assert.equal((await coverageRow(x.f, lease)).state, "ACTIVE");
+  await finishCoverage(x.core.id);
+  await x.fresh();
+  assert.equal((await renewals().attempt(essential.id)).status, "RENEWED");
+  await finishCoverage(lease);
+  await x.fresh();
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_OPERATING_SUPPORT",
+  );
+  await renewals().revoke(admin, essential.id, false);
+});
+
+test("expansion: database permissions prevent changing kind, support history or consumed demand", async (t) => {
+  const x = await expansionFixture(t);
+  await renewals().attempt(x.a.id);
+  for (const sql of [
+    "UPDATE cooperative_renewal_authorizations SET coverage_kind='ESSENTIAL'",
+    "UPDATE cooperative_provider_mandates SET coverage_kind='ESSENTIAL'",
+    "UPDATE cooperative_operating_support SET expires_at=now()+interval '1 year'",
+    "UPDATE economic_affiliations SET party_id=party_id",
+    "DELETE FROM cooperative_expansion_demand",
+    "INSERT INTO economic_parties(id,name,created_by,evidence_sha256,source_reference,idempotency_key,request_sha256,created_at) SELECT id,name,created_by,evidence_sha256,source_reference,idempotency_key,request_sha256,created_at FROM economic_parties LIMIT 0",
+  ])
+    await assert.rejects(db.pool.query(sql), { code: "42501" });
+  assert.equal(
+    (await db.pool.query("SELECT sum(balance)::text AS n FROM ledger_accounts"))
+      .rows[0].n,
+    "0",
+  );
+});
+
+test("expansion: cancelled, too-new or nearly expired requests provide no excess funded pressure", async (t) => {
+  const x = await expansionFixture(t);
+  await owner.query("UPDATE sessions SET created_at=now() WHERE id=$1", [
+    x.queued[0].id,
+  ]);
+  assert.equal((await x.facts()).eligible_funded_parties, 1);
+  await owner.query(
+    "UPDATE sessions SET created_at=now()-interval '20 seconds',queue_deadline=now()+interval '5 seconds' WHERE id=$1",
+    [x.queued[0].id],
+  );
+  assert.equal((await x.facts()).eligible_funded_parties, 1);
+  await sessions.cancel(x.consumers[0]!, x.queued[0].id);
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_FUNDED_PRESSURE",
+  );
+  assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+});
+
+test("expansion: optional growth cannot take the sponsor slots reserved for other essential plans", async (t) => {
+  const x = await expansionFixture(t);
+  for (let i = 0; i < 3; i++)
+    await coop().create(x.f.buyer, {
+      name: `Isolated essential plan ${i}`,
+      support_until: new Date(Date.now() + 3600000).toISOString(),
+      idempotency_key: randomUUID(),
+      groups: [
+        {
+          key: "essential",
+          route_ids: [x.f.route.id],
+          duration_seconds: 60,
+          rate_microtu_per_second: "100",
+        },
+      ],
+    });
+  assert.equal((await x.facts()).reserved_sponsor_contract_slots, 4);
+  assert.equal(
+    (await renewals().attempt(x.a.id)).status,
+    "EXPANSION_ESSENTIAL_CONTRACT_SLOTS",
+  );
+  assert.equal((await authorityRow(x.a.id)).windows_used, 0);
+});
+
+test("expansion: legacy pool terms stay essential-only and cannot be silently upgraded", async (t) => {
+  const f = await fixture(t);
+  const p = await coop().create(f.buyer, {
+    name: "Isolated preserved legacy policy",
+    support_until: new Date(Date.now() + 3600000).toISOString(),
+    idempotency_key: randomUUID(),
+    groups: [
+      {
+        key: "essential",
+        route_ids: [f.route.id],
+        duration_seconds: 60,
+        rate_microtu_per_second: "100",
+      },
+    ],
+  });
+  // Reconstruct an old-format record before any funding or contract in this isolated database.
+  p.policy = {
+    ...p.policy,
+    version: "private-cooperative-floor-first-v1",
+    expansion: "NOT_QUALIFIED",
+  };
+  p.policy_sha256 = hash(canonical(p.policy));
+  await owner.query(
+    "UPDATE cooperative_pools SET policy=$2,policy_sha256=$3 WHERE id=$1",
+    [p.id, p.policy, p.policy_sha256],
+  );
+  const os = await economics().support(admin, p.id, {
+    ...economicEvidence(),
+    policy_sha256: p.policy_sha256,
+    scope: "Isolated old-policy support does not amend existing fund terms",
+    expires_at: new Date(Date.now() + 3600000).toISOString(),
+    consent: "PRIVATE_IN_KIND_SUPPORT_NO_VERIFIED_CASH_CLAIM",
+  });
+  await assert.rejects(
+    renewals().authorize(
+      f.buyer,
+      p.id,
+      authorityTerms(p, {
+        coverage_kind: "EXPANSION",
+        operating_support_id: os.id,
+      }),
+    ),
+    { code: "expansion_policy" },
+  );
+  const essential = await renewals().authorize(
+    f.buyer,
+    p.id,
+    authorityTerms(p),
+  );
+  await assert.rejects(
+    renewals().mandate(
+      f.root,
+      p.id,
+      mandateTerms(p, f.route.id, {
+        coverage_kind: "EXPANSION",
+        consent: "READINESS_ONLY_BOUNDED_EXPANSION",
+      }),
+    ),
+    { code: "expansion_policy" },
+  );
+  assert.equal(essential.coverage_kind, "ESSENTIAL");
+  assert.ok(
+    (await renewals().view(f.buyer, p.id)).expansion[0]!.blocked_by.includes(
+      "policy_permission",
+    ),
+  );
+  await renewals().revoke(admin, essential.id, false);
+});
+
+test("expansion: a PostgreSQL backup restores positive demand claims, support and immutable limits", async (t) => {
+  const x = await expansionFixture(t);
+  assert.equal((await renewals().attempt(x.a.id)).status, "RENEWED");
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(
+      process.execPath,
+      ["scripts/verify-backup.mjs", "--source-test-database", name],
+      {
+        windowsHide: true,
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 60000,
+      },
+    );
+    let output = "";
+    child.stdout.on("data", (chunk) => {
+      output += chunk.toString();
+    });
+    child.stderr.on("data", (chunk) => {
+      output += chunk.toString();
+    });
+    child.on("error", reject);
+    child.on("exit", (code) =>
+      code === 0
+        ? resolve()
+        : reject(new Error(`Isolated restore failed: ${output}`)),
+    );
+  });
+  const report = JSON.parse(
+    await readFile(
+      ".runtime/private-lab/expansion-fixture-restore.json",
+      "utf8",
+    ),
+  );
+  assert.equal(report.source_scope, "FABRICATED_CONTRACT_FIXTURES");
+  assert.ok(report.route_tables.cooperative_expansion_demand > 0);
+  assert.equal(
+    report.expansion_demand_support_and_coverage_binding_mismatches,
+    0,
   );
 });

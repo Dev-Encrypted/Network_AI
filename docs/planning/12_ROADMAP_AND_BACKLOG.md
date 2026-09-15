@@ -19,13 +19,15 @@ The original 58-item backlog and its detailed historical decomposition remain in
 | R09: distinct physical hosts | LAN and WAN profiles with measured links, NAT/relay behavior and independent failure injection | Authenticated private QUIC bridge implemented and tested on one host; distinct-host and relay qualification remain |
 | R10: integrated distributed model | Gateway admission covers every stage; cancellation, receipts and recovery work for the whole route | Real 32B root plus two signed stage agents, all-domain reservations and all-receipt settlement demonstrated; distinct-participant devices, integrated WAN and adversarial verification remain |
 | R11: heterogeneous profiles | Qualified hardware classes with transparent contribution-to-consumption comparisons | Required beyond the current host |
-| R12: useful readiness contracts | Funded bounded leases, verified READY periods, no duplicate physical commitments | Standalone and complete-route LAB_TU escrow windows implemented, with all-provider consent and component obligations during draining; independent verification, common-fund circulation and candidate treasury remain |
+| R12: useful readiness contracts | Funded bounded leases, verified READY periods, no duplicate physical commitments | Private standalone/complete-route escrow, common-fund recycling, bounded automatic renewal and demand-backed expansion implemented; independent verification, public evidence/correction policy and approved issuance remain |
 | R13: full economic study | Updated parameters, fresh holdout, full elastic/recovery predicates and mature-phase/cohort acceptance | Tested F0 configuration rejected |
 | R14: public trust | Work/resource verification, bounded newcomer exposure, adversarial and collusion tests | Required |
 | R15: independent continuity | Named operators, quorum, partition, restoration, key rotation and replacement gateway | Required |
 | R16: operational pilot | Confirmed costs and responsible operators; actual 7/30-day pilot evidence | Required |
 | R17: optional commercial service | Seller responsibility, capped funding, settlement, disputes, payouts and exit tested end to end | Separate path; disabled |
 | R18: broader product | Desktop contributor, localization, model adapters, multimodality and locally bounded coding agent | Incremental work after compatible contracts |
+
+Through v0.8, private circulation and expansion are executable mechanisms. A live one-account 32B cycle demonstrates recycling and honest expansion refusals; separate isolated fixtures demonstrate the positive expansion transaction, rollback and restoration. Neither is a real 24-hour recovery observation, independent-provider economy or successful mature study. [Current validation and remaining work](../implementation/STATUS.md).
 
 ## Order of work
 

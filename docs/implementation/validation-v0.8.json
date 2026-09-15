@@ -1,0 +1,103 @@
+{
+  "version": "0.8.0-private-expansion-preview",
+  "validation_local_dates": [
+    "2026-09-14",
+    "2026-09-15"
+  ],
+  "timezone": "America/Sao_Paulo",
+  "scope": "Private Windows application and real installed 32B CPU model on one physical host; positive expansion uses explicitly fabricated conditions in isolated PostgreSQL databases.",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "tests": {
+    "integration_and_integer_accounting": 91,
+    "new_expansion_cases": 17,
+    "artifact_acquisition": 3,
+    "rpc_socket_protocol": 4,
+    "rust_runtime": 4,
+    "rust_private_link": 3,
+    "rust_f0": 2,
+    "python_f0": 21,
+    "browser": 10,
+    "total_automated_without_double_counting_new_cases": 138
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_economic_sources_unchanged": true,
+    "applied_migration_bytes_preserved": true
+  },
+  "real_campaign": {
+    "report": "evidence/qwen3-32b-expansion-gates.json",
+    "initial_existing_funding_microtu": "3000",
+    "essential_windows": 1,
+    "seconds_per_window": 30,
+    "readiness_paid_microtu": "3000",
+    "actual_consumption_recycled_microtu": "40000",
+    "positive_independent_recurring_flow_microtu": "0",
+    "expansion_windows": 0,
+    "expansion_commitment_microtu": "0",
+    "new_lab_grants": 0,
+    "explicit_separate_expansion_consents": true,
+    "truthful_time_bounded_in_kind_support": true,
+    "fabricated_clock_readiness_or_ownership": false
+  },
+  "positive_expansion_tests": {
+    "scope": "FABRICATED_CONTRACT_FIXTURES_ONLY",
+    "whole_alternate_route_activated": true,
+    "essential_floor_preserved": true,
+    "reserve_unchanged": true,
+    "aliases_and_unknown_parties_excluded": true,
+    "refund_and_retrospective_classification_excluded": true,
+    "claimed_requests_not_reused": true,
+    "concurrent_attempts_commit_once": true,
+    "late_failure_rolls_back_funding_claims_and_counters": true,
+    "revocation_preserves_accepted_contracts_and_essential_renewal": true,
+    "legacy_policy_not_upgraded": true,
+    "shared_sponsor_essential_headroom_preserved": true
+  },
+  "browser_campaign": {
+    "distinct_cases_passed": 10,
+    "execution": "All ten journeys passed in one full local run.",
+    "lost_support_response_reuses_identity_and_absolute_expiry": true,
+    "expansion_requires_explicit_mode_and_provider_consent": true,
+    "reserve_authority_fixed_at_zero": true,
+    "private_classification_and_support_forms": true,
+    "one_host_blockers_visible": true,
+    "no_unauthorized_extra_window": true,
+    "support_revocation": true,
+    "desktop_mobile_visual_review": true,
+    "mobile_width": 390,
+    "no_page_overflow": true,
+    "ci_scope": "CI runs three model-independent browser journeys. The real-model journeys, including expansion, require the already installed private model profile."
+  },
+  "isolated_restores": [
+    {
+      "report": "evidence/expansion-fixture-restore.json",
+      "source_scope": "FABRICATED_CONTRACT_FIXTURES",
+      "journal_entries": 450,
+      "positive_expansion_claims": 7,
+      "active_complete_route_windows": 2
+    },
+    {
+      "report": "evidence/expansion-backup-restore.json",
+      "source_scope": "PRIVATE_WORKING_DATABASE",
+      "journal_entries": 315,
+      "positive_expansion_claims": 0,
+      "active_complete_route_windows": 0
+    }
+  ],
+  "unqualified_or_unfinished": [
+    "real 24-hour healthy recovery campaign",
+    "independently verified ownership and work",
+    "historical evidence dispute/correction policy for public use",
+    "observed cost calibration and fresh successful mature economic study",
+    "cooperative issuance and exposure governance",
+    "independent heterogeneous GPU/WAN routes",
+    "distributed continuity and public operating quorum",
+    "cash payments, disputes and payouts",
+    "independently funded public pilot and production operation"
+  ]
+}

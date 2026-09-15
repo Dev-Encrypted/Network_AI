@@ -13,6 +13,20 @@ const require = createRequire(
 );
 const { Pool } = require("pg");
 const c = await config();
+const args = process.argv.slice(2);
+const fixtureDatabase =
+  args.length === 2 && args[0] === "--source-test-database" ? args[1] : null;
+assert.ok(
+  !args.length ||
+    (fixtureDatabase && /^network_ai_test_[a-f0-9]{32}$/.test(fixtureDatabase)),
+  "Only a named isolated contract database may override the lab source",
+);
+if (fixtureDatabase)
+  for (const key of ["database_owner_url", "database_url"]) {
+    const url = new URL(c[key]);
+    url.pathname = `/${fixtureDatabase}`;
+    c[key] = url.toString();
+  }
 const name = `network_ai_restore_${randomUUID().replaceAll("-", "")}`;
 assert.match(name, /^network_ai_restore_[a-f0-9]{32}$/);
 const source = new Pool({ connectionString: c.database_owner_url });
@@ -25,7 +39,10 @@ try {
   const snapshot = (
     await snapshotClient.query("SELECT pg_export_snapshot() AS id")
   ).rows[0].id;
-  const path = await backup({ snapshot });
+  const path = await backup({
+    snapshot,
+    sourceDatabase: fixtureDatabase ?? "network_ai",
+  });
   await source.query(`CREATE DATABASE "${name}"`);
   await new Promise((resolve, reject) => {
     const child = spawn(
@@ -109,6 +126,10 @@ try {
     "cooperative_renewal_runs",
     "cooperative_mandate_usages",
     "cooperative_renewal_events",
+    "economic_parties",
+    "economic_affiliations",
+    "cooperative_operating_support",
+    "cooperative_expansion_demand",
   ];
   const routeCounts = {};
   for (const table of routeTables) {
@@ -218,7 +239,7 @@ try {
     await restored.query(`SELECT rr.lease_id FROM cooperative_renewal_runs rr
     JOIN cooperative_renewal_authorizations a ON a.id=rr.authorization_id JOIN cooperative_windows cw ON cw.lease_id=rr.lease_id
     JOIN route_availability_leases l ON l.id=rr.lease_id WHERE a.pool_id<>cw.pool_id OR a.group_key<>cw.group_key
-    OR rr.source<>cw.funding_source OR rr.committed_microtu<>l.budget_microtu OR l.ends_ms>floor(extract(epoch FROM a.expires_at)*1000)
+    OR a.coverage_kind<>cw.coverage_kind OR rr.source<>cw.funding_source OR rr.committed_microtu<>l.budget_microtu OR l.ends_ms>floor(extract(epoch FROM a.expires_at)*1000)
     OR l.terms->'cooperative'->'renewal'->>'authorization_id' IS DISTINCT FROM a.id::text
     OR l.terms->'cooperative'->'renewal'->>'authorization_terms_sha256' IS DISTINCT FROM a.terms_sha256
     OR EXISTS(SELECT DISTINCT am.provider_id FROM route_availability_members am WHERE am.lease_id=l.id
@@ -229,6 +250,7 @@ try {
     WHERE u.provider_id<>m.provider_id OR u.terms_sha256<>m.terms_sha256 OR m.route_id<>l.route_id OR m.route_sha256<>l.route_sha256
     OR ac.provider_mandate_id IS DISTINCT FROM m.id OR ac.terms_sha256 IS DISTINCT FROM l.terms_sha256
     OR l.ends_ms>floor(extract(epoch FROM m.expires_at)*1000)
+    OR m.coverage_kind IS DISTINCT FROM (SELECT coverage_kind FROM cooperative_windows WHERE lease_id=l.id)
     OR NOT EXISTS(SELECT 1 FROM route_availability_members am WHERE am.lease_id=l.id AND am.provider_id=u.provider_id)`);
   for (const result of [
     renewalProjection,
@@ -237,6 +259,24 @@ try {
     mandateBindings,
   ])
     assert.equal(result.rowCount, 0);
+  const expansionBindings =
+    await restored.query(`SELECT w.lease_id FROM cooperative_windows w
+    JOIN route_availability_leases l ON l.id=w.lease_id LEFT JOIN cooperative_expansion_demand ed ON ed.lease_id=w.lease_id
+    LEFT JOIN cooperative_renewal_runs rr ON rr.lease_id=w.lease_id
+    LEFT JOIN cooperative_renewal_authorizations a ON a.id=rr.authorization_id
+    LEFT JOIN cooperative_operating_support os ON os.id=a.operating_support_id
+    LEFT JOIN economic_affiliations ea ON ea.id=ed.affiliation_id LEFT JOIN sessions s ON s.id=ed.session_id
+    WHERE w.coverage_kind IS DISTINCT FROM coalesce(l.terms->'cooperative'->>'coverage_kind','ESSENTIAL')
+    OR (w.coverage_kind='ESSENTIAL' AND ed.lease_id IS NOT NULL)
+    OR (w.coverage_kind='EXPANSION' AND (ed.lease_id IS NULL OR os.id IS NULL OR w.funding_source<>'WORKING'
+      OR ed.evidence IS DISTINCT FROM l.terms->'cooperative'->'expansion'
+      OR ed.evidence_sha256 IS DISTINCT FROM l.terms->'cooperative'->>'expansion_sha256'
+      OR ea.party_id IS DISTINCT FROM ed.consumer_party_id OR ea.user_id IS DISTINCT FROM s.user_id
+      OR ed.evidence->'selected_demand'->>'session_id' IS DISTINCT FROM ed.session_id::text
+      OR ed.evidence->'selected_demand'->>'affiliation_id' IS DISTINCT FROM ea.id::text
+      OR os.pool_id IS DISTINCT FROM w.pool_id OR os.policy_sha256 IS DISTINCT FROM a.policy_sha256
+      OR ed.evidence->'support'->>'terms_sha256' IS DISTINCT FROM os.terms_sha256))`);
+  assert.equal(expansionBindings.rowCount, 0);
   for (const statement of [
     "UPDATE cooperative_renewal_authorizations SET windows_used=0",
     "UPDATE cooperative_renewal_authorizations SET maximum_working_microtu=maximum_working_microtu",
@@ -244,10 +284,20 @@ try {
     "UPDATE cooperative_provider_mandates SET windows_used=0",
     "DELETE FROM cooperative_renewal_runs",
     "DELETE FROM cooperative_mandate_usages",
+    "UPDATE cooperative_renewal_authorizations SET coverage_kind='ESSENTIAL'",
+    "UPDATE cooperative_provider_mandates SET coverage_kind='ESSENTIAL'",
+    "UPDATE cooperative_operating_support SET expires_at=now()+interval '1 year'",
+    "UPDATE economic_affiliations SET party_id=party_id",
+    "UPDATE economic_affiliations SET created_at=now()",
+    "DELETE FROM economic_parties",
+    "DELETE FROM cooperative_expansion_demand",
   ])
     await assert.rejects(() => restored.query(statement), { code: "42501" });
   const report = {
     evidence_type: "ISOLATED_POSTGRES_RESTORE",
+    source_scope: fixtureDatabase
+      ? "FABRICATED_CONTRACT_FIXTURES"
+      : "PRIVATE_WORKING_DATABASE",
     source_comparison: "same exported PostgreSQL snapshot as pg_dump",
     observed_at: new Date().toISOString(),
     journal_entries: after.rows[0].n,
@@ -258,6 +308,8 @@ try {
     provider_mandate_projection_mismatches: 0,
     renewal_contract_binding_mismatches: 0,
     provider_mandate_binding_mismatches: 0,
+    expansion_demand_support_and_coverage_binding_mismatches: 0,
+    runtime_expansion_terms_and_classification_history_writes_denied: true,
     runtime_renewal_limits_terms_and_usage_writes_denied: true,
     runtime_cooperative_policy_and_history_writes_denied: true,
     runtime_balance_write_denied: true,
@@ -285,7 +337,10 @@ try {
     ).rows[0].n,
   };
   await writeFile(
-    join(runtime, "backup-report.json"),
+    join(
+      runtime,
+      fixtureDatabase ? "expansion-fixture-restore.json" : "backup-report.json",
+    ),
     JSON.stringify(report, null, 2) + "\n",
   );
   console.log(

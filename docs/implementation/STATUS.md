@@ -1,6 +1,16 @@
 # Private-preview implementation and validation status
 
-## Version 0.7 additions
+## Version 0.8 additions
+
+The private controller now opens optional complete-route expansion only under explicit new-plan terms, separate bounded manager/provider permissions, stable recovery, a preserved essential floor, full protected reserve, recorded operating support, covered essential groups, sponsor headroom, qualifying retained flow and current funded pressure beyond covered free slots. Economic parties and time-bounded account affiliations are administrator-reviewed declarations with immutable provenance. Unknown or affiliated users do not justify expansion; later classifications cannot qualify prior consumption. Each selected request can justify expansion once. Activation, escrow, demand evidence and used permissions are atomic. [Detailed explanation and API](DEMAND_BACKED_EXPANSION.md).
+
+The actual one-host 32B CPU campaign funded one essential 30-second window with 3,000 existing microcredits. A 19-input/seven-output-token request completed in 4,054 ms and recycled 40,000 microcredits. The window paid 3,000. Expansion remained at zero windows/zero commitment despite separate permissions and recorded local support: self-use was not qualifying independent flow, no second physical route existed, and reserve/recovery conditions were unmet. No grants or fabricated clock/party observations were used. [Real report](evidence/qwen3-32b-expansion-gates.json).
+
+Validation includes 91 integration/accounting cases, of which 17 exercise the new expansion behavior, seven unit/socket cases, nine Rust cases, 21 unchanged Python F0 cases and ten browser journeys. The browser campaign passed all ten journeys in one run, including support-response retry, explicit expansion consent, zero reserve authority, waiting explanations, revocation and 390-pixel layout. An isolated fixture restore contained seven positive expansion claims and two active whole-route windows; a separate working snapshot correctly contained none. Both preserved projections, contract bindings and restricted runtime permissions. [Version 0.8 report](validation-v0.8.json), [fixture restore](evidence/expansion-fixture-restore.json), [working restore](evidence/expansion-backup-restore.json).
+
+This completes the private expansion mechanism, not the public economic controller. Real 24-hour recovery, independent ownership/work verification, observed cost calibration, a fresh successful mature economic study, issuance/exposure governance, heterogeneous multi-host GPU/WAN routes, distributed continuity, cash settlement and a funded public pilot remain open. The original F0 evidence and failed configurations remain unchanged. Old pool policies retain essential-only behavior; new plans explicitly permit separate private expansion authorization.
+
+## Preserved version 0.7 campaign
 
 The private coordinator now renews whole-route readiness automatically within two independent permissions: finite manager authority over gross working/reserve commitments, and finite provider mandates over their exact route participation. Activation, escrow, participant consent, physical claims and used limits commit atomically. Returned escrow never replenishes a permission. Pauses, absent consent, unavailable capacity, insufficient funds, source restrictions or expiry prevent new commitments. Revocation preserves accepted windows. The interface shows limits, consumed authority, waiting reasons and revocation controls. [Complete contract and operations guide](BOUNDED_RENEWALS.md).
 
@@ -8,7 +18,7 @@ The installed 32B CPU campaign used one host, one account and three signed agent
 
 Validation includes 74 integration/accounting cases (14 specific to renewal), seven unit/socket cases, nine Rust cases, 21 unchanged Python F0 cases and nine browser journeys: 120 distinct automated cases. The prior eight browser journeys passed in the full run; the new journey passed after correcting its select locator. Its controls were inspected at desktop and 390-pixel mobile widths. An isolated restore of a snapshot containing 293 journal entries and one active complete-route window preserved renewal projections, bindings and runtime-role restrictions. [Version 0.7 validation](validation-v0.7.json), [restore result](evidence/renewal-backup-restore.json).
 
-This closes the private bounded-renewal mechanism. Independent operators, heterogeneous GPUs across hosts, WAN campaigns, public work verification/consensus, economic qualification, issuance, demand-backed expansion and cash settlement remain unfinished. An active mandate does not guarantee gap-free service: the next window is funded after the prior one ends. The original F0 source hashes and unsuccessful economic studies remain unchanged.
+That release closed the private bounded-renewal mechanism. Its then-outstanding private expansion work is covered by v0.8 above; independent operators, heterogeneous GPU/WAN routes, public verification/consensus, economic qualification, issuance and cash settlement remain unfinished. An active mandate does not guarantee gap-free service: the next window is funded after the prior one ends. The original F0 source hashes and unsuccessful economic studies remain unchanged.
 
 ## Preserved version 0.6 campaign
 
@@ -90,7 +100,7 @@ Detailed private reports live under `.runtime/private-lab/`. The public report c
 1. **Capacity and links:** different devices and physical hosts, per-stage memory, LAN/WAN/NAT/relay, and integrated qualified transport.
 2. **Models above 27B:** broaden quality/context qualification beyond the executed official 32B Q4_K_M profile, then validate distinct-device routes, integrated cross-participant distribution, state and recovery. Official BF16 and Kimi gaps remain as recorded in F0.
 3. **Public trust:** independent usage/work verification, adversarial operators, anti-Sybil, exact offer licensing, and appropriate content/privacy policies.
-4. **Economics:** qualify the implemented private circulation/coverage rules, implement demand-backed expansion and issuance, and evaluate new parameters with fresh holdout seeds and observed costs.
+4. **Economics:** qualify private circulation, coverage and demand-backed expansion with independent evidence; implement approved issuance/exposure governance and evaluate new parameters with fresh holdout seeds and observed costs.
 5. **Continuity:** independent operators, federation/consensus, authority rotation, replacement coordinators, and recovery of keys/data on other hosts.
 6. **Commercial path:** separate payments, liabilities, seller responsibilities, settlement, disputes and payouts. None is activated here.
 

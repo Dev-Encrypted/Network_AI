@@ -33,6 +33,12 @@ Login verifies a scrypt password hash and creates a 12-hour HttpOnly, SameSite=S
 | POST | `/cooperative/renewals/:id/revoke` | Manager/admin revokes future fund authority; accepted windows preserved |
 | POST | `/cooperative/provider-mandates/:id/revoke` | Owning provider/admin revokes future participation; accepted windows preserved |
 | POST | `/cooperative/refunds/:session_id` | Administrator-only full refund from exact original destinations |
+| GET | `/admin/economics` | Administrator-only private party/affiliation registry |
+| POST | `/admin/economics/parties` | Administrator records an economic party with immutable evidence |
+| POST | `/admin/economics/affiliations` | Administrator records a bounded account-to-party declaration |
+| POST | `/admin/economics/affiliations/:id/revoke` | End future eligibility; retain historical declaration |
+| POST | `/cooperative/pools/:id/operating-support` | Administrator records exact-policy in-kind operational support |
+| POST | `/cooperative/operating-support/:id/revoke` | Revoke support for future expansion, preserving accepted contracts |
 | GET | `/sessions`, `/sessions/:id` | Up to 100 own sessions / details and events |
 | POST | `/sessions/:id/cancel` | Cancel an owned session |
 | GET / POST | `/keys` | List/create own personal keys |
@@ -163,5 +169,7 @@ Stages additionally send signed `POST /nodes/:id/stage-claim` and `/nodes/:id/st
 ## Opt-in cooperative sessions
 
 Optional automatic coverage requires the [bounded renewal contracts](BOUNDED_RENEWALS.md). Fund and provider permissions use separate limits, hashes and expiries. Creating or funding a pool does not implicitly enable renewal. The authenticated renewal read endpoint includes recent permissions, own eligible routes, consumed windows and reasons for waiting.
+
+Version 0.8 adds `coverage_kind` (`ESSENTIAL` by default, or `EXPANSION`) to those permissions. Expansion requires new pool terms, zero `maximum_reserve_microtu`, an exact `operating_support_id` and provider consent `READINESS_ONLY_BOUNDED_EXPANSION`. Old omitted-kind idempotency hashes retain their meaning. The read response adds aggregate `expansion` criteria and `operating_support`; route requests used as private demand evidence are omitted from the aggregate eligibility object. Revocation and history include both modes. [Complete field, scope, deadline and failure contract](DEMAND_BACKED_EXPANSION.md#api-contract).
 
 `POST /quotes` accepts optional `cooperative_pool_id`. The quote and session freeze that pool and policy hash. Supply the resulting quote in `X-Quote-Id`; the normal chat body is unchanged. Coverage-aware admission binds `coverage_lease_id` and `coverage_terms_sha256` into the session/capability and caps its execution deadline at the accepted window end. A session cannot switch pools or bypass missing coverage. Ordinary quotes remain 80/20; cooperative consumption is recycled while providers earn under the separately accepted readiness-only window. See the [complete request/consent guide](COOPERATIVE_FUNDS.md).

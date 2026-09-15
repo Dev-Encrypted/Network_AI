@@ -3,8 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatTU } from "@network-ai/contracts";
 import type { CooperativePool } from "./cooperative";
+import {
+  ExpansionPanel,
+  expansionNames,
+  type Expansion,
+  type OperatingSupport,
+} from "./expansion";
 
 type Authority = {
+  coverage_kind: string;
   id: string;
   state: string;
   maximum_windows: number;
@@ -19,6 +26,7 @@ type Authority = {
   reserve_committed_microtu: string;
 };
 type Mandate = {
+  coverage_kind: string;
   id: string;
   provider_id: string;
   provider_name: string;
@@ -31,6 +39,8 @@ type Mandate = {
   terms: { components: { maximum_microtu: string }[] };
 };
 type View = {
+  expansion: Expansion[];
+  operating_support: OperatingSupport[];
   authorizations: Authority[];
   mandates: Mandate[];
   routes: {
@@ -42,6 +52,7 @@ type View = {
     own_components: { share_bps: number }[];
   }[];
   runs: {
+    coverage_kind: string;
     lease_id: string;
     sequence: number;
     source: string;
@@ -78,7 +89,13 @@ const names: Record<string, string> = {
   DRAINING: "Concluindo compromissos",
   CANCELLED: "Cancelada",
 };
-const label = (value: string) => names[value] ?? value;
+const label = (value: string) =>
+  names[value] ??
+  (value.startsWith("EXPANSION_")
+    ? `Expansão pendente: ${expansionNames[value.slice(10).toLowerCase()] ?? value}`
+    : value);
+const kindLabel = (value: string) =>
+  value === "EXPANSION" ? "Expansão" : "Essencial";
 const tu = (value: string) => `${formatTU(value)} LAB_TU`;
 const date = (value: string) => new Date(value).toLocaleString("pt-BR");
 
@@ -103,6 +120,9 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
   const [operatorMinutes, setOperatorMinutes] = useState(60),
     [operatorReason, setOperatorReason] = useState("");
   const [operatorConsent, setOperatorConsent] = useState(false);
+  const [kind, setKind] = useState("ESSENTIAL"),
+    [operatorKind, setOperatorKind] = useState("ESSENTIAL");
+  const [supportId, setSupportId] = useState("");
   const attempt = useRef<{
     payload: string;
     id: string;
@@ -211,6 +231,14 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
             <p>Carregando autorizações…</p>
           ) : (
             <>
+              <ExpansionPanel
+                pool={p}
+                user={user}
+                expansion={view.expansion}
+                support={view.operating_support}
+                request={request}
+                refresh={refresh}
+              />
               {manager && (
                 <details>
                   <summary>Autorizar gastos do fundo</summary>
@@ -225,7 +253,12 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                           policy_sha256: p.policy_sha256,
                           maximum_windows: windows,
                           maximum_working_microtu: working,
-                          maximum_reserve_microtu: reserve,
+                          maximum_reserve_microtu:
+                            kind === "EXPANSION" ? "0" : reserve,
+                          coverage_kind: kind,
+                          ...(kind === "EXPANSION"
+                            ? { operating_support_id: supportId }
+                            : {}),
                           reason,
                           consent:
                             "BOUNDED_GROSS_COMMITMENTS_NO_AUTOMATIC_LIMIT_INCREASE",
@@ -234,6 +267,50 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                       );
                     }}
                   >
+                    <label>
+                      Finalidade do limite do fundo
+                      <select
+                        value={kind}
+                        onChange={(e) => {
+                          setKind(e.target.value);
+                          setConsent(false);
+                        }}
+                      >
+                        <option value="ESSENTIAL">Cobertura essencial</option>
+                        <option
+                          value="EXPANSION"
+                          disabled={!view.expansion[0]?.gates.policy_permission}
+                        >
+                          Expansão condicionada à demanda
+                        </option>
+                      </select>
+                    </label>
+                    {kind === "EXPANSION" && (
+                      <label>
+                        Apoio vinculado à expansão
+                        <select
+                          required
+                          value={supportId}
+                          onChange={(e) => {
+                            setSupportId(e.target.value);
+                            setConsent(false);
+                          }}
+                        >
+                          <option value="">Selecione o apoio registrado</option>
+                          {view.operating_support
+                            .filter(
+                              (s) =>
+                                !s.revoked_at &&
+                                new Date(s.expires_at).getTime() > Date.now(),
+                            )
+                            .map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.scope.slice(0, 60)} · {date(s.expires_at)}
+                              </option>
+                            ))}
+                        </select>
+                      </label>
+                    )}
                     <label>
                       Grupo autorizado
                       <select
@@ -274,7 +351,8 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                         inputMode="numeric"
                         pattern="[0-9]+"
                         required
-                        value={reserve}
+                        value={kind === "EXPANSION" ? "0" : reserve}
+                        disabled={kind === "EXPANSION"}
                         onChange={(e) => setReserve(e.target.value)}
                       />
                     </label>
@@ -313,6 +391,14 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                         limite, só pode cobrir uma falta real de giro.
                       </p>
                     )}
+                    {kind === "EXPANSION" && (
+                      <p className="coverage-wide">
+                        A expansão usa somente giro acima do piso essencial. Ela
+                        exige todos os critérios de demanda e apoio, além de
+                        autorização específica dos operadores. O limite não se
+                        aplica às janelas essenciais.
+                      </p>
+                    )}
                     <label className="coverage-wide consent-line">
                       <input
                         type="checkbox"
@@ -349,12 +435,34 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                           policy_sha256: p.policy_sha256,
                           maximum_windows: operatorWindows,
                           reason: operatorReason,
-                          consent: "READINESS_ONLY_BOUNDED_RENEWALS",
+                          coverage_kind: operatorKind,
+                          consent:
+                            operatorKind === "EXPANSION"
+                              ? "READINESS_ONLY_BOUNDED_EXPANSION"
+                              : "READINESS_ONLY_BOUNDED_RENEWALS",
                         },
                         operatorMinutes,
                       );
                     }}
                   >
+                    <label>
+                      Finalidade da minha participação
+                      <select
+                        value={operatorKind}
+                        onChange={(e) => {
+                          setOperatorKind(e.target.value);
+                          setOperatorConsent(false);
+                        }}
+                      >
+                        <option value="ESSENTIAL">Cobertura essencial</option>
+                        <option
+                          value="EXPANSION"
+                          disabled={!view.expansion[0]?.gates.policy_permission}
+                        >
+                          Expansão condicionada à demanda
+                        </option>
+                      </select>
+                    </label>
                     <label>
                       Minha rota autorizada
                       <select
@@ -438,6 +546,9 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                         checked={operatorConsent}
                         onChange={(e) => setOperatorConsent(e.target.checked)}
                       />
+                      {operatorKind === "EXPANSION"
+                        ? "Autorizo apenas janelas de expansão. "
+                        : ""}
                       Aceito receber por prontidão, sem pagamento 80/20
                       adicional nas sessões cooperativas; revogar preserva
                       janelas já aceitas.
@@ -462,7 +573,8 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                   data-renewal-authorization={a.id}
                 >
                   <strong>
-                    {a.group_key} · {label(a.state)}
+                    {a.group_key} · {kindLabel(a.coverage_kind)} ·{" "}
+                    {label(a.state)}
                   </strong>
                   <p>
                     Janelas: {a.windows_used} / {a.maximum_windows}. Validade:{" "}
@@ -502,7 +614,8 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                   data-provider-mandate={m.id}
                 >
                   <strong>
-                    {m.provider_name} · {m.route_name} · {label(m.state)}
+                    {m.provider_name} · {m.route_name} ·{" "}
+                    {kindLabel(m.coverage_kind)} · {label(m.state)}
                   </strong>
                   <p>
                     Janelas aceitas: {m.windows_used} / {m.maximum_windows}.
@@ -550,7 +663,8 @@ export function RenewalsPanel({ pool: p, user, request, onChange }: Props) {
                     {view.runs.map((r) => (
                       <tr key={r.lease_id} data-renewal-window={r.lease_id}>
                         <td>
-                          {r.lease_id.slice(0, 8)} / {r.sequence}
+                          {r.lease_id.slice(0, 8)} / {r.sequence} ·{" "}
+                          {kindLabel(r.coverage_kind)}
                         </td>
                         <td>
                           {r.state === "ACTIVE"

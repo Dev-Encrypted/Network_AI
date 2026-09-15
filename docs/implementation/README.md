@@ -1,4 +1,4 @@
-# Private bounded-renewal preview v0.7
+# Private demand-backed expansion preview v0.8
 
 **Created and directed by Dev-Encrypted.** This release connects the interface, control service, PostgreSQL, Rust gateway, and Rust node to a real local inference engine. It is an executable private environment. Public decentralized operation and the proposed cooperative economy still require qualification.
 
@@ -17,6 +17,7 @@
 - [Complete-route readiness budgets, component obligations and refunds](ROUTE_AVAILABILITY.md)
 - [Cooperative funding, readiness-only terms, recycling and exact refunds](COOPERATIVE_FUNDS.md)
 - [Bounded automatic renewal, spending authority and provider mandates](BOUNDED_RENEWALS.md)
+- [Demand-backed expansion, essential protection and private economic evidence](DEMAND_BACKED_EXPANSION.md)
 
 ## Components and data flow
 

@@ -18,6 +18,7 @@ import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
 import { RouteAvailability } from "./route-availability.js";
 import { Renewals } from "./renewals.js";
+import { Economics } from "./economics.js";
 import { Cooperative } from "./cooperative.js";
 import { Routes } from "./routes.js";
 import { capacity } from "./capacity.js";
@@ -34,6 +35,7 @@ export class ApiController {
     @Inject(Availability) readonly availability: Availability,
     @Inject(RouteAvailability) readonly routeAvailability: RouteAvailability,
     @Inject(Renewals) readonly renewals: Renewals,
+    @Inject(Economics) readonly economics: Economics,
     @Inject(Cooperative) readonly cooperative: Cooperative,
     @Inject(Routes) readonly routes: Routes,
   ) {}
@@ -131,6 +133,41 @@ export class ApiController {
     @Param("id") id: string,
   ) {
     return this.renewals.view(await this.auth.authenticate(req), id);
+  }
+  @Get("admin/economics") async economicParties(@Req() req: FastifyRequest) {
+    return this.economics.list(await this.auth.authenticate(req));
+  }
+  @Post("admin/economics/parties") async economicParty(
+    @Req() req: FastifyRequest,
+    @Body() body: unknown,
+  ) {
+    return this.economics.party(await this.auth.authenticate(req), body);
+  }
+  @Post("admin/economics/affiliations") async economicAffiliation(
+    @Req() req: FastifyRequest,
+    @Body() body: unknown,
+  ) {
+    return this.economics.affiliate(await this.auth.authenticate(req), body);
+  }
+  @Post("admin/economics/affiliations/:id/revoke")
+  async revokeEconomicAffiliation(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.economics.revoke(await this.auth.authenticate(req), id, false);
+  }
+  @Post("cooperative/pools/:id/operating-support") async economicSupport(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.economics.support(await this.auth.authenticate(req), id, body);
+  }
+  @Post("cooperative/operating-support/:id/revoke") async revokeEconomicSupport(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.economics.revoke(await this.auth.authenticate(req), id, true);
   }
   @Post("cooperative/pools/:id/renewals") async renewalAuthority(
     @Req() req: FastifyRequest,

@@ -2,6 +2,8 @@
 
 Version 0.7 private preview · Dev-Encrypted · CC BY 4.0
 
+The essential mechanism and v0.7 evidence below are preserved. Version 0.8 adds a separately authorized [demand-backed expansion mode](DEMAND_BACKED_EXPANSION.md). Active-permission uniqueness now includes coverage kind; omitted kind and old records remain essential. Expansion has zero reserve authority and cannot amend old pool terms.
+
 A community fund can keep commissioning complete readiness windows without asking every participant to click Accept each time. It needs two separate, finite permissions: the fund manager's authority to commit credits and each provider's consent to participate. Every window is still fully funded and bound to exact terms before it starts.
 
 This implements a private continuation mechanism for the [cooperative fund](COOPERATIVE_FUNDS.md). It does not issue credits, change prices, purchase hardware, expand an essential plan or promise continuous public availability. The installed 32B campaign uses one physical computer, one account and three agents. Multiple agents on that computer do not establish independent operators.

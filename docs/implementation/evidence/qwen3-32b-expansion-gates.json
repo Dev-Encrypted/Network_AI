@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "evidence_type": "REAL_INSTALLED_32B_PRIVATE_EXPANSION_GATES",
+  "observed_at": "2026-09-15T02:51:25.774Z",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "compute": "CPU",
+  "model_id": "qwen3-32b-route-private",
+  "unit": "LAB_TU",
+  "cash_payments": false,
+  "fabricated_database_observations": false,
+  "fabricated_party_classifications": false,
+  "sustainable_economics_established": false,
+  "public_operation_approved": false,
+  "checks": [
+    {
+      "name": "separate_consents_cannot_override_missing_independent_demand_or_extra_physical_capacity",
+      "passed": true
+    },
+    {
+      "name": "real_32b_self_use_recycles_existing_credits_without_becoming_independent_recurring_flow",
+      "passed": true
+    },
+    {
+      "name": "no_expansion_no_new_issuance_and_no_accepted_contract_cancellation",
+      "passed": true
+    }
+  ],
+  "during_essential_window": {
+    "group_key": "essential-32b",
+    "policy": "private-demand-backed-expansion-v1",
+    "qualification_scope": "PRIVATE_DECLARED_PARTIES",
+    "evaluated_at": "2026-09-15T02:51:27.477Z",
+    "approved": false,
+    "blocked_by": [
+      "normal_recovery",
+      "working_floor",
+      "protected_reserve",
+      "recurring_flow",
+      "funded_pressure",
+      "additional_complete_route"
+    ],
+    "gates": {
+      "policy_permission": true,
+      "normal_recovery": false,
+      "working_floor": false,
+      "protected_reserve": false,
+      "operating_support": true,
+      "essential_coverage": true,
+      "essential_contract_slots": true,
+      "recurring_flow": false,
+      "funded_pressure": false,
+      "additional_complete_route": false
+    },
+    "window_budget_microtu": "3000",
+    "free_working_microtu": "0",
+    "essential_floor_microtu": "2157000",
+    "free_reserve_microtu": "0",
+    "reserve_target_microtu": "25920000",
+    "net_recycled_microtu": "0",
+    "normal_cost_microtu": "0",
+    "eligible_funded_parties": 0,
+    "spare_covered_slots": 1,
+    "additional_complete_routes": 0,
+    "essential_groups_covered": 1,
+    "essential_groups_required": 1,
+    "reserved_sponsor_contract_slots": 1,
+    "support": {
+      "registered": true,
+      "expires_at": "2026-09-15T03:01:25.895Z"
+    }
+  },
+  "inference": {
+    "elapsed_ms": 4054,
+    "prompt_tokens": 19,
+    "completion_tokens": 7,
+    "charged_microtu": "40000",
+    "state": "COMPLETED",
+    "billing_state": "SETTLED",
+    "allocation": {
+      "working_microtu": "40000",
+      "reserve_microtu": "0",
+      "burned_microtu": "0"
+    },
+    "additional_inference_payout_microtu": "0"
+  },
+  "after_self_consumption": {
+    "group_key": "essential-32b",
+    "policy": "private-demand-backed-expansion-v1",
+    "qualification_scope": "PRIVATE_DECLARED_PARTIES",
+    "evaluated_at": "2026-09-15T02:51:31.575Z",
+    "approved": false,
+    "blocked_by": [
+      "normal_recovery",
+      "working_floor",
+      "protected_reserve",
+      "recurring_flow",
+      "funded_pressure",
+      "additional_complete_route"
+    ],
+    "gates": {
+      "policy_permission": true,
+      "normal_recovery": false,
+      "working_floor": false,
+      "protected_reserve": false,
+      "operating_support": true,
+      "essential_coverage": true,
+      "essential_contract_slots": true,
+      "recurring_flow": false,
+      "funded_pressure": false,
+      "additional_complete_route": false
+    },
+    "window_budget_microtu": "3000",
+    "free_working_microtu": "40000",
+    "essential_floor_microtu": "2157395",
+    "free_reserve_microtu": "0",
+    "reserve_target_microtu": "25920000",
+    "net_recycled_microtu": "0",
+    "normal_cost_microtu": "395",
+    "eligible_funded_parties": 0,
+    "spare_covered_slots": 1,
+    "additional_complete_routes": 0,
+    "essential_groups_covered": 1,
+    "essential_groups_required": 1,
+    "reserved_sponsor_contract_slots": 1,
+    "support": {
+      "registered": true,
+      "expires_at": "2026-09-15T03:01:25.895Z"
+    }
+  },
+  "essential_window": {
+    "state": "COMPLETED",
+    "committed_microtu": "3000",
+    "paid_microtu": "3000"
+  },
+  "final": {
+    "expansion_windows": 0,
+    "expansion_gross_commitment_microtu": "0",
+    "new_lab_grants": 0,
+    "working_projection_mismatches": 0,
+    "revoked_operating_support": true,
+    "essential_contract_preserved": true,
+    "expansion_status": "EXPANSION_NORMAL_RECOVERY"
+  },
+  "result": "PASS"
+}

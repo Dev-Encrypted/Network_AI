@@ -752,6 +752,14 @@ export async function status() {
   console.log(JSON.stringify(result, null, 2));
 }
 export async function backup(options = {}) {
+  const sourceDatabase = options.sourceDatabase ?? "network_ai";
+  if (
+    sourceDatabase !== "network_ai" &&
+    !/^network_ai_test_[a-f0-9]{32}$/.test(sourceDatabase)
+  )
+    throw new Error(
+      "Backup source must be the lab or an isolated contract test database",
+    );
   if (
     options.snapshot !== undefined &&
     (typeof options.snapshot !== "string" ||
@@ -778,7 +786,7 @@ export async function backup(options = {}) {
           "-U",
           "network_ai_owner",
           "-d",
-          "network_ai",
+          sourceDatabase,
           "-Fc",
           "--no-owner",
           ...(options.snapshot ? ["--snapshot", options.snapshot] : []),

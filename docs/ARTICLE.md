@@ -1,6 +1,6 @@
 # NETWORK AI: cooperative inference for models beyond one computer
 
-> Implementation update: the [cooperative guide](implementation/COOPERATIVE_FUNDS.md) documents the private credit cycle. The [v0.7 bounded-renewal guide](implementation/BOUNDED_RENEWALS.md) adds automatic continuation within finite fund authority and separate provider mandates. The actual one-host 32B campaign recycled consumption into a second window and blocked a third after revoking future provider consent, while preserving the accepted window's payments. The research and candidate policies below retain their evidence classifications and remaining economic/public-network gates.
+> Implementation update: the [cooperative guide](implementation/COOPERATIVE_FUNDS.md) documents the private credit cycle, and [bounded renewal](implementation/BOUNDED_RENEWALS.md) adds continuation within finite manager and provider permissions. The [v0.8 expansion guide](implementation/DEMAND_BACKED_EXPANSION.md) implements additional complete-route windows gated by funded demand, essential protection and recorded private evidence. Positive activation is tested in isolated fixtures; the real one-host 32B campaign continued useful inference while correctly refusing expansion. The research and candidate policies below retain their evidence classifications and remaining economic/public-network gates.
 
 
 **Concept, direction, and authorship:** [Dev-Encrypted](https://github.com/Dev-Encrypted)
@@ -155,6 +155,10 @@ No cash buyers is different from no cooperative users. If participants contribut
 If there is little compatible demand, idle capacity can support temporary larger allowances. The planned 1×/2×/4× policy concerns new per-profile concurrency allowances. It does not automatically enlarge context, lower prices, create permanent credit bonuses, or consume standby capacity already committed to continuity.
 
 The controller should grant extras gradually from recent measured headroom, remove new extras when queues return, and honor sessions already accepted. When there is no complete route for a model, spare hardware elsewhere does not help until it becomes compatible capacity for that route.
+
+Version 0.8 implements a separate private decision for paying another complete-route readiness window. A temporary concurrency allowance uses already covered capacity; expansion commits additional credits and therefore needs additional safeguards. The controller preserves the six-hour essential floor and complete 72-hour reserve, requires all essential groups to be covered, and compares current funded pressure with actual covered free slots. A waiting request can justify expansion only once, under finite manager and provider limits.
+
+The private controller excludes known affiliated or unclassified consumers, grants and direct contributions from its qualifying flow. It counts retained settled consumption and refund outflows in a rolling 24-hour window. Classification is evaluated at the original settlement time, preventing a later declaration from turning earlier unknown use into accepted historical flow. The identities and support declarations remain trusted administrative evidence: public ownership verification, cash backing, mature economic behavior and independent operations still need qualification. [Exact predicates, equations and failure behavior](implementation/DEMAND_BACKED_EXPANSION.md).
 
 If there is no useful demand at all, paying permanent readiness from newly issued credits would accumulate obligations without proving redemption. The response is to reduce future coverage, schedule specific windows, or pause new commitments while preserving existing rights. The policy must make that possibility visible to participants before they contribute.
 

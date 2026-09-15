@@ -15,6 +15,7 @@ import { need } from "./errors.js";
 import { canonical, hash } from "./security.js";
 import { Cooperative, cooperativeSnapshot } from "./cooperative.js";
 import { RouteAvailability } from "./route-availability.js";
+import { expansionFacts, publicExpansion } from "./economics.js";
 
 type Row = Record<string, any>;
 const reason = z.string().trim().min(20).max(500);
@@ -25,6 +26,7 @@ const common = {
   expires_at: z.iso.datetime(),
   idempotency_key: uuid,
   reason,
+  coverage_kind: z.enum(["ESSENTIAL", "EXPANSION"]).optional(),
 };
 const policy = "bounded-essential-renewal-v1";
 async function poolLock(tx: PoolClient, id: string): Promise<Row> {
@@ -70,13 +72,10 @@ export class Renewals {
   async view(user: User, id: string) {
     uuid.parse(id);
     return this.db.transaction(async (tx) => {
-      need(
-        (await tx.query("SELECT 1 FROM cooperative_pools WHERE id=$1", [id]))
-          .rowCount,
-        404,
-        "pool_missing",
-        "Fundo não encontrado.",
-      );
+      const pool = (
+        await tx.query("SELECT * FROM cooperative_pools WHERE id=$1", [id])
+      ).rows[0];
+      need(pool, 404, "pool_missing", "Fundo não encontrado.");
       const authorizations = (
         await tx.query(
           "SELECT * FROM cooperative_renewal_authorizations WHERE pool_id=$1 ORDER BY created_at DESC LIMIT 100",
@@ -104,7 +103,7 @@ export class Renewals {
       ).rows;
       const runs = (
         await tx.query(
-          `SELECT rr.*,l.state,l.started_ms,l.ends_ms,l.paid_microtu,l.terms_sha256 FROM cooperative_renewal_runs rr
+          `SELECT rr.*,cw.coverage_kind,l.state,l.started_ms,l.ends_ms,l.paid_microtu,l.terms_sha256 FROM cooperative_renewal_runs rr
         JOIN cooperative_windows cw ON cw.lease_id=rr.lease_id JOIN route_availability_leases l ON l.id=rr.lease_id
         WHERE cw.pool_id=$1 ORDER BY rr.created_at DESC LIMIT 100`,
           [id],
@@ -116,6 +115,34 @@ export class Renewals {
           [id],
         )
       ).rows;
+      const snapshot = await cooperativeSnapshot(tx, pool);
+      const expansion = [];
+      for (const group of snapshot.groups) {
+        const authority = authorizations.find(
+          (a) =>
+            a.group_key === group.group_key &&
+            a.coverage_kind === "EXPANSION" &&
+            a.state === "ACTIVE",
+        );
+        expansion.push({
+          group_key: group.group_key,
+          ...publicExpansion(
+            await expansionFacts(
+              tx,
+              pool,
+              group,
+              snapshot,
+              authority?.operating_support_id,
+            ),
+          ),
+        });
+      }
+      const operating_support = (
+        await tx.query(
+          "SELECT * FROM cooperative_operating_support WHERE pool_id=$1 ORDER BY created_at DESC LIMIT 100",
+          [id],
+        )
+      ).rows;
       return {
         authorizations,
         mandates,
@@ -123,6 +150,8 @@ export class Renewals {
         runs,
         events,
         renewal_policy: policy,
+        expansion,
+        operating_support,
       };
     });
   }
@@ -134,13 +163,32 @@ export class Renewals {
         group_key: z.string().regex(/^[a-z][a-z0-9_-]{0,39}$/),
         maximum_working_microtu: amount,
         maximum_reserve_microtu: amount,
+        operating_support_id: uuid.optional(),
         consent: z.literal(
           "BOUNDED_GROSS_COMMITMENTS_NO_AUTOMATIC_LIMIT_INCREASE",
         ),
       })
       .strict()
       .parse(body);
-    const digest = hash(canonical({ pool_id: id, ...d }));
+    const kind = d.coverage_kind ?? "ESSENTIAL";
+    need(
+      kind === "EXPANSION"
+        ? Boolean(d.operating_support_id) && d.maximum_reserve_microtu === "0"
+        : !d.operating_support_id,
+      400,
+      "expansion_authority",
+      "Expansão exige apoio operacional específico e limite zero para a reserva.",
+    );
+    const { coverage_kind, operating_support_id, ...legacy } = d;
+    const digest = hash(
+      canonical({
+        pool_id: id,
+        ...legacy,
+        ...(kind === "EXPANSION"
+          ? { coverage_kind: kind, operating_support_id }
+          : {}),
+      }),
+    );
     return this.db.transaction(async (tx) => {
       const p = await poolLock(tx, id);
       need(
@@ -170,6 +218,13 @@ export class Renewals {
         "pool_terms",
         "Confira a política exata do fundo.",
       );
+      need(
+        kind !== "EXPANSION" ||
+          p.policy.expansion === "PRIVATE_DEMAND_BACKED_SEPARATE_AUTHORIZATION",
+        409,
+        "expansion_policy",
+        "A política original deste fundo não permite expansão. Crie um novo plano com os novos termos.",
+      );
       const g = (
         await tx.query(
           "SELECT * FROM cooperative_groups WHERE pool_id=$1 AND group_key=$2",
@@ -178,6 +233,20 @@ export class Renewals {
       ).rows[0];
       need(g, 404, "group_missing", "Grupo essencial não encontrado.");
       checkExpiry(d.expires_at, g.duration_seconds);
+      if (kind === "EXPANSION")
+        need(
+          (
+            await tx.query(
+              `SELECT 1 FROM cooperative_operating_support os JOIN users u ON u.id=os.created_by
+        WHERE os.id=$1 AND os.pool_id=$2 AND os.policy_sha256=$3 AND os.revoked_at IS NULL AND NOT u.disabled
+        AND os.expires_at>clock_timestamp()+($4::int+10)*interval '1 second' FOR UPDATE OF os`,
+              [operating_support_id, id, p.policy_sha256, g.duration_seconds],
+            )
+          ).rowCount,
+          409,
+          "operating_support",
+          "Confira uma declaração de apoio válida para este fundo e janela.",
+        );
       const cost =
           BigInt(g.rate_microtu_per_second) * BigInt(g.duration_seconds),
         working = BigInt(d.maximum_working_microtu),
@@ -195,8 +264,8 @@ export class Renewals {
       need(
         !(
           await tx.query(
-            "SELECT 1 FROM cooperative_renewal_authorizations WHERE pool_id=$1 AND group_key=$2 AND state='ACTIVE'",
-            [id, d.group_key],
+            "SELECT 1 FROM cooperative_renewal_authorizations WHERE pool_id=$1 AND group_key=$2 AND coverage_kind=$3 AND state='ACTIVE'",
+            [id, d.group_key, kind],
           )
         ).rowCount,
         409,
@@ -205,7 +274,10 @@ export class Renewals {
       );
       const auth = randomUUID(),
         terms = {
-          policy,
+          policy: kind === "EXPANSION" ? "bounded-demand-expansion-v1" : policy,
+          ...(kind === "EXPANSION"
+            ? { coverage_kind: kind, operating_support_id }
+            : {}),
           authorization_id: auth,
           pool_id: id,
           policy_sha256: p.policy_sha256,
@@ -223,8 +295,8 @@ export class Renewals {
       const row = (
         await tx.query(
           `INSERT INTO cooperative_renewal_authorizations(id,pool_id,group_key,authorized_by,policy_sha256,maximum_windows,
-        maximum_working_microtu,maximum_reserve_microtu,terms,terms_sha256,expires_at,idempotency_key,request_sha256)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+        maximum_working_microtu,maximum_reserve_microtu,terms,terms_sha256,expires_at,idempotency_key,request_sha256,coverage_kind,operating_support_id)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
           [
             auth,
             id,
@@ -239,6 +311,8 @@ export class Renewals {
             d.expires_at,
             d.idempotency_key,
             digest,
+            kind,
+            operating_support_id ?? null,
           ],
         )
       ).rows[0];
@@ -254,11 +328,31 @@ export class Renewals {
       .object({
         ...common,
         route_id: uuid,
-        consent: z.literal("READINESS_ONLY_BOUNDED_RENEWALS"),
+        consent: z.enum([
+          "READINESS_ONLY_BOUNDED_RENEWALS",
+          "READINESS_ONLY_BOUNDED_EXPANSION",
+        ]),
       })
       .strict()
       .parse(body);
-    const digest = hash(canonical({ pool_id: id, ...d }));
+    const kind = d.coverage_kind ?? "ESSENTIAL";
+    need(
+      d.consent ===
+        (kind === "EXPANSION"
+          ? "READINESS_ONLY_BOUNDED_EXPANSION"
+          : "READINESS_ONLY_BOUNDED_RENEWALS"),
+      400,
+      "mandate_kind",
+      "Confira o consentimento específico para capacidade essencial ou expansão.",
+    );
+    const { coverage_kind, ...legacy } = d;
+    const digest = hash(
+      canonical({
+        pool_id: id,
+        ...legacy,
+        ...(kind === "EXPANSION" ? { coverage_kind: kind } : {}),
+      }),
+    );
     return this.db.transaction(async (tx) => {
       const p = await poolLock(tx, id);
       const old = (
@@ -281,6 +375,13 @@ export class Renewals {
         409,
         "pool_terms",
         "Confira a política exata do fundo.",
+      );
+      need(
+        kind !== "EXPANSION" ||
+          p.policy.expansion === "PRIVATE_DEMAND_BACKED_SEPARATE_AUTHORIZATION",
+        409,
+        "expansion_policy",
+        "A política original deste fundo não permite expansão. Crie um novo plano com os novos termos.",
       );
       const r = (
         await tx.query(
@@ -305,8 +406,8 @@ export class Renewals {
       need(
         !(
           await tx.query(
-            "SELECT 1 FROM cooperative_provider_mandates WHERE pool_id=$1 AND route_id=$2 AND provider_id=$3 AND state='ACTIVE'",
-            [id, r.route_id, user.id],
+            "SELECT 1 FROM cooperative_provider_mandates WHERE pool_id=$1 AND route_id=$2 AND provider_id=$3 AND coverage_kind=$4 AND state='ACTIVE'",
+            [id, r.route_id, user.id, kind],
           )
         ).rowCount,
         409,
@@ -336,7 +437,8 @@ export class Renewals {
       );
       const mid = randomUUID(),
         terms = {
-          policy,
+          policy: kind === "EXPANSION" ? "bounded-demand-expansion-v1" : policy,
+          ...(kind === "EXPANSION" ? { coverage_kind: kind } : {}),
           mandate_id: mid,
           pool_id: id,
           policy_sha256: p.policy_sha256,
@@ -355,8 +457,8 @@ export class Renewals {
         };
       const row = (
         await tx.query(
-          `INSERT INTO cooperative_provider_mandates(id,pool_id,provider_id,route_id,route_sha256,policy_sha256,maximum_windows,terms,terms_sha256,expires_at,idempotency_key,request_sha256)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
+          `INSERT INTO cooperative_provider_mandates(id,pool_id,provider_id,route_id,route_sha256,policy_sha256,maximum_windows,terms,terms_sha256,expires_at,idempotency_key,request_sha256,coverage_kind)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
           [
             mid,
             id,
@@ -370,6 +472,7 @@ export class Renewals {
             d.expires_at,
             d.idempotency_key,
             digest,
+            kind,
           ],
         )
       ).rows[0];
@@ -501,8 +604,8 @@ export class Renewals {
         (
           await tx.query(
             `SELECT 1 FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
-        WHERE cw.pool_id=$1 AND cw.group_key=$2 AND l.state IN ('OFFERED','ACTIVE','DRAINING')`,
-            [p.id, g.group_key],
+        WHERE cw.pool_id=$1 AND cw.group_key=$2 AND cw.coverage_kind=$3 AND l.state IN ('OFFERED','ACTIVE','DRAINING')`,
+            [p.id, g.group_key, a.coverage_kind],
           )
         ).rowCount
       )
@@ -526,6 +629,17 @@ export class Renewals {
         return this.note(tx, a, "EXHAUSTED");
       }
       const snap = await cooperativeSnapshot(tx, p);
+      const expansion =
+        a.coverage_kind === "EXPANSION"
+          ? await expansionFacts(tx, p, g, snap, a.operating_support_id)
+          : null;
+      if (expansion && !expansion.approved)
+        return this.note(
+          tx,
+          a,
+          `EXPANSION_${expansion.blocked_by[0]!.toUpperCase()}`,
+          { blocked_by: expansion.blocked_by },
+        );
       const source =
         snap.working >= cost && workingLimit >= cost
           ? "WORKING"
@@ -543,10 +657,10 @@ export class Renewals {
       const candidates = (
         await tx.query(
           `SELECT cr.* FROM cooperative_routes cr JOIN ready_execution_offers o ON o.route_id=cr.route_id
-        WHERE cr.pool_id=$1 AND cr.group_key=$2 AND NOT EXISTS(SELECT 1 FROM availability_domain_claims ac WHERE ac.resource_domain_id=ANY(o.domain_ids))
+        WHERE cr.pool_id=$1 AND cr.group_key=$2 AND ($3::uuid[] IS NULL OR cr.route_id=ANY($3::uuid[])) AND NOT EXISTS(SELECT 1 FROM availability_domain_claims ac WHERE ac.resource_domain_id=ANY(o.domain_ids))
         ORDER BY (SELECT max(l.created_at) FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
           WHERE cw.pool_id=$1 AND l.route_id=cr.route_id) ASC NULLS FIRST,cr.route_id`,
-          [p.id, g.group_key],
+          [p.id, g.group_key, expansion?.candidates ?? null],
         )
       ).rows;
       if (!candidates.length) return this.note(tx, a, "WAITING_FOR_CAPACITY");
@@ -563,7 +677,7 @@ export class Renewals {
           await tx.query(
             `SELECT m.* FROM cooperative_provider_mandates m WHERE m.pool_id=$1 AND m.route_id=$2
           AND m.provider_id=ANY($3::uuid[]) AND m.route_sha256=$4 AND m.policy_sha256=$5 AND m.state='ACTIVE'
-          AND m.windows_used<m.maximum_windows AND m.expires_at>to_timestamp($6::double precision/1000) ORDER BY m.id FOR UPDATE`,
+          AND m.windows_used<m.maximum_windows AND m.expires_at>to_timestamp($6::double precision/1000) AND m.coverage_kind=$7 ORDER BY m.id FOR UPDATE`,
             [
               p.id,
               r.route_id,
@@ -571,6 +685,7 @@ export class Renewals {
               r.route_sha256,
               p.policy_sha256,
               earliestEnd,
+              a.coverage_kind,
             ],
           )
         ).rows;
@@ -581,6 +696,41 @@ export class Renewals {
         }
       }
       if (!chosen) return this.note(tx, a, "WAITING_FOR_OPERATORS");
+      const selectedDemand = expansion?.demand[0];
+      let expansionEvidence: Record<string, any> | undefined;
+      if (expansion && selectedDemand) {
+        // Freeze the selected request and supporting declarations before committing capacity.
+        await tx.query(
+          "SELECT id FROM cooperative_operating_support WHERE id=$1 FOR UPDATE",
+          [a.operating_support_id],
+        );
+        await tx.query(
+          `SELECT id FROM economic_affiliations WHERE revoked_at IS NULL AND (user_id=$1 OR user_id=$2 OR user_id IN(
+            SELECT rm.provider_id FROM cooperative_routes cr JOIN route_members rm ON rm.route_id=cr.route_id WHERE cr.pool_id=$3 AND cr.group_key=$4)) ORDER BY id FOR SHARE`,
+          [selectedDemand.user_id, p.creator_id, p.id, g.group_key],
+        );
+        const held = (
+          await tx.query(
+            "SELECT * FROM sessions WHERE id=$1 AND state='QUEUED' AND billing_state='HELD' AND queue_deadline>clock_timestamp()+interval '10 seconds' FOR UPDATE",
+            [selectedDemand.id],
+          )
+        ).rows[0];
+        need(
+          held,
+          409,
+          "demand_changed",
+          "A demanda mudou antes da reserva de expansão.",
+        );
+        expansionEvidence = {
+          ...publicExpansion(expansion),
+          selected_demand: {
+            session_id: held.id,
+            party_id: selectedDemand.party_id,
+            affiliation_id: selectedDemand.affiliation_id,
+            hold_microtu: held.hold_microtu,
+          },
+        };
+      }
       const creator = (
         await tx.query("SELECT id,login,name,role FROM users WHERE id=$1", [
           p.creator_id,
@@ -593,11 +743,12 @@ export class Renewals {
         {
           group_key: g.group_key,
           source,
-          reason: `Bounded essential renewal ${a.id}; fixed policy and gross commitment limits.`,
+          reason: `Bounded ${a.coverage_kind.toLowerCase()} renewal ${a.id}; fixed policy and gross commitment limits.`,
           idempotency_key: randomUUID(),
         },
         {
           eligibleRoutes: [chosen.route_id],
+          ...(expansionEvidence ? { expansion: expansionEvidence } : {}),
           renewal: {
             authorization_id: a.id,
             authorization_terms_sha256: a.terms_sha256,
@@ -634,11 +785,25 @@ export class Renewals {
           "INSERT INTO cooperative_mandate_usages(lease_id,provider_id,mandate_id,terms_sha256) VALUES($1,$2,$3,$4)",
           [lease.id, m.provider_id, m.id, m.terms_sha256],
         );
+      if (selectedDemand && expansionEvidence)
+        await tx.query(
+          `INSERT INTO cooperative_expansion_demand(lease_id,session_id,consumer_party_id,affiliation_id,evidence,evidence_sha256)
+        VALUES($1,$2,$3,$4,$5,$6)`,
+          [
+            lease.id,
+            selectedDemand.id,
+            selectedDemand.party_id,
+            selectedDemand.affiliation_id,
+            expansionEvidence,
+            hash(canonical(expansionEvidence)),
+          ],
+        );
       return this.note(tx, a, "RENEWED", {
         lease_id: lease.id,
         source,
         committed_microtu: cost.toString(),
         sequence: a.windows_used + 1,
+        coverage_kind: a.coverage_kind,
       });
     });
   }
@@ -651,8 +816,17 @@ export class Renewals {
         "SELECT id FROM cooperative_renewal_authorizations WHERE state='ACTIVE' ORDER BY last_attempt_at NULLS FIRST,id LIMIT 100",
       )
     ).rows;
+    // Keep the age-based batch fair; prioritize essential work within that batch.
+    const ordered = active.length
+      ? (
+          await this.db.pool.query(
+            "SELECT id FROM cooperative_renewal_authorizations WHERE id=ANY($1::uuid[]) ORDER BY (coverage_kind='EXPANSION'),last_attempt_at NULLS FIRST,id",
+            [active.map((a) => a.id)],
+          )
+        ).rows
+      : [];
     const results = [];
-    for (const { id } of active) {
+    for (const { id } of ordered) {
       try {
         results.push(await this.attempt(id));
       } catch (e) {

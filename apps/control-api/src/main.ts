@@ -24,6 +24,7 @@ import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
 import { RouteAvailability } from "./route-availability.js";
 import { Renewals } from "./renewals.js";
+import { Economics } from "./economics.js";
 import { Cooperative } from "./cooperative.js";
 import { Routes } from "./routes.js";
 import { ApiController } from "./controller.js";
@@ -47,6 +48,7 @@ const renewals = new Renewals(db);
     { provide: Availability, useValue: availability },
     { provide: RouteAvailability, useValue: routeAvailability },
     { provide: Renewals, useValue: renewals },
+    { provide: Economics, useValue: new Economics(db) },
     { provide: Cooperative, useValue: cooperative },
     { provide: Routes, useValue: new Routes(db, auth) },
   ],

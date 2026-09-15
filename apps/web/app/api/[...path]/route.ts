@@ -7,7 +7,7 @@ async function handle(
 ) {
   const path = (await context.params).path.join("/");
   const allowed =
-    /^v1\/(health|me|models|quotes|wallet|cooperative\/(pools(?:\/[a-f0-9-]{36}\/(fund|windows|manage|renewals|provider-mandates))?|refunds\/[a-f0-9-]{36}|(renewals|provider-mandates)\/[a-f0-9-]{36}\/revoke)|routes(?:\/[a-f0-9-]{36}\/(accept|withdraw))?|capacity\/[a-z0-9._-]{2,80}|availability\/(leases|routes)(?:\/[a-f0-9-]{36}\/(accept|cancel))?|keys(?:\/[a-f0-9-]{36})?|sessions(?:\/[a-f0-9-]{36}(?:\/cancel)?)?|nodes(?:\/[a-f0-9-]{36}\/state)?|auth\/(login|logout)|admin\/(users|grants|domains|node-invites|metrics|routes\/[a-f0-9-]{36}\/qualify|models\/[a-z0-9._-]{2,80}\/qualify))$/;
+    /^v1\/(health|me|models|quotes|wallet|cooperative\/(pools(?:\/[a-f0-9-]{36}\/(fund|windows|manage|renewals|provider-mandates|operating-support))?|refunds\/[a-f0-9-]{36}|(renewals|provider-mandates|operating-support)\/[a-f0-9-]{36}\/revoke)|routes(?:\/[a-f0-9-]{36}\/(accept|withdraw))?|capacity\/[a-z0-9._-]{2,80}|availability\/(leases|routes)(?:\/[a-f0-9-]{36}\/(accept|cancel))?|keys(?:\/[a-f0-9-]{36})?|sessions(?:\/[a-f0-9-]{36}(?:\/cancel)?)?|nodes(?:\/[a-f0-9-]{36}\/state)?|auth\/(login|logout)|admin\/(economics(?:\/(parties|affiliations(?:\/[a-f0-9-]{36}\/revoke)?))?|users|grants|domains|node-invites|metrics|routes\/[a-f0-9-]{36}\/qualify|models\/[a-z0-9._-]{2,80}\/qualify))$/;
   if (!allowed.test(path))
     return Response.json(
       { error: { message: "Rota não encontrada." } },

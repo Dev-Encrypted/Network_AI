@@ -41,6 +41,10 @@ Finalized consumption goes to the working floor, then reserve, then the working 
 
 Version 0.7 introduces [bounded renewal authority](BOUNDED_RENEWALS.md) without a new minting or payout path. Immutable whole-window records project gross working/reserve commitments into the fund's limits; immutable provider usages project separately into each provider's window limit. Creating authority does not move funds. Actual activation reserves a complete budget and consumes permissions in one transaction. Returning unused escrow does not replenish the authorized gross limits. Revocation preserves existing readiness and consumer obligations.
 
+Version 0.8 adds [demand-backed expansion](DEMAND_BACKED_EXPANSION.md) using those existing transactional contracts. Expansion is working-only, keeps free working funds above the essential floor, and requires the complete protected reserve. Its escrow is included in total held balances but excluded from the essential budgets that reduce the floor. One immutable request claim prevents repeated growth from the same queued work. Neither a direct contribution nor a grant becomes qualifying recurring flow; retained qualifying consumption is measured net of refund outflows. Private account classifications and in-kind support are evidence declarations, not a cash asset or independently verified ownership.
+
+Only newly created v2 plans permit separately authorized expansion. An old v1 pool's frozen policy and consumption-allocation version are preserved. Essential contracts and permissions never silently become expansion. Restored databases retain both coverage kinds, their demand/support bindings and lifetime usage counters.
+
 - Every journal transaction has at least two lines whose sum is zero at commit.
 - Triggers project entries into balances; user accounts cannot become negative.
 - The runtime role cannot directly update balances or insert a nonzero initial balance.

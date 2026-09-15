@@ -1,6 +1,6 @@
 {
   "name": "network-ai",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -35,7 +35,8 @@
     "test:route": "node scripts/route-acceptance.mjs",
     "test:route-availability": "node scripts/route-availability-acceptance.mjs",
     "test:cooperative": "node scripts/cooperative-acceptance.mjs",
-    "test:renewal": "node scripts/renewal-acceptance.mjs"
+    "test:renewal": "node scripts/renewal-acceptance.mjs",
+    "test:expansion": "node scripts/expansion-acceptance.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

@@ -5,8 +5,8 @@ title: "NETWORK AI: cooperative inference for models beyond one computer"
 authors:
   - family-names: "Dev-Encrypted"
     website: "https://github.com/Dev-Encrypted"
-version: "0.7.0-private-renewal-preview"
-date-released: "2026-09-14"
+version: "0.8.0-private-expansion-preview"
+date-released: "2026-09-15"
 url: "https://github.com/Dev-Encrypted/Network_AI"
 repository-code: "https://github.com/Dev-Encrypted/Network_AI"
 license: Apache-2.0
@@ -20,7 +20,7 @@ keywords:
 abstract: >-
   Research, an F0 benchmark suite, and a private inference application with
   signed nodes, transactional laboratory credits, cooperative funds and bounded
-  automatic readiness renewal. The project prioritizes
+  automatic readiness renewal and demand-backed private expansion. The project prioritizes
   models above 27 billion parameters and documents memory, hardware, and
   communication requirements for contributed capacity. Includes local evidence
   and an economic study that rejected the fictional parameters tested.

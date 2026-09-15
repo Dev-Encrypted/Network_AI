@@ -1,15 +1,15 @@
 # Current advancement and launch gates
 
-Status reflects the preserved F0 evidence and private implementation through v0.5, measured locally on September 14, 2026. A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
+Status reflects the preserved F0 evidence and private implementation through v0.8, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
 
 | Gate | Current evidence | Still required |
 |---|---|---|
-| FC01: contract coherence | Candidate v6 preserved; complete-route admission, receipt settlement and pre-funded component readiness obligations implemented and tested privately | Target cooperative treasury/issuance contracts, independent verification and distributed lifecycle consistency |
-| FC02: economics and liquidity | Event study completed; fictional parameters rejected | New calibration, observed costs/behavior, fresh holdout, full elastic/recovery evaluation |
+| FC01: contract coherence | Candidate v6 preserved; private full-route readiness, fund recycling, bounded renewal and demand-backed expansion tested, including rollback and restoration | Approved issuance/exposure contracts, independent evidence correction/verification and distributed lifecycle consistency |
+| FC02: economics and liquidity | Event study completed; fictional parameters rejected; existing-credit circulation and expansion predicates executed privately | New calibration, observed independent costs/behavior, fresh holdout, real recovery, mature cohort acceptance and public economic qualification |
 | FC03: capacity and exchange | Official 32.8B Q4_K_M executed through a root and two guarded signed CPU stages; shared-domain admission, stage failure and readiness draining measured on one computer | Distinct-device and physical-host routes, heterogeneous GPUs, broader quality/context/performance qualification and measured exchange ratios |
 | FC04: optional commerce | Historical adapter reference only | Responsible seller, bounded payments, finality, payouts, disputes and exit |
 | FC05: trust and continuity | Local transport controls, node epochs, receipt outbox and database restore | Independent operators, quorum, adversarial verification, partitions and replacement gateway recovery |
-| FC06: funded pilot and opening | Private application available for further work | Confirmed operating/closure resources, named responsibilities and actual 7/30-day pilots |
+| FC06: funded pilot and opening | Private application and time-bounded in-kind support declarations available | Independently confirmed operating/closure resources, named responsibilities and actual 7/30-day pilots |
 
 ## Concrete capacity gaps
 
@@ -28,3 +28,5 @@ An open catalog does not certify every GPU/model combination. License, architect
 Economic failure does not prevent further private inference engineering. It prevents describing the tested settings as a sustainable public policy. See [the candidate rules](../planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md) and [implementation coverage](../implementation/STATUS.md).
 
 The v0.5 [readiness campaign](../implementation/ROUTE_AVAILABILITY.md) transfers existing LAB_TU under a complete-route window. Its one-account payments, exact refund and balanced journal are contract evidence. They neither replace the failed economic study nor establish independent-provider income, demand or treasury replenishment.
+
+The v0.6/v0.7 campaigns demonstrate consumption recycling and bounded automatic continuation. The v0.8 [expansion controller](../implementation/DEMAND_BACKED_EXPANSION.md) activates in isolated positive fixtures, but correctly remains blocked on the actual single-host 32B campaign. Its private party classifications do not prove beneficial ownership or public anti-Sybil resistance; its in-kind support record does not prove audited cash funding. No public gate is closed by these declarations or by the local tests.
