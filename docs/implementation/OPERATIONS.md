@@ -42,6 +42,10 @@ The current interface is PT-BR. The [beginner guide](../GETTING_STARTED.md) maps
 3. In Sessions, inspect state, terminal reason, token counts and billing. Past answer bodies are not retained for replay.
 4. In API access, create a personal key and save the one-time displayed value. Revocation prevents new authentication with that key.
 5. In My nodes, pause or resume new admissions. Previously accepted work may complete. The availability section lets a sponsor fund a bounded readiness offer, its provider accept it, and either party close it with the unused balance returned. See [contract terms and temporary request limits](AVAILABILITY.md).
+
+For a split model, use **Disponibilidade da rota completa** after every participant has accepted and the administrator has qualified the route. Fund one whole-route budget, record the purpose and reason, then have each distinct provider accept the returned terms. The window begins only when every component is freshly ready and every physical domain is unclaimed. [Complete walkthrough and API bodies](ROUTE_AVAILABILITY.md).
+
+Complete-route cancellation differs from standalone cancellation: after activation, escrow and readiness domain claims remain through the fixed deadline to preserve other providers' accepted rights. A provider can relinquish its own future payment; it cannot erase another participant's earned or still-funded interval. A failed route drains automatically. Resume healthy service as appropriate, but do not edit the database to shorten deadlines, remove claims or change accepted prices.
 6. In Administration, create users, explicit lab grants, physical domains, invitations and qualifications.
 
 ## Register another model or agent
@@ -123,3 +127,11 @@ pnpm test:backup
 The PostgreSQL integration suite uses a temporary database without a GPU. Full browser, live, fault, outbox and multi-node acceptance require the actual configured model. Fault tests restart only the named project service; run them without unrelated user sessions in progress. CI exercises integration and the browser journeys that do not require a model engine.
 
 Read [validation scope](STATUS.md) before interpreting a passing command as hardware, WAN, economic or public-operation qualification.
+
+## Upgrading readiness contracts
+
+Version 0.5 requires migration 006. Back up first, finish funded windows when practical, stop the managed application, run `pnpm lab:init` to apply checksummed migrations, then rebuild/start normally. Initialization refuses to run while the configured control port is listening, so an older coordinator cannot accept leases during the claim-registry upgrade. Existing standalone active claims are imported into the shared readiness registry. Accepted standalone terms retain their previous cancellation policy. Roots and stages cannot create new standalone offers.
+
+Reconciliation preserves funded windows across restarts, but unobserved gaps over six seconds are not extrapolated into compensation. After a restart, inspect the window's state, per-component observed time, escrow and refund events. `pnpm test:backup` restores into another database and verifies route-readiness tables, individual/total budget projections, escrow and runtime permissions. The dump and source comparison share an exported PostgreSQL snapshot, so concurrent new payments are not mistaken for missing restored entries. The working database is preserved.
+
+With the managed 32B route already installed, `pnpm test:route-availability --fault` exercises an actual 30-second funded window, one bounded stage pause, recovery and real inference using that same model copy. It spends at most 0.030 LAB_TU on readiness plus the separately quoted request charge. Use a domain without another active readiness window. This campaign's evidence is local control behavior, not independent hardware or economic qualification.

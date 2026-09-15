@@ -1,6 +1,14 @@
 # Private-preview implementation and validation status
 
-## Version 0.4 additions
+## Version 0.5 additions
+
+Complete-route readiness now has one pre-funded budget, immutable per-component maximums, exact-term acceptance by every distinct provider, shared-domain exclusion across both readiness APIs, and fixed-window draining. A failed or withdrawing stage stops earning its own future entitlement; eligible peers preserve their accepted obligations. Remaining escrow is returned to the sponsor at the fixed end. The PT-BR interface exposes funding, consent, component payments, joint-ready time and closure. This compensation is explicitly additional to normal inference settlement.
+
+The September 14 local campaign used the already-installed official 32B CPU route and actual signed agents. A 30-second window paid 25,483 micro-LAB_TU and refunded 4,517. An API pause stopped one stage's readiness earnings while its peers continued earning. After resumption, a real inference completed with 18 input and seven output tokens and separately settled 39,000 microcredits. No new grant, model copy or cash transfer was used. [Exact terms and evidence](ROUTE_AVAILABILITY.md), [allowlisted report](evidence/qwen3-32b-route-availability.json).
+
+Coverage adds 13 real-PostgreSQL cases to the previous 34 and a seventh browser journey, including a lost funding response retried without a duplicate hold. Readiness escrow, component projections, domain claims and restricted permissions are included in isolated backup restoration. [Version 0.5 validation](validation-v0.5.json). As with v0.4, the actual model evidence uses one account and one physical host. Common-fund circulation, the candidate reserve/issuance controller, independent verification and a successful economic study remain unfinished.
+
+## Preserved version 0.4 campaign
 
 The official 32.8B Q4_K_M model now executes through a complete route containing one root and two signed stage agents. The coordinator freezes every participant's epoch, resource domain and share; reserves all domains atomically; requires all claims before root execution; and settles only after the root and both stage receipts arrive. The browser exposes proposal, consent, withdrawal and private qualification, with participant amounts in session details. A managed installer and start/stop support the whole local CPU group.
 
@@ -12,11 +20,11 @@ Automated coverage for this version includes 34 real-PostgreSQL tests, seven art
 
 ## Preserved version 0.3 campaign
 
-The current increment adds an authenticated Iroh/QUIC bridge for the actual private node protocol, portable operator invitations, fully funded availability contracts, temporary 1/2/4 admission quotas, verified artifact acquisition and a trusted local CPU cluster adapter. The [link guide](PRIVATE_LINK.md), [availability guide](AVAILABILITY.md) and [model guide](MODEL_ARTIFACTS.md) explain their executable boundaries.
+That increment added an authenticated Iroh/QUIC bridge for the actual private node protocol, portable operator invitations, fully funded availability contracts, temporary 1/2/4 admission quotas, verified artifact acquisition and a trusted local CPU cluster adapter. The [link guide](PRIVATE_LINK.md), [availability guide](AVAILABILITY.md) and [model guide](MODEL_ARTIFACTS.md) explain their executable boundaries.
 
 The September 14 private QUIC campaign completed registration, heartbeat, inference, signed settlement, readiness payment and unused-fund refund through two real peers on one physical computer. The model request used 62 input and 53 output tokens and completed in 1,997 ms. These measurements refer to the existing GPU-backed local model, not the 32B CPU experiment or a WAN link.
 
-Current automated coverage includes 22 real-PostgreSQL tests, three artifact acquisition tests, three private-link tests and five browser journeys, alongside the preserved Rust/Python F0 checks. Browser validation covers the contract lifecycle at desktop and mobile widths. A fresh isolated restore also preserved the balanced journal projection. See the [v0.3 evidence summary](validation-v0.3.json).
+That campaign included 22 real-PostgreSQL tests, three artifact acquisition tests, three private-link tests and five browser journeys, alongside the preserved Rust/Python F0 checks. Browser validation covered the contract lifecycle at desktop and mobile widths. A fresh isolated restore also preserved the balanced journal projection. See the [v0.3 evidence summary](validation-v0.3.json).
 
 No public launch gate is closed merely by these local tests. Cooperative treasury/issuance, a successful mature economic study, independent model-stage admission and metering, adversarial verification, distributed consensus, real payments and an actual funded pilot still require work.
 

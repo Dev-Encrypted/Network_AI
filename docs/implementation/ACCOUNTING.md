@@ -25,6 +25,10 @@ Failure, cancellation and interruption return the full reservation. Inconsistent
 
 There is no automatic provider income merely for remaining online. Version 0.3 adds an explicit, separately funded availability contract: a sponsor reserves existing LAB_TU, the provider accepts, and the coordinator pays observed ready intervals from that escrow. Unpaid funds return to the sponsor. Temporary admission quotas also respond to demand. These additions do not implement the candidate cooperative issuer, reserve controller or accepted market economics. See [funded availability and quotas](AVAILABILITY.md) and the separate [proposed economy](../planning/24_CLOSURE_PROGRAM_AND_LAUNCH_GATES.md).
 
+Version 0.5 funds a complete route under one additional readiness budget. Prefix rounding assigns exact component maximums; each component earns `floor(maximum × credited_ms / window_ms)`. Their sum cannot exceed the held budget. Healthy components preserve their accepted entitlements when a peer fails, so component earnings and joint-route-ready time are recorded separately. The sponsor cannot reclaim other providers' accepted window early. Terminal closure returns the remaining escrow and releases every readiness domain claim. [Lifecycle, arithmetic and real 32B example](ROUTE_AVAILABILITY.md).
+
+Readiness reserve, payment and refund use `ROUTE_AVAILABILITY_RESERVE`, `ROUTE_AVAILABILITY_PAYMENT` and `ROUTE_AVAILABILITY_REFUND` journal kinds. They transfer existing LAB_TU without touching `LAB_ISSUER` or automatically spending `lab:working`. The underlying inference tariff and its separate provider payment remain unchanged. Common-fund recycling and an economically justified relationship between readiness and useful-work compensation are still required for the target cooperative economy.
+
 ## Database protections
 
 - Every journal transaction has at least two lines whose sum is zero at commit.

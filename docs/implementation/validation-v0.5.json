@@ -1,0 +1,75 @@
+{
+  "version": "0.5.0-private-readiness-preview",
+  "observed_on_local_date": "2026-09-14",
+  "timezone": "America/Sao_Paulo",
+  "scope": "Private Windows application, actual installed 32B CPU route on one host, one operator account, three signed agents and one coordinator.",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "tests": {
+    "postgres_integration": 47,
+    "new_complete_route_readiness_cases": 13,
+    "artifact_acquisition": 3,
+    "rpc_socket_protocol": 4,
+    "rust_runtime": 4,
+    "rust_private_link": 3,
+    "rust_f0": 2,
+    "python_f0": 21,
+    "browser": 7,
+    "total_automated_without_double_counting_new_cases": 91
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_economic_sources_unchanged": true
+  },
+  "installed_route_campaign": {
+    "duration_seconds": 30,
+    "budget_microtu": "30000",
+    "readiness_paid_microtu": "25483",
+    "readiness_refunded_microtu": "4517",
+    "idle_readiness_paid_without_requests": true,
+    "paused_stage_stops_earning": true,
+    "other_accepted_components_continue_earning": true,
+    "route_restored_after_pause": true,
+    "actual_inference_state": "COMPLETED",
+    "actual_inference_billing": "SETTLED",
+    "actual_inference_charge_microtu": "39000",
+    "compensation_relation": "readiness is explicitly additional to per-inference settlement",
+    "no_fabricated_database_readiness": true,
+    "report": "evidence/qwen3-32b-route-availability.json"
+  },
+  "browser_campaign": {
+    "lost_funding_response_reuses_identity": true,
+    "only_one_hold_after_retry": true,
+    "all_provider_acceptance": true,
+    "withdrawal_preserves_fixed_end": true,
+    "desktop_and_mobile_inspected": true,
+    "requires_existing_managed_route": true,
+    "gpu_less_ci_substitutes_no_fake_readiness": true
+  },
+  "isolated_restore": {
+    "comparison_uses_exported_postgres_snapshot": true,
+    "journals_in_snapshot": 155,
+    "new_live_journals_during_restore": 1,
+    "active_route_windows_in_snapshot": 1,
+    "physical_readiness_claims_in_snapshot": 1,
+    "escrow_and_component_projections_match": true,
+    "runtime_permissions_preserved": true,
+    "report": "evidence/route-readiness-backup-restore.json"
+  },
+  "not_completed_or_approved": {
+    "cooperative_common_fund_and_consumption_recycling": true,
+    "candidate_protected_reserve_and_issuance_controller": true,
+    "successful_mature_economic_study": true,
+    "independent_provider_qualification": true,
+    "heterogeneous_gpu_and_wan_route_qualification": true,
+    "independent_work_verification": true,
+    "distributed_consensus": true,
+    "cash_payments_and_payouts": true,
+    "funded_public_pilot": true,
+    "production": true
+  }
+}

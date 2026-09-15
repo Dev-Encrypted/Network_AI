@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "evidence_type": "REAL_INSTALLED_ROUTE_FUNDED_READINESS",
+  "observed_at": "2026-09-15T00:07:26.353Z",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "agent_identities": 3,
+  "model_id": "qwen3-32b-route-private",
+  "compute": "CPU",
+  "unit": "LAB_TU",
+  "cash_payments": false,
+  "heartbeat_source": "existing signed root and stage agents",
+  "database_observations_fabricated": false,
+  "checks": [
+    {
+      "name": "signed_ready_intervals_earn_from_existing_escrow_without_inference",
+      "passed": true
+    },
+    {
+      "name": "three_agents_share_one_readiness_budget_and_one_physical_claim",
+      "passed": true
+    },
+    {
+      "name": "paused_stage_earns_no_further_readiness_while_other_accepted_components_do",
+      "passed": true
+    },
+    {
+      "name": "original_route_is_restored_after_the_bounded_pause",
+      "passed": true
+    },
+    {
+      "name": "real_32b_inference_preserves_separate_token_settlement",
+      "passed": true
+    },
+    {
+      "name": "window_completion_refunds_exact_remainder_and_releases_domain_claim",
+      "passed": true
+    },
+    {
+      "name": "all_postings_balance_without_new_issuance",
+      "passed": true
+    }
+  ],
+  "public_operation_approved": false,
+  "sustainable_economics_established": false,
+  "idle": {
+    "state": "ACTIVE",
+    "budget_microtu": "30000",
+    "paid_microtu": "5971",
+    "joint_ready_ms": "5972",
+    "participants": [
+      {
+        "ordinal": 0,
+        "role": "ROOT",
+        "maximum_microtu": "3000",
+        "credited_ms": "5972",
+        "paid_microtu": "597"
+      },
+      {
+        "ordinal": 1,
+        "role": "STAGE",
+        "maximum_microtu": "13500",
+        "credited_ms": "5972",
+        "paid_microtu": "2687"
+      },
+      {
+        "ordinal": 2,
+        "role": "STAGE",
+        "maximum_microtu": "13500",
+        "credited_ms": "5972",
+        "paid_microtu": "2687"
+      }
+    ]
+  },
+  "fault": {
+    "injection": "API pause of one actual stage agent; no worker process killed",
+    "before": {
+      "state": "DRAINING",
+      "budget_microtu": "30000",
+      "paid_microtu": "7076",
+      "joint_ready_ms": "5972",
+      "participants": [
+        {
+          "ordinal": 0,
+          "role": "ROOT",
+          "maximum_microtu": "3000",
+          "credited_ms": "7981",
+          "paid_microtu": "798"
+        },
+        {
+          "ordinal": 1,
+          "role": "STAGE",
+          "maximum_microtu": "13500",
+          "credited_ms": "5972",
+          "paid_microtu": "2687"
+        },
+        {
+          "ordinal": 2,
+          "role": "STAGE",
+          "maximum_microtu": "13500",
+          "credited_ms": "7981",
+          "paid_microtu": "3591"
+        }
+      ]
+    },
+    "after": {
+      "state": "DRAINING",
+      "budget_microtu": "30000",
+      "paid_microtu": "9281",
+      "joint_ready_ms": "5972",
+      "participants": [
+        {
+          "ordinal": 0,
+          "role": "ROOT",
+          "maximum_microtu": "3000",
+          "credited_ms": "11991",
+          "paid_microtu": "1199"
+        },
+        {
+          "ordinal": 1,
+          "role": "STAGE",
+          "maximum_microtu": "13500",
+          "credited_ms": "5972",
+          "paid_microtu": "2687"
+        },
+        {
+          "ordinal": 2,
+          "role": "STAGE",
+          "maximum_microtu": "13500",
+          "credited_ms": "11991",
+          "paid_microtu": "5395"
+        }
+      ]
+    }
+  },
+  "inference": {
+    "state": "COMPLETED",
+    "billing_state": "SETTLED",
+    "charged_microtu": "39000",
+    "prompt_tokens": 18,
+    "completion_tokens": 7,
+    "elapsed_ms": 4183,
+    "participants": [
+      {
+        "ordinal": 0,
+        "role": "ROOT",
+        "paid_microtu": "3120"
+      },
+      {
+        "ordinal": 1,
+        "role": "STAGE",
+        "paid_microtu": "14040"
+      },
+      {
+        "ordinal": 2,
+        "role": "STAGE",
+        "paid_microtu": "14040"
+      }
+    ]
+  },
+  "final": {
+    "state": "COMPLETED",
+    "budget_microtu": "30000",
+    "paid_microtu": "25483",
+    "joint_ready_ms": "19963",
+    "participants": [
+      {
+        "ordinal": 0,
+        "role": "ROOT",
+        "maximum_microtu": "3000",
+        "credited_ms": "30000",
+        "paid_microtu": "3000"
+      },
+      {
+        "ordinal": 1,
+        "role": "STAGE",
+        "maximum_microtu": "13500",
+        "credited_ms": "19963",
+        "paid_microtu": "8983"
+      },
+      {
+        "ordinal": 2,
+        "role": "STAGE",
+        "maximum_microtu": "13500",
+        "credited_ms": "30000",
+        "paid_microtu": "13500"
+      }
+    ]
+  },
+  "refunded_microtu": "4517",
+  "completed": true
+}

@@ -2,6 +2,8 @@
 
 This private implementation makes accepted readiness payable even when no inference request arrives. It transfers existing `LAB_TU` under a bounded agreement. It does not activate the candidate cooperative issuer, protected treasury, cash market or an approved economic tariff.
 
+This page describes standalone complete-model contracts and private quotas. Version 0.5 adds a separate [complete-route contract](ROUTE_AVAILABILITY.md) with all-provider consent and protected component obligations. New standalone offers require an `INFERENCE` node; roots and stages use the complete route. Both APIs share the four-open-contract sponsor limit and one accepted readiness claim per declared physical domain.
+
 ## Contract lifecycle
 
 1. An authenticated sponsor selects a qualified node, 30–3,600 seconds and an integer rate in microTU per second. A maximum of four open contracts per sponsor bounds private exposure.
@@ -33,7 +35,7 @@ new_payment = total_payable_microTU - already_paid_microTU
 
 Payment cannot exceed the pre-funded budget. A crash followed by reconciliation does not pay the unobserved outage. A backwards wall-clock adjustment does not rewind an already observed checkpoint. Cancellation and reconciliation serialize on the contract, so they cannot both refund the same remaining balance.
 
-These observations are **private control evidence**, not independent proof of useful hardware or correct computation. An unobserved period can underpay a provider who remained available while the coordinator failed. Physical-domain labels cannot defeat an adversary that falsely registers one GPU as several domains. Independent verification, outage compensation, complete distributed routes and fleet-wide funding policy remain required before an open cooperative launch.
+These observations are **private control evidence**, not independent proof of useful hardware or correct computation. An unobserved period can underpay a provider who remained available while the coordinator failed. Physical-domain labels cannot defeat an adversary that falsely registers one GPU as several domains. Independent verification, outage compensation, qualified distinct-host routes and fleet-wide funding policy remain required before an open cooperative launch.
 
 Normal inference currently retains its experimental 80/20 provider/working-account allocation. A readiness contract is separately funded; it does not silently draw on that working account. The eventual cooperative tariff must define whether and how useful-work compensation supplements readiness. This private increment does not establish a sustainable market price.
 

@@ -64,7 +64,8 @@ export class Availability {
       }
       const active = (
         await tx.query(
-          "SELECT count(*)::int AS n FROM availability_leases WHERE sponsor_id=$1 AND state IN ('OFFERED','ACTIVE')",
+          `SELECT ((SELECT count(*) FROM availability_leases WHERE sponsor_id=$1 AND state IN ('OFFERED','ACTIVE'))+
+            (SELECT count(*) FROM route_availability_leases WHERE sponsor_id=$1 AND state IN ('OFFERED','ACTIVE','DRAINING')))::int AS n`,
           [user.id],
         )
       ).rows[0].n;
@@ -77,7 +78,7 @@ export class Availability {
       const node = (
         await tx.query(
           `SELECT n.*,m.manifest_sha256 FROM nodes n JOIN models m ON m.id=n.model_id
-        JOIN users u ON u.id=n.owner_id WHERE n.id=$1 AND m.state='LOCAL_PREVIEW' AND n.desired_state<>'REVOKED' AND NOT u.disabled`,
+        JOIN users u ON u.id=n.owner_id WHERE n.id=$1 AND n.node_kind='INFERENCE' AND m.state='LOCAL_PREVIEW' AND n.desired_state<>'REVOKED' AND NOT u.disabled`,
           [data.node_id],
         )
       ).rows[0];
@@ -85,7 +86,7 @@ export class Availability {
         node,
         409,
         "node_unavailable",
-        "O nó ou modelo está indisponível para contribuição.",
+        "Use um nó de modelo completo ou financie a rota com todas as etapas.",
       );
       const id = randomUUID();
       const escrow = `lease:${id}:escrow`;
@@ -159,7 +160,7 @@ export class Availability {
         row.resource_domain_id,
       ]);
       const occupied = await tx.query(
-        "SELECT id FROM availability_leases WHERE resource_domain_id=$1 AND state='ACTIVE'",
+        "SELECT resource_domain_id FROM availability_domain_claims WHERE resource_domain_id=$1",
         [row.resource_domain_id],
       );
       need(
@@ -171,7 +172,7 @@ export class Availability {
       const now = await clock(tx);
       const node = await this.observation(tx, row, now);
       need(
-        node?.ready,
+        node?.ready && node.kind === "INFERENCE",
         409,
         "node_not_ready",
         "O modelo precisa estar pronto e com presença recente.",
@@ -230,6 +231,7 @@ export class Availability {
     if (!node) return null;
     return {
       epoch: node.epoch,
+      kind: node.node_kind,
       ready:
         node.state === "READY" &&
         node.desired_state === "READY" &&

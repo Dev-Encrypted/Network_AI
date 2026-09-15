@@ -16,7 +16,7 @@ The absence of buyers is not the absence of costs. External operation still need
 
 The historical candidate permits temporary concurrency allowances per configuration as recent usable headroom increases. Begin from the base allowance, promote gradually, and require fresh healthy capacity, acceptable queue/latency signals, available spending balance, and funded resources.
 
-The multiplier is an admission allowance. It does not multiply throughput, expand the context window, change the tariff, issue permanent TU, or turn a protected standby into free capacity. It is not currently implemented in the private preview, and the F0 event study does not fully evaluate it.
+The multiplier is an admission allowance. It does not multiply throughput, expand the context window, change the tariff, issue permanent TU, or turn a protected standby into free capacity. The private preview now implements a narrower 1/2/4 rule based on ready slots and competing queues, while preserving accepted sessions. It does not implement the full candidate's gradual control windows, economic predicates or recovery evaluation. The F0 event study does not fully evaluate those rules. [Executable private quotas](../implementation/AVAILABILITY.md#elastic-admission-1-2-or-4).
 
 For example, allowing an eligible account two simultaneous requests instead of one can make sense when its qualified route has spare funded slots. It does not mean a 70B model becomes twice as fast, or that a route can safely double its KV cache allocation without measurement.
 
@@ -31,6 +31,8 @@ The implementation must distinguish the time a limit changes from the terms atta
 Above-27B models may require several contributors to stay ready at once. If demand is intermittent, scheduled windows or requester-funded readiness can be more appropriate than permanent shared coverage. The exact choice needs measured loading time, expected funded requests, and contributor commitments.
 
 Model popularity must not silently force every participant to subsidize a route indefinitely. Publish its availability policy and funding source. A catalog entry remains discoverable even when no route is presently funded or ready.
+
+The private v0.5 [complete-route window](../implementation/ROUTE_AVAILABILITY.md) supplies an executable requester-funded mechanism: a purpose and one existing budget, all-provider acceptance, capped component payments, no overlapping readiness compensation on a physical domain, and an exact final refund. Healthy components keep their accepted obligations if another fails. Common-fund scheduling, demand qualification, consumption recycling and sustainable renewal still require implementation and evidence; this additional readiness payment does not establish them.
 
 ## Acceptance criteria
 

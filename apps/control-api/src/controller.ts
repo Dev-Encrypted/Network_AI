@@ -16,6 +16,7 @@ import { Market } from "./market.js";
 import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
+import { RouteAvailability } from "./route-availability.js";
 import { Routes } from "./routes.js";
 import { capacity } from "./capacity.js";
 import { need } from "./errors.js";
@@ -29,6 +30,7 @@ export class ApiController {
     @Inject(Nodes) readonly nodes: Nodes,
     @Inject(Sessions) readonly sessions: Sessions,
     @Inject(Availability) readonly availability: Availability,
+    @Inject(RouteAvailability) readonly routeAvailability: RouteAvailability,
     @Inject(Routes) readonly routes: Routes,
   ) {}
   internal(req: FastifyRequest) {
@@ -119,6 +121,39 @@ export class ApiController {
     return {
       data: await this.availability.list(await this.auth.authenticate(req)),
     };
+  }
+  @Get("availability/routes") async routeLeases(@Req() req: FastifyRequest) {
+    return {
+      data: await this.routeAvailability.list(
+        await this.auth.authenticate(req),
+      ),
+    };
+  }
+  @Post("availability/routes") async offerRouteLease(
+    @Req() req: FastifyRequest,
+    @Body() body: unknown,
+  ) {
+    return this.routeAvailability.offer(
+      await this.auth.authenticate(req),
+      body,
+    );
+  }
+  @Post("availability/routes/:id/accept") async acceptRouteLease(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.routeAvailability.accept(
+      await this.auth.authenticate(req),
+      id,
+      body,
+    );
+  }
+  @Post("availability/routes/:id/cancel") async cancelRouteLease(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.routeAvailability.cancel(await this.auth.authenticate(req), id);
   }
   @Post("availability/leases") async offerLease(
     @Req() req: FastifyRequest,

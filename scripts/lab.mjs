@@ -145,6 +145,16 @@ export function assertFreshEnvironment() {
     );
 }
 export async function init() {
+  // Schema upgrades must not race an older coordinator accepting new leases.
+  // Check the configured port as well as managed ownership: an untracked
+  // manually started coordinator cannot safely coexist with this initializer.
+  if (await exists(configPath)) {
+    const previous = await config();
+    if (await listening(previous.control_port))
+      throw new Error(
+        "Stop the private control service before initialization or schema migrations; use lab:start --no-build to reuse the running installation.",
+      );
+  }
   await mkdir(runtime, { recursive: true });
   await protectDirectory(runtime);
   if (!(await exists(configPath))) {
@@ -741,7 +751,13 @@ export async function status() {
     };
   console.log(JSON.stringify(result, null, 2));
 }
-export async function backup() {
+export async function backup(options = {}) {
+  if (
+    options.snapshot !== undefined &&
+    (typeof options.snapshot !== "string" ||
+      !/^[A-Fa-f0-9-]{1,100}$/.test(options.snapshot))
+  )
+    throw new Error("Invalid PostgreSQL export snapshot identifier");
   await mkdir(join(runtime, "backups"), { recursive: true });
   const path = join(
     runtime,
@@ -765,6 +781,7 @@ export async function backup() {
           "network_ai",
           "-Fc",
           "--no-owner",
+          ...(options.snapshot ? ["--snapshot", options.snapshot] : []),
         ],
         { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] },
       );

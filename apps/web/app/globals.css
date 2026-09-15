@@ -1949,3 +1949,50 @@ td small,
 .route-card summary {
   cursor: pointer;
 }
+.route-availability-section {
+  margin-top: 36px;
+}
+.route-availability-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+.route-availability-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+.route-availability-form input,
+.route-availability-form select {
+  min-width: 0;
+  width: 100%;
+}
+.coverage-wide {
+  grid-column: 1 / -1;
+}
+.coverage-budget {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.coverage-budget p {
+  margin: 0 0 8px;
+}
+.coverage-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 36px;
+}
+.coverage-stats strong {
+  display: block;
+  margin-top: 6px;
+}
+.coverage-card .route-actions {
+  margin-top: 16px;
+}
+@media (max-width: 700px) {
+  .route-availability-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

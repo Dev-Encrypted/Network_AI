@@ -21,6 +21,8 @@ The product targets models above 27B. Version 0.3 executed an official 32.8B Q4_
 
 Version 0.4 adds [complete routes and participant settlement](implementation/COMPLETE_ROUTES.md): signed stage claims, all-domain reservations, provider consent, real guarded 32B computation and refund after stage loss. Its evidence still uses one computer and one operator account.
 
+Version 0.5 adds [one funded readiness window for a complete route](implementation/ROUTE_AVAILABILITY.md), including every-provider acceptance, component entitlements during a peer failure, shared physical-domain exclusion and exact refunds. Actual agents exercised this on the same installed 32B route. Readiness compensation remains additional to inference payment; cooperative treasury circulation and economic viability are not established by this contract test.
+
 ## Documentation map
 
 - [Article](ARTICLE.md): motivation, architecture, participation, economics, limitations, and results.

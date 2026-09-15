@@ -119,6 +119,8 @@ contribution_reward = verified_READY_duration × accepted_assignment_rate
 
 A funded readiness contract can pay for availability even when no request arrives. This matters for a service that should be ready when participants need it. The rule does not pay every advertised GPU or every open application indefinitely. An offer needs an accepted assignment, a duration, a purpose, a budget, and evidence.
 
+The private v0.5 implementation now applies this to a complete route. A sponsor holds one existing LAB_TU budget; all providers accept its immutable terms; each component has a fixed maximum and earns only observed eligible time. A missing stage cannot receive more readiness pay, while healthy peers keep the remainder of their accepted window. A shared-domain claim prevents duplicate readiness compensation through additional identities. This is additional to normal per-inference compensation, with no automatic common-fund financing or new issuance. [Executable contract and measured example](implementation/ROUTE_AVAILABILITY.md).
+
 A split route receives an overall resource plan and compensation budget. Creating more node identities or subdividing the same physical GPU cannot multiply that budget. Providers should understand which obligations they accept and which failure risks they bear.
 
 Consumers receive a quote and a maximum reservation before work starts. Settlement charges authorized completed usage and releases the unused part. Retry behavior must prevent a second charge while making clear whether the original answer can be recovered. The private preview keeps metadata rather than answer bodies, so an idempotent retry returns the existing session ID instead of replaying stored text.
@@ -179,7 +181,7 @@ A valid node signature proves which registered key signed a message. It does not
 
 The private preview uses Ed25519 node identities, one-time invitations, timestamps, nonces, epochs, bounded capabilities, and durable receipt retries. PostgreSQL protects accounting projections and committed journals from the runtime role. The database owner remains a trusted administrator.
 
-Version 0.3 adds authenticated private QUIC links to the actual node protocol, portable operator profiles, pre-funded availability contracts and temporary 1/2/4 admission limits. A real same-host campaign completed inference, signed settlement, readiness payment and the unused-fund refund through the new link. This advances the private implementation without approving public trust or the failed candidate economic parameters. [Current implementation and evidence](implementation/STATUS.md).
+Version 0.3 added authenticated private QUIC links to the actual node protocol, portable operator profiles, pre-funded availability contracts and temporary 1/2/4 admission limits. Version 0.4 added a real 32B route with one root and two independently signed stage agents on the same physical host. Version 0.5 extends funding to complete-route readiness windows with protected component obligations. These steps advance the private implementation without approving independent-provider trust or the failed candidate economic parameters. [Current implementation and evidence](implementation/STATUS.md).
 
 An open deployment must add independent operator qualification, resource and work verification, bounded exposure to new participants, dispute handling, and recovery from malicious or correlated failures. Verification also consumes resources and needs a budget.
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AvailabilityPanel } from "./availability";
 import { RoutesPanel } from "./routes";
+import { RouteAvailabilityPanel } from "./route-availability";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -523,7 +524,7 @@ export default function Home() {
           </div>
           <footer>
             Um projeto de <strong>Dev-Encrypted</strong>
-            <span>v0.3 · Ambiente privado</span>
+            <span>v0.5 · Ambiente privado</span>
           </footer>
         </section>
         <section className="login-side">
@@ -1152,13 +1153,18 @@ export default function Home() {
               </p>
               <AvailabilityPanel
                 user={user}
-                nodes={nodes}
+                nodes={nodes.filter((n) => n.node_kind === "INFERENCE")}
                 request={api}
                 onChange={refresh}
               />
               <RoutesPanel
                 user={user}
                 nodes={nodes}
+                request={api}
+                onChange={refresh}
+              />
+              <RouteAvailabilityPanel
+                user={user}
                 request={api}
                 onChange={refresh}
               />
@@ -1552,7 +1558,7 @@ export default function Home() {
           <span>
             NETWORK AI <i>by Dev-Encrypted</i>
           </span>
-          <span>Ambiente privado · v0.3 · Sem oferta comercial</span>
+          <span>Ambiente privado · v0.5 · Sem oferta comercial</span>
         </footer>
       </div>
     </div>

@@ -1,4 +1,4 @@
-# Private route preview v0.4
+# Private readiness preview v0.5
 
 **Created and directed by Dev-Encrypted.** This release connects the interface, control service, PostgreSQL, Rust gateway, and Rust node to a real local inference engine. It is an executable private environment. Public decentralized operation and the proposed cooperative economy still require qualification.
 
@@ -14,6 +14,7 @@
 - [Funded availability and temporary quotas](AVAILABILITY.md)
 - [Verified model artifacts and the trusted CPU cluster adapter](MODEL_ARTIFACTS.md)
 - [Complete routes, stage agents, consent and participant settlement](COMPLETE_ROUTES.md)
+- [Complete-route readiness budgets, component obligations and refunds](ROUTE_AVAILABILITY.md)
 
 ## Components and data flow
 
@@ -53,5 +54,7 @@ The current UI is Brazilian Portuguese. The [beginner guide](../GETTING_STARTED.
 NETWORK AI prioritizes models above 27B. The original integrated profile is a community 27B/Q4 model; version 0.3 adds a pinned official Qwen3-32B GGUF manifest, verified acquisition and a trusted CPU cluster experiment. Consult the [current evidence](STATUS.md) for measured outcomes. Independent multi-participant execution remains a [roadmap requirement](../planning/12_ROADMAP_AND_BACKLOG.md). Read [model scaling](../MODEL_SCALING.md) before estimating contributors or devices.
 
 Version 0.4 adds a complete signed-agent route around two real CPU workers, including all-stage preparation and claims, atomic shared-domain admission, participant consent and receipt-dependent payouts. Its managed installer keeps one model copy active. The real campaign covers completed requests, concurrent admission and stage loss on the same computer; it does not close the independent-participant requirement.
+
+Version 0.5 adds a fully funded readiness window for the complete route. Its providers accept one set of terms; each component earns its agreed maximum in proportion to observed ready time. A stage failure does not retroactively remove healthy providers' accepted commitments. The common physical-domain registry prevents overlapping readiness payments across route and standalone contracts. The [guide](ROUTE_AVAILABILITY.md) explains the additional compensation, fixed deadlines, private trust boundary and measured campaign.
 
 Original code: [Apache 2.0](../../LICENSE). Original documentation: [CC BY 4.0](../../LICENSES/CC-BY-4.0.txt). Dependencies and model artifacts retain their own terms.

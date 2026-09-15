@@ -11,6 +11,8 @@ import { Database } from "../../apps/control-api/src/db.js";
 import { Market } from "../../apps/control-api/src/market.js";
 import { Nodes } from "../../apps/control-api/src/nodes.js";
 import { Routes } from "../../apps/control-api/src/routes.js";
+import { Availability } from "../../apps/control-api/src/availability.js";
+import { RouteAvailability } from "../../apps/control-api/src/route-availability.js";
 import { Sessions } from "../../apps/control-api/src/sessions.js";
 import { capacity } from "../../apps/control-api/src/capacity.js";
 import { createAccounts } from "../../apps/control-api/src/ledger.js";
@@ -189,6 +191,13 @@ async function fixture(t: TestContext, shared = false, qualified = true) {
     });
   }
   t.after(async () => {
+    await owner.query(
+      `UPDATE route_availability_leases SET
+      started_ms=started_ms-3600000,ends_ms=ends_ms-3600000,offer_expires_at=now()-interval '1 second'
+      WHERE route_id=$1`,
+      [route.id],
+    );
+    await new RouteAvailability(db).reconcile();
     await owner.query(
       "UPDATE sessions SET queue_deadline=now()-interval '1 second',execution_deadline=now()-interval '1 second' WHERE model_id=$1",
       [modelId],
@@ -664,6 +673,522 @@ test("route journals still match all account projections and held obligations", 
       await db.pool
         .query(`SELECT a.id FROM ledger_accounts a WHERE kind='HELD' AND balance<>
     coalesce((SELECT sum(hold_microtu) FROM sessions s WHERE s.user_id=a.owner_id AND s.billing_state='HELD'),0)`)
+    ).rowCount,
+    0,
+  );
+});
+
+const coverage = () => new RouteAvailability(db);
+function coverageTerms(f: Fixture, rate = "1000") {
+  return {
+    route_id: f.route.id,
+    duration_seconds: 30,
+    rate_microtu_per_second: rate,
+    purpose: "EXPERIMENT",
+    reason: "Isolated database readiness contract fixture.",
+    idempotency_key: randomUUID(),
+  };
+}
+async function acceptCoverage(f: Fixture, lease: any) {
+  let result;
+  for (const p of new Map(f.providers.map((p) => [p.id, p])).values())
+    result = await coverage().accept(p, lease.id, {
+      terms_sha256: lease.terms_sha256,
+    });
+  return result!;
+}
+async function coverageRow(f: Fixture, id: string) {
+  return (await coverage().list(f.buyer)).find((l) => l.id === id)!;
+}
+async function elapsedCoverage(id: string, ms = 1000) {
+  // Explicit test-only owner intervention: synthetic observation time, never hardware evidence.
+  await owner.query(
+    "UPDATE route_availability_leases SET sample_ms=sample_ms-$2 WHERE id=$1",
+    [id, ms],
+  );
+}
+async function finishCoverage(id: string) {
+  await owner.query(
+    `UPDATE route_availability_leases SET started_ms=started_ms-3600000,ends_ms=ends_ms-3600000 WHERE id=$1`,
+    [id],
+  );
+  await coverage().reconcile();
+}
+
+test("route readiness funding is atomic, idempotent, scoped and bound to immutable complete terms", async (t) => {
+  const f = await fixture(t),
+    body = coverageTerms(f),
+    before = await balance(f.buyer);
+  const lease = await coverage().offer(f.buyer, body);
+  assert.equal(lease.state, "OFFERED");
+  assert.equal(lease.budget_microtu, "30000");
+  assert.equal(await balance(f.buyer), before - 30000n);
+  assert.equal((await coverage().offer(f.buyer, body)).id, lease.id);
+  await assert.rejects(
+    () => coverage().offer(f.buyer, { ...body, duration_seconds: 31 }),
+    { code: "idempotency_conflict" },
+  );
+  assert.equal(
+    (await coverage().list(f.root)).some((l) => l.id === lease.id),
+    true,
+  );
+  const stranger = await member();
+  assert.deepEqual(await coverage().list(stranger), []);
+  await assert.rejects(
+    () =>
+      coverage().accept(stranger, lease.id, {
+        terms_sha256: lease.terms_sha256,
+      }),
+    { code: "lease_missing" },
+  );
+  await assert.rejects(() => coverage().cancel(stranger, lease.id), {
+    code: "lease_missing",
+  });
+  await assert.rejects(
+    () =>
+      coverage().accept(f.root, lease.id, { terms_sha256: hash("changed") }),
+    { code: "lease_terms" },
+  );
+  for (const sql of [
+    "UPDATE route_availability_leases SET duration_seconds=31 WHERE id=$1",
+    "UPDATE route_availability_leases SET terms=terms WHERE id=$1",
+    "UPDATE route_availability_members SET maximum_microtu=1 WHERE lease_id=$1",
+    "DELETE FROM route_availability_events WHERE lease_id=$1",
+    "UPDATE route_availability_acceptances SET terms_sha256='changed' WHERE lease_id=$1",
+  ])
+    await assert.rejects(() => db.pool.query(sql, [lease.id]), {
+      code: "42501",
+    });
+  await assert.rejects(
+    () =>
+      db.pool.query(
+        `INSERT INTO route_availability_members(lease_id,node_id,provider_id,resource_domain_id,ordinal,role,share_bps,maximum_microtu)
+    VALUES($1,$2,$3,$4,5,'STAGE',1,1)`,
+        [lease.id, f.parts[1].nodeId, f.providers[1]!.id, f.parts[1].domainId],
+      ),
+    /cannot append to committed availability terms/,
+  );
+  await coverage().cancel(f.buyer, lease.id);
+  await coverage().cancel(f.buyer, lease.id);
+  assert.equal(await balance(f.buyer), before);
+});
+
+test("only an entirely ready qualified route can be funded and insufficient funds create nothing", async (t) => {
+  const f = await fixture(t),
+    body = coverageTerms(f),
+    unfunded = await member();
+  await assert.rejects(() => coverage().offer(unfunded, body), {
+    code: "insufficient_credits",
+  });
+  assert.equal((await coverage().list(unfunded)).length, 0);
+  await market.nodeState(f.providers[1]!, f.parts[1].nodeId, {
+    state: "PAUSED",
+  });
+  await assert.rejects(() => coverage().offer(f.buyer, body), {
+    code: "route_not_ready",
+  });
+  await market.nodeState(f.providers[1]!, f.parts[1].nodeId, {
+    state: "READY",
+  });
+  for (const p of f.parts) await ready(p.nodeId);
+  await routes.withdraw(f.providers[1]!, f.route.id);
+  await assert.rejects(() => coverage().offer(f.buyer, body), {
+    code: "route_not_ready",
+  });
+  assert.equal((await coverage().list(f.buyer)).length, 0);
+});
+
+test("all provider signatures precede activation and the last signature rolls back if a stage becomes unavailable", async (t) => {
+  const f = await fixture(t),
+    lease = await coverage().offer(f.buyer, coverageTerms(f));
+  for (const p of f.providers.slice(0, 2)) {
+    assert.equal(
+      (
+        await coverage().accept(p, lease.id, {
+          terms_sha256: lease.terms_sha256,
+        })
+      ).state,
+      "OFFERED",
+    );
+  }
+  await owner.query(
+    "UPDATE nodes SET last_seen=now()-interval '10 seconds' WHERE id=$1",
+    [f.parts[2].nodeId],
+  );
+  await assert.rejects(
+    () =>
+      coverage().accept(f.providers[2]!, lease.id, {
+        terms_sha256: lease.terms_sha256,
+      }),
+    { code: "route_not_ready" },
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM route_availability_acceptances WHERE lease_id=$1",
+        [lease.id],
+      )
+    ).rows[0].n,
+    2,
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT 1 FROM availability_domain_claims WHERE route_lease_id=$1",
+        [lease.id],
+      )
+    ).rowCount,
+    0,
+  );
+  await ready(f.parts[2].nodeId);
+  const started = await acceptCoverage(f, lease);
+  assert.equal(started.state, "ACTIVE");
+  assert.equal(Number(started.ends_ms) - Number(started.started_ms), 30000);
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT 1 FROM availability_domain_claims WHERE route_lease_id=$1",
+        [lease.id],
+      )
+    ).rowCount,
+    3,
+  );
+});
+
+test("shared physical capacity has one claim and one budget despite several stage identities", async (t) => {
+  const f = await fixture(t, true),
+    lease = await coverage().offer(f.buyer, coverageTerms(f));
+  await acceptCoverage(f, lease);
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT 1 FROM availability_domain_claims WHERE route_lease_id=$1",
+        [lease.id],
+      )
+    ).rowCount,
+    1,
+  );
+  await elapsedCoverage(lease.id);
+  await coverage().reconcile();
+  const paid = await coverageRow(f, lease.id);
+  assert.ok(BigInt(paid.paid_microtu) > 0n);
+  assert.equal(
+    paid.participants.reduce(
+      (s: bigint, p: any) => s + BigInt(p.paid_microtu),
+      0n,
+    ),
+    BigInt(paid.paid_microtu),
+  );
+  assert.equal(await balance(f.root), BigInt(paid.paid_microtu));
+  assert.equal(
+    paid.participants.reduce(
+      (s: bigint, p: any) => s + BigInt(p.maximum_microtu),
+      0n,
+    ),
+    30000n,
+  );
+});
+
+test("concurrent complete-route acceptances cannot double-lease any shared domain", async (t) => {
+  const f = await fixture(t, true),
+    a = await coverage().offer(f.buyer, coverageTerms(f)),
+    b = await coverage().offer(f.buyer, coverageTerms(f));
+  const results = await Promise.allSettled([
+    acceptCoverage(f, a),
+    acceptCoverage(f, b),
+  ]);
+  assert.equal(results.filter((r) => r.status === "fulfilled").length, 1);
+  const rejected = results.find(
+    (r) => r.status === "rejected",
+  ) as PromiseRejectedResult;
+  assert.equal(rejected.reason.code, "domain_leased");
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT 1 FROM availability_domain_claims WHERE resource_domain_id=$1",
+        [f.parts[0].domainId],
+      )
+    ).rowCount,
+    1,
+  );
+});
+
+test("standalone and complete-route contracts share sponsor caps and bidirectional physical exclusion", async (t) => {
+  const f = await fixture(t, true),
+    single = new Availability(db);
+  const whole = await market.invite(admin, {
+    name: "Whole model on the same physical capacity",
+    owner_id: f.root.id,
+    resource_domain_id: f.parts[0].domainId,
+    model_id: f.modelId,
+    base_url: "http://127.0.0.1:43249",
+  });
+  await ready(whole.id);
+  const nodeTerms = () => ({
+    node_id: whole.id,
+    duration_seconds: 30,
+    rate_microtu_per_second: "1000",
+    idempotency_key: randomUUID(),
+  });
+  await assert.rejects(
+    () => single.offer(f.buyer, { ...nodeTerms(), node_id: f.parts[1].nodeId }),
+    { code: "node_unavailable" },
+  );
+  const nodeLease = await single.offer(f.buyer, nodeTerms());
+  await single.accept(f.root, nodeLease.id);
+  const routeLease = await coverage().offer(f.buyer, coverageTerms(f));
+  await assert.rejects(() => acceptCoverage(f, routeLease), {
+    code: "domain_leased",
+  });
+  await single.cancel(f.buyer, nodeLease.id);
+  await acceptCoverage(f, routeLease);
+  const blocked = await single.offer(f.buyer, nodeTerms());
+  await assert.rejects(() => single.accept(f.root, blocked.id), {
+    code: "domain_leased",
+  });
+  const a = await single.offer(f.buyer, nodeTerms()),
+    b = await coverage().offer(f.buyer, coverageTerms(f));
+  await assert.rejects(() => single.offer(f.buyer, nodeTerms()), {
+    code: "lease_limit",
+  });
+  await assert.rejects(() => coverage().offer(f.buyer, coverageTerms(f)), {
+    code: "lease_limit",
+  });
+  for (const l of [blocked, a]) await single.cancel(f.buyer, l.id);
+  await coverage().cancel(f.buyer, b.id);
+  await finishCoverage(routeLease.id);
+  const restored = await single.offer(f.buyer, nodeTerms());
+  await single.accept(f.root, restored.id);
+  await single.cancel(f.buyer, restored.id);
+});
+
+test("ready components keep their accepted entitlement when another stage fails", async (t) => {
+  const f = await fixture(t),
+    lease = await coverage().offer(f.buyer, coverageTerms(f));
+  await acceptCoverage(f, lease);
+  await market.nodeState(f.providers[1]!, f.parts[1].nodeId, {
+    state: "PAUSED",
+  });
+  await elapsedCoverage(lease.id);
+  await coverage().reconcile();
+  const row = await coverageRow(f, lease.id);
+  assert.equal(row.state, "DRAINING");
+  assert.equal(row.joint_ready_ms, "0");
+  assert.equal(row.participants[1].paid_microtu, "0");
+  assert.ok(BigInt(row.participants[0].paid_microtu) > 0n);
+  assert.ok(BigInt(row.participants[2].paid_microtu) > 0n);
+  assert.deepEqual(
+    await Promise.all(f.providers.map(balance)),
+    row.participants.map((p: any) => BigInt(p.paid_microtu)),
+  );
+  await assert.rejects(() => coverage().offer(f.buyer, coverageTerms(f)), {
+    code: "route_not_ready",
+  });
+  const terminal = await coverage().cancel(f.buyer, lease.id);
+  assert.equal(terminal.state, "DRAINING");
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        row.escrow_account,
+      ])
+    ).rows[0].balance,
+    (30000n - BigInt(terminal.paid_microtu)).toString(),
+  );
+  await finishCoverage(lease.id);
+  const ended = await coverageRow(f, lease.id);
+  assert.equal(ended.state, "COMPLETED");
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        row.escrow_account,
+      ])
+    ).rows[0].balance,
+    "0",
+  );
+  assert.equal(await balance(f.buyer), 100000000n - BigInt(ended.paid_microtu));
+});
+
+test("provider exit relinquishes only its future earnings and preserves other funded obligations", async (t) => {
+  const f = await fixture(t),
+    lease = await coverage().offer(f.buyer, coverageTerms(f));
+  await acceptCoverage(f, lease);
+  await coverage().cancel(f.providers[1]!, lease.id);
+  const before = await coverageRow(f, lease.id);
+  await elapsedCoverage(lease.id);
+  await coverage().reconcile();
+  const after = await coverageRow(f, lease.id);
+  assert.equal(after.state, "DRAINING");
+  assert.equal(
+    after.participants[1].paid_microtu,
+    before.participants[1].paid_microtu,
+  );
+  assert.ok(after.participants[1].withdrawn_at);
+  assert.ok(
+    BigInt(after.participants[0].paid_microtu) >
+      BigInt(before.participants[0].paid_microtu),
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT 1 FROM availability_domain_claims WHERE route_lease_id=$1",
+        [lease.id],
+      )
+    ).rowCount,
+    3,
+  );
+});
+
+test("coordinator outages and node epochs cannot be extrapolated into paid readiness", async (t) => {
+  const f = await fixture(t),
+    lease = await coverage().offer(f.buyer, coverageTerms(f));
+  await acceptCoverage(f, lease);
+  await elapsedCoverage(lease.id, 10000);
+  await coverage().reconcile();
+  assert.equal((await coverageRow(f, lease.id)).paid_microtu, "0");
+  await elapsedCoverage(lease.id);
+  await owner.query("UPDATE nodes SET epoch=epoch+1 WHERE id=$1", [
+    f.parts[1].nodeId,
+  ]);
+  await coverage().reconcile();
+  const after = await coverageRow(f, lease.id);
+  assert.equal(after.participants[1].paid_microtu, "0");
+  assert.ok(BigInt(after.participants[0].paid_microtu) > 0n);
+  assert.equal(after.joint_ready_ms, "0");
+  await elapsedCoverage(lease.id);
+  await coverage().reconcile();
+  assert.ok(
+    BigInt((await coverageRow(f, lease.id)).participants[1].paid_microtu) > 0n,
+  );
+});
+
+test("a backwards clock checkpoint cannot rewind accrued coverage", async (t) => {
+  const f = await fixture(t),
+    lease = await coverage().offer(f.buyer, coverageTerms(f));
+  await acceptCoverage(f, lease);
+  await owner.query(
+    "UPDATE route_availability_leases SET sample_ms=sample_ms+10000 WHERE id=$1",
+    [lease.id],
+  );
+  const before = await coverageRow(f, lease.id);
+  await coverage().reconcile();
+  const after = await coverageRow(f, lease.id);
+  assert.equal(after.sample_ms, before.sample_ms);
+  assert.equal(after.paid_microtu, "0");
+  await elapsedCoverage(lease.id, 10000);
+});
+
+test("expired partial signatures refund the sponsor once without paying a fragment", async (t) => {
+  const f = await fixture(t),
+    lease = await coverage().offer(f.buyer, coverageTerms(f));
+  await coverage().accept(f.root, lease.id, {
+    terms_sha256: lease.terms_sha256,
+  });
+  await owner.query(
+    "UPDATE route_availability_leases SET offer_expires_at=now()-interval '1 second' WHERE id=$1",
+    [lease.id],
+  );
+  await assert.rejects(
+    () =>
+      coverage().accept(f.providers[1]!, lease.id, {
+        terms_sha256: lease.terms_sha256,
+      }),
+    { code: "offer_expired" },
+  );
+  await Promise.all([coverage().reconcile(), coverage().reconcile()]);
+  const after = await coverageRow(f, lease.id);
+  assert.equal(after.state, "EXPIRED");
+  assert.equal(after.paid_microtu, "0");
+  assert.equal(await balance(f.buyer), 100000000n);
+  assert.deepEqual(await Promise.all(f.providers.map(balance)), [0n, 0n, 0n]);
+  assert.equal(
+    (
+      await db.pool.query("SELECT 1 FROM journal WHERE business_key=$1", [
+        `route-lease:${lease.id}:refund`,
+      ])
+    ).rowCount,
+    1,
+  );
+});
+
+test("fractional shares conserve the full window budget and repeated completion cannot pay twice", async (t) => {
+  const f = await fixture(t),
+    lease = await coverage().offer(f.buyer, coverageTerms(f, "1"));
+  await acceptCoverage(f, lease);
+  // Fabricate an already observed 29s prefix to exercise the exact 30s boundary.
+  await owner.query(
+    "UPDATE route_availability_members SET credited_ms=29000 WHERE lease_id=$1",
+    [lease.id],
+  );
+  await owner.query(
+    `WITH c AS (SELECT floor(extract(epoch FROM clock_timestamp())*1000)::bigint AS ms)
+    UPDATE route_availability_leases SET started_ms=c.ms-30000,ends_ms=c.ms,sample_ms=c.ms-1000,joint_ready_ms=29000 FROM c WHERE id=$1`,
+    [lease.id],
+  );
+  await Promise.all([
+    coverage().reconcile(),
+    coverage().cancel(f.buyer, lease.id),
+  ]);
+  const after = await coverageRow(f, lease.id);
+  assert.equal(after.state, "COMPLETED");
+  assert.equal(after.paid_microtu, "30");
+  assert.equal(after.joint_ready_ms, "30000");
+  assert.deepEqual(
+    after.participants.map((p: any) => p.paid_microtu),
+    ["3", "13", "14"],
+  );
+  await coverage().cancel(f.buyer, lease.id);
+  assert.deepEqual(await Promise.all(f.providers.map(balance)), [3n, 13n, 14n]);
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT 1 FROM availability_domain_claims WHERE route_lease_id=$1",
+        [lease.id],
+      )
+    ).rowCount,
+    0,
+  );
+});
+
+test("route readiness payment projections, escrow remainders and domain claims reconcile", async () => {
+  assert.equal(
+    (await db.pool.query("SELECT sum(balance)::text AS n FROM ledger_accounts"))
+      .rows[0].n,
+    "0",
+  );
+  assert.equal(
+    (
+      await db.pool
+        .query(`SELECT a.id FROM ledger_accounts a LEFT JOIN journal_lines l ON l.account_id=a.id
+    GROUP BY a.id HAVING a.balance<>coalesce(sum(l.amount),0)`)
+    ).rowCount,
+    0,
+  );
+  assert.equal(
+    (
+      await db.pool
+        .query(`SELECT l.id FROM route_availability_leases l JOIN ledger_accounts a ON a.id=l.escrow_account
+    WHERE a.balance<>CASE WHEN l.state IN ('OFFERED','ACTIVE','DRAINING') THEN l.budget_microtu-l.paid_microtu ELSE 0 END`)
+    ).rowCount,
+    0,
+  );
+  assert.equal(
+    (
+      await db.pool
+        .query(`SELECT l.id FROM route_availability_leases l JOIN route_availability_members p ON p.lease_id=l.id
+    GROUP BY l.id HAVING sum(p.paid_microtu)<>l.paid_microtu OR sum(p.maximum_microtu)<>l.budget_microtu`)
+    ).rowCount,
+    0,
+  );
+  await assert.rejects(
+    () => db.pool.query("DELETE FROM availability_domain_claims"),
+    { code: "42501" },
+  );
+  assert.equal(
+    (
+      await db.pool
+        .query(`SELECT c.resource_domain_id FROM availability_domain_claims c
+    LEFT JOIN route_availability_leases r ON r.id=c.route_lease_id LEFT JOIN availability_leases n ON n.id=c.node_lease_id
+    WHERE (c.route_lease_id IS NOT NULL AND r.state NOT IN ('ACTIVE','DRAINING')) OR (c.node_lease_id IS NOT NULL AND n.state<>'ACTIVE')`)
     ).rowCount,
     0,
   );

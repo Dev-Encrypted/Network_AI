@@ -65,6 +65,14 @@ The private-preview interface currently uses Brazilian Portuguese. Repository gu
 
 The application retains session metadata but does not store conversation text in PostgreSQL. Reloading the page does not retrieve a past answer. Save any response you need in your own application.
 
+## Keep a complete route available
+
+Once a complete route is qualified and ready, open **Meus nós → Disponibilidade da rota completa** (My nodes → Complete-route availability). A sponsor chooses a duration, total rate and purpose, then reserves the full budget. Every provider must review and accept the offer before the clock starts.
+
+For example, 30 seconds at 1,000 microcredits per second reserves 0.030 LAB_TU for the whole route. Its accepted shares divide that total among the components. Ready time can earn payment even when nobody submits a question. Registering a node alone earns nothing, and an empty sponsor balance cannot fund the offer.
+
+If a stage goes offline, it stops earning eligible readiness time. The other components retain their accepted window while ready; the sponsor receives the unused remainder at the fixed end. Normal inference compensation is additional and separately accounted. The [full explanation](implementation/ROUTE_AVAILABILITY.md) covers shares, withdrawal, refunds and the limits of this private mechanism.
+
 ## Understand common outcomes
 
 | Outcome | Meaning | Next step |

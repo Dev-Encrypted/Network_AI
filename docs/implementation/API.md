@@ -21,6 +21,9 @@ Login verifies a scrypt password hash and creates a 12-hour HttpOnly, SameSite=S
 | GET / POST | `/availability/leases` | Inspect own contracts / reserve an offer's complete funding |
 | POST | `/availability/leases/:id/accept` | Only the provider accepts a ready-capacity contract |
 | POST | `/availability/leases/:id/cancel` | Counterparty/admin closes and refunds unused funding |
+| GET / POST | `/availability/routes` | Inspect own complete-route windows / reserve one full budget |
+| POST | `/availability/routes/:id/accept` | A listed provider accepts the exact `terms_sha256`; the last acceptance activates ready, unclaimed capacity |
+| POST | `/availability/routes/:id/cancel` | Cancel an offered window or drain accepted obligations until their fixed end |
 | GET | `/sessions`, `/sessions/:id` | Up to 100 own sessions / details and events |
 | POST | `/sessions/:id/cancel` | Cancel an owned session |
 | GET / POST | `/keys` | List/create own personal keys |
@@ -39,6 +42,8 @@ Login verifies a scrypt password hash and creates a 12-hour HttpOnly, SameSite=S
 | GET | `/admin/metrics` | Administrator reads counts and ledger sum |
 
 The executable [shared contract](../../packages/contracts/src/index.ts) defines request bodies. A model manifest cannot change under the same ID. Another revision needs another identifier. Qualification state can change separately, with an audit event.
+
+Service-specific readiness bodies are validated in their control modules. [Complete-route readiness](ROUTE_AVAILABILITY.md) defines `route_id`, duration, total rate, purpose, reason and UUID idempotency. Its cancellation preserves other accepted component obligations, unlike immediate cancellation of a legacy standalone lease. Both generations share the four-open-contract sponsor cap and one accepted readiness claim per physical domain. Standalone offers now require `INFERENCE` nodes; roots and stages must use the complete-route contract.
 
 Route bodies and their lifecycle are detailed in the [complete-route guide](COMPLETE_ROUTES.md). A proposal contains `name`, `model_id`, UUID `idempotency_key` and 2–16 ordered `{node_id, share_bps}` members, starting with the root and totaling 10,000 basis points. Node invitations accept `node_kind` as `INFERENCE` (default), `ROUTE_ROOT` or `RPC_STAGE`. Qualified roots/stages cannot be selected as standalone complete-model offers. `/sessions/:id` includes frozen participants, accepted stage receipts and individual `paid_microtu` values. `/capacity/:model` reports conservative complete-route packing over shared domains; it is not a sum of advertised stage slots.
 

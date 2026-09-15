@@ -6,6 +6,118 @@ const config = JSON.parse(
   await readFile(".runtime/private-lab/config.json", "utf8"),
 );
 
+test("complete route readiness survives a lost funding response and preserves the accepted window", async ({
+  page,
+}) => {
+  const profile = await readFile(".runtime/private-lab/cpu-route.json", "utf8")
+    .then(JSON.parse)
+    .catch(() => null);
+  test.skip(
+    !profile,
+    "Requires the explicitly installed private CPU route; no fake readiness is substituted.",
+  );
+  await page.goto("/");
+  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
+  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await page.getByRole("button", { name: "Meus nós", exact: true }).click();
+  const section = page.locator(".route-availability-section");
+  const reason = `Browser funded route window ${randomUUID().slice(0, 8)}`;
+  const auth = { headers: { Origin: config.web_origin } };
+  let id: string | undefined;
+  let dropped = false;
+  await page.route("**/api/v1/availability/routes", async (route) => {
+    if (!dropped && route.request().method() === "POST") {
+      dropped = true;
+      const created = await route.fetch();
+      expect(created.status()).toBe(201);
+      id = (await created.json()).id;
+      await route.abort("failed");
+    } else await route.continue();
+  });
+  try {
+    await section
+      .getByRole("combobox", { name: "Rota beneficiada", exact: true })
+      .selectOption(profile.route_id);
+    await section
+      .getByLabel("Duração da janela (segundos)", { exact: true })
+      .fill("30");
+    await section
+      .getByRole("combobox", { name: "Finalidade da janela", exact: true })
+      .selectOption("EXPERIMENT");
+    await section
+      .getByLabel("Por que manter esta rota disponível?", { exact: true })
+      .fill(reason);
+    await section
+      .getByRole("button", { name: "Financiar janela da rota", exact: true })
+      .click();
+    await expect(section.getByRole("alert")).toBeVisible();
+    // The same unchanged logical offer must reuse its identity after a lost reply.
+    await section
+      .getByRole("button", { name: "Financiar janela da rota", exact: true })
+      .click();
+    await expect(section.getByRole("status")).toContainText(
+      "Orçamento reservado",
+    );
+    const ls = (
+      await (await page.request.get("/api/v1/availability/routes")).json()
+    ).data.filter((l: any) => l.reason === reason);
+    expect(ls).toHaveLength(1);
+    expect(ls[0].id).toBe(id);
+    const card = section.locator(".coverage-card").filter({ hasText: reason });
+    await expect(card).toContainText("Aguardando todos os operadores");
+    await card
+      .getByRole("button", { name: "Aceitar janela", exact: true })
+      .click();
+    await expect(card).toContainText("Janela ativa");
+    await expect(
+      card.getByRole("cell", { name: "Aceito", exact: true }),
+    ).toHaveCount(3);
+    await expect
+      .poll(
+        async () => {
+          const row = (
+            await (await page.request.get("/api/v1/availability/routes")).json()
+          ).data.find((l: any) => l.id === id);
+          return BigInt(row.paid_microtu) > 0n;
+        },
+        { timeout: 12000 },
+      )
+      .toBe(true);
+    await card.getByText("Termos desta janela", { exact: true }).click();
+    await expect(card).toContainText(
+      "30 segundos; 1000 microcréditos por segundo",
+    );
+    await mkdir(".runtime/private-lab/screenshots", { recursive: true });
+    await card.screenshot({
+      path: ".runtime/private-lab/screenshots/route-availability-desktop.png",
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await card.screenshot({
+      path: ".runtime/private-lab/screenshots/route-availability-mobile.png",
+    });
+    await card
+      .getByRole("button", { name: "Encerrar minha contribuição", exact: true })
+      .click();
+    await expect(card).toContainText("Concluindo compromissos");
+    await expect(
+      card.getByRole("cell", { name: "Contribuição encerrada", exact: true }),
+    ).toHaveCount(3);
+    await expect(card).toContainText("Janela concluída", { timeout: 40000 });
+  } finally {
+    if (id)
+      await page.request.post(`/api/v1/availability/routes/${id}/cancel`, {
+        ...auth,
+        data: {},
+      });
+  }
+});
+
 test("route proposal, consent, qualification and withdrawal work in the browser", async ({
   page,
 }) => {
