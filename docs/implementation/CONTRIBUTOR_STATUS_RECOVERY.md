@@ -1,5 +1,7 @@
 # Contributor status recovery in v0.10.1
 
+This page preserves the v0.10.1 correction and its measured evidence. [Version 0.11](CONTRIBUTOR_PROCESS_CONTAINMENT.md) subsequently adds required Windows contributor process containment. Use the current package/upgrade instructions for a new installation; the historical limitations below describe v0.10.1.
+
 Version 0.10.1 fixes a Windows contributor failure in which a reader holding the status file could terminate a healthy worker. It also removes an unnecessary HTTP request from the supervisor to its own guard. This is a reliability correction to the private contributor preview; the accounting, model bindings and execution authorization rules are unchanged.
 
 ## What happened and what is known

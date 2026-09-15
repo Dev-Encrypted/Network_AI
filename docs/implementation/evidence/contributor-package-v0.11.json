@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "version": "0.11.0",
+  "filename": "network-ai-contributor-0.11.0.tgz",
+  "sha256": "60a9ba4ebda17d4caa4952d3520fd62a860e71d6f84452659b15a4711e633ca0",
+  "bytes": 1177544,
+  "dependency": {
+    "name": "zod",
+    "version": "4.6.5",
+    "bundled": true,
+    "license_included": true
+  },
+  "extraction_and_cli_without_coordinator_source": true,
+  "model_or_engine_included": false,
+  "executable_signing_or_multi_host_qualification": false
+}

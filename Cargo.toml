@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/transport-bench", "crates/runtime-core", "crates/gateway", "crates/node", "crates/link"]
+members = ["crates/transport-bench", "crates/runtime-core", "crates/gateway", "crates/node", "crates/link", "crates/contributor-guardian"]
 resolver = "2"
 
 [profile.release]

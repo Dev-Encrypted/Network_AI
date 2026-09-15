@@ -59,7 +59,11 @@ export const profileSchema = z
         directory: z.string().min(1),
       })
       .strict(),
-    binaries: z.object({ http: binary, rpc: binary }).strict(),
+    // Legacy profiles remain readable for status and graceful shutdown. Starting
+    // a new contributor requires an explicitly pinned guardian; no unsafe fallback.
+    binaries: z
+      .object({ http: binary, rpc: binary, guardian: binary.optional() })
+      .strict(),
     threads: z.number().int().min(1).max(32),
     startup_compute_commands: z.number().int().min(0).max(4),
   })
@@ -146,28 +150,37 @@ export async function loadProfile(file, verify = true) {
   const pin = JSON.parse(
     await readFile(new URL("./engine-pin.json", import.meta.url), "utf8"),
   );
-  if (verify) {
+  if (verify) await verifyProfileRuntime(c, pin);
+  return { profile: c, path, directory, state: join(directory, "state"), pin };
+}
+export async function verifyProfileRuntime(c, pin) {
+  requireValue(
+    process.platform === pin.platform && process.arch === pin.arch,
+    "worker_platform_not_qualified",
+  );
+  requireValue(c.binaries.guardian, "worker_guardian_required");
+  await verifyPinnedFiles(c.engine.directory, pin.files);
+  for (const b of Object.values(c.binaries)) {
+    const info = await lstat(b.path);
     requireValue(
-      process.platform === pin.platform && process.arch === pin.arch,
-      "worker_platform_not_qualified",
-    );
-    await verifyPinnedFiles(c.engine.directory, pin.files);
-    for (const b of Object.values(c.binaries)) {
-      const info = await lstat(b.path);
-      requireValue(
-        info.isFile() &&
-          !info.isSymbolicLink() &&
-          (await hashFile(b.path)) === b.sha256,
-        "worker_link_pin",
-      );
-    }
-    requireValue(
-      (await realpath(c.binaries.http.path)) !==
-        (await realpath(c.binaries.rpc.path)),
-      "worker_link_binary_collision",
+      info.isFile() &&
+        !info.isSymbolicLink() &&
+        (await hashFile(b.path)) === b.sha256,
+      "worker_link_pin",
     );
   }
-  return { profile: c, path, directory, state: join(directory, "state"), pin };
+  requireValue(
+    (await realpath(c.binaries.http.path)) !==
+      (await realpath(c.binaries.rpc.path)),
+    "worker_link_binary_collision",
+  );
+  const binaryPaths = await Promise.all(
+    Object.values(c.binaries).map((b) => realpath(b.path)),
+  );
+  requireValue(
+    new Set(binaryPaths).size === 3,
+    "worker_guardian_binary_collision",
+  );
 }
 export function workerEnvironment(source = process.env) {
   const allowed = new Set([

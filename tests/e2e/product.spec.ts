@@ -2,6 +2,7 @@
 import { test, expect } from "@playwright/test";
 import { readFile, mkdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import { expectReadyRoute } from "./readiness";
 const config = JSON.parse(
   await readFile(".runtime/private-lab/config.json", "utf8"),
 );
@@ -470,6 +471,7 @@ test("bounded renewal controls preserve retry identity and revoke only future op
     page.getByRole("button", { name: "Cooperação", exact: true }),
   ).toBeVisible();
   const auth = { headers: { Origin: config.web_origin } };
+  await expectReadyRoute(page.request, profile.route_id);
   const created = await page.request.post("/api/v1/cooperative/pools", {
     ...auth,
     data: {
@@ -486,8 +488,8 @@ test("bounded renewal controls preserve retry identity and revoke only future op
       ],
     },
   });
-  expect(created.status()).toBe(201);
   const p = await created.json();
+  expect(created.status(), p.error?.code).toBe(201);
   const funded = await page.request.post(
     `/api/v1/cooperative/pools/${p.id}/fund`,
     {
@@ -676,6 +678,7 @@ test("cooperative plan, funding retry, readiness consent and opted-in chat work 
   await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await page.getByRole("button", { name: "Cooperação", exact: true }).click();
+  await expectReadyRoute(page.request, profile.route_id);
   const section = page.getByRole("region", { name: "Fundos cooperativos" });
   await section
     .getByText("Criar plano de capacidade essencial", { exact: true })

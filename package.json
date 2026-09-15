@@ -1,6 +1,6 @@
 {
   "name": "network-ai",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -43,7 +43,9 @@
     "lab:route-contributors": "node scripts/route-contributors.mjs",
     "contributor:pack": "node scripts/pack-contributor.mjs",
     "test:contributors": "node scripts/rpc-route-acceptance.mjs --contributors --fault",
-    "test:contributor-state": "node scripts/contributor-state-acceptance.mjs"
+    "test:contributor-state": "node scripts/contributor-state-acceptance.mjs",
+    "test:guardian": "node --test tests/guardian/*.test.mjs",
+    "test:containment": "node scripts/rpc-route-acceptance.mjs --contributors --containment --fault"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

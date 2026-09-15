@@ -1,6 +1,6 @@
 # Portable contributor workers
 
-**Current patch: v0.10.1.** The [status recovery guide](CONTRIBUTOR_STATUS_RECOVERY.md) describes a corrected Windows file-sharing failure, stale-status semantics, upgrade steps and a real 32B request that continued through a nine-second diagnostic-file lock. The v0.10 feature campaign below remains preserved as historical evidence.
+**Current version: v0.11.** The [process containment guide](CONTRIBUTOR_PROCESS_CONTAINMENT.md) explains the required Windows guardian, forced-crash cleanup and upgrade path. The [v0.10.1 status recovery guide](CONTRIBUTOR_STATUS_RECOVERY.md) describes the earlier Windows file-sharing correction. The v0.10 feature campaign below remains preserved as historical evidence.
 
 Version 0.10 separates a contributor's CPU worker, protocol guard and two authenticated transports from the root's model server. The root no longer has to start the contributor's worker process or give the contributor its model API credential. The standalone package accepts the participant's own keys, a private invitation and explicit public route/peer settings.
 
@@ -55,7 +55,7 @@ The private `LAB_TU` ledger, existing-credit funding and cooperative rules are u
 
 ## Standalone participant setup
 
-The [package README](../../packages/contributor/README.md) gives the complete operator workflow and an [editable Windows settings example](../../packages/contributor/examples/settings.windows.json). Its commands are `identity`, `configure`, `check`, `start`, `status` and `stop`.
+The [package README](../../packages/contributor/README.md) gives the complete operator workflow and an [editable Windows settings example](../../packages/contributor/examples/settings.windows.json). Its commands are `identity`, `configure`, `check`, `start`, `status`, `stop` and `upgrade`.
 
 The package has one declared bundled JavaScript dependency, Zod. Packing uses an isolated staging directory with the installed exact dependency, without changing the workspace's pnpm linker. The pack script extracts the resulting artifact and launches its CLI and identity command from the extracted package. This proves the package can resolve its own source/dependency without importing the coordinator's source tree; it does not prove physical-host or OS security isolation.
 
@@ -74,6 +74,7 @@ First build the transport binaries and control application, with accepted sessio
 ```powershell
 pnpm --filter @network-ai/control-api build
 cargo +1.93.1 build --locked -p network-ai-link
+cargo +1.93.1 build --locked -p network-ai-contributor-guardian
 pnpm lab:route-contributors enable
 pnpm test:contributors
 ```
@@ -101,8 +102,8 @@ The installed root backend remains on 43224 and the root node on 43124. None of 
 
 The supervisor reports `STARTING`, `WAITING_ROOT`, `READY`, `STOPPING`, `STOPPED` or `FAILED` with its PID, boot ID and current timestamp. A tracked child failure closes the guard and drains the contributor's other children. The graceful stop command is bound to the live boot. The root owns only its model process when contributors supervise the workers. Group recovery reuses the original node signing identities and reloads model tensors.
 
-A forced OS kill of the supervisor itself can leave children behind; this version does not install a Windows Job Object or service manager. The next startup refuses occupied ports. Recover by inspecting the tracked components and their ownership, not by killing every process with a similar name. Local process supervision and environment filtering do not sandbox an authorized malicious engine or root. The [upstream prototype RPC warning](https://github.com/ggml-org/llama.cpp/blob/b29c606e2/tools/rpc/README.md) still applies.
+Version 0.11 adds a required [Windows job guardian](CONTRIBUTOR_PROCESS_CONTAINMENT.md) for normal contributor descendants. It addresses supervisor/guardian termination without depending on JavaScript cleanup. Root-model service supervision, hostile-peer resource limits and OS-user isolation remain separate work. The next startup still refuses occupied ports. Inspect recorded ownership before recovery. The [upstream prototype RPC warning](https://github.com/ggml-org/llama.cpp/blob/b29c606e2/tools/rpc/README.md) still applies.
 
-The [contributor campaign](evidence/qwen3-32b-portable-contributors.json) completed five real 32B requests, concurrent consumers sharing one slot, loss of an owned control-link child during execution, loss of an owned CPU worker, zero-charge failure handling and full-group recovery. It checked actual QUIC byte counters, the root receipt, both observed stage receipts, payouts and ledger projections. Control-link failure took 17,482 ms to reach the recorded terminal/refunded observation; worker failure took 1,655 ms. These are measured acceptance outcomes, not a public failure-detection SLO. No additional grant or clock/ownership fabrication was introduced. Signature/expiry/profile tests use explicit fabricated fixtures and are reported separately from actual model execution. The [versioned validation record](validation-v0.10.json) and [package record](evidence/contributor-package.json) preserve these distinctions.
+The preserved [v0.10 contributor campaign](evidence/qwen3-32b-portable-contributors.json) completed five real 32B requests, concurrent consumers sharing one slot, loss of an owned control-link child during execution, loss of an owned CPU worker, zero-charge failure handling and full-group recovery. It checked actual QUIC byte counters, the root receipt, both observed stage receipts, payouts and ledger projections. Control-link failure took 17,482 ms to reach the recorded terminal/refunded observation; worker failure took 1,655 ms. These are measured acceptance outcomes, not a public failure-detection SLO. No additional grant or clock/ownership fabrication was introduced. Signature/expiry/profile tests use explicit fabricated fixtures and are reported separately from actual model execution. The [v0.10 validation](validation-v0.10.json) and [original package record](evidence/contributor-package.json) remain unchanged. The [v0.11 containment campaign](CONTRIBUTOR_PROCESS_CONTAINMENT.md#september-15-2026-measurements) adds actual supervisor/guardian termination, complete affected-process cleanup and another real status-lock regression.
 
 Remaining work includes independent Windows/Linux/GPU operator profiles, hardware and cost qualification, private/WAN transport tests, NAT/relay operation, OS resource limits and isolation, public admission, independent work verification, distributed continuity, issuance and payment settlement. The project continues to prioritize models above 27B; larger model support still depends on a qualified complete route, not a sum of advertised VRAM or additional node names.

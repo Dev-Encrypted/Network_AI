@@ -551,6 +551,8 @@ export async function start(options = {}) {
       "network-ai-gateway",
       "-p",
       "network-ai-link",
+      "-p",
+      "network-ai-contributor-guardian",
       "--locked",
     ]);
   }
@@ -672,7 +674,9 @@ export async function stopRouteRpcStage(index) {
 export async function faultContributorComponent(index, component) {
   if (
     ![1, 2].includes(index) ||
-    !["worker", "control_link", "rpc_link"].includes(component)
+    !["worker", "control_link", "rpc_link", "supervisor", "guardian"].includes(
+      component,
+    )
   )
     throw new Error(
       "Choose an installed contributor and one of its owned components",
@@ -690,12 +694,47 @@ export async function faultContributorComponent(index, component) {
   const s = await workerStatus(expected),
     { profile, pin } = await loadProfile(expected, false);
   const program =
-    component === "worker"
-      ? join(profile.engine.directory, pin.entry)
-      : profile.binaries[component === "control_link" ? "http" : "rpc"].path;
-  const pid = s.component_pids[component];
+    component === "supervisor"
+      ? entry.program
+      : component === "guardian"
+        ? profile.binaries.guardian?.path
+        : component === "worker"
+          ? join(profile.engine.directory, pin.entry)
+          : profile.binaries[component === "control_link" ? "http" : "rpc"]
+              .path;
+  const pid =
+    component === "supervisor"
+      ? entry.pid
+      : component === "guardian"
+        ? s.containment?.guardian_pid
+        : s.component_pids[component];
+  if (
+    ["supervisor", "guardian"].includes(component) &&
+    (s.containment?.kind !== "windows_job" ||
+      s.containment.parent_pid !== entry.pid ||
+      s.containment.boot_id !== s.boot_id)
+  )
+    throw new Error(
+      "Hard termination requires the confirmed current Windows job",
+    );
   if (!s.live || s.pid !== entry.pid || !(await owned({ pid, program })))
     throw new Error("Contributor component ownership could not be verified");
+  if (process.platform === "win32") {
+    const script = `$p=Get-CimInstance Win32_Process -Filter "ProcessId = ${pid}"; if($p){$p | Select-Object ExecutablePath,ParentProcessId,CommandLine | ConvertTo-Json -Compress}`;
+    const actual = JSON.parse(
+      execFileSync(
+        "powershell.exe",
+        ["-NoProfile", "-NonInteractive", "-Command", script],
+        { encoding: "utf8", windowsHide: true },
+      ),
+    );
+    if (
+      actual.ExecutablePath.toLowerCase() !== program.toLowerCase() ||
+      (component !== "supervisor" && actual.ParentProcessId !== entry.pid) ||
+      (component === "guardian" && !actual.CommandLine.includes(s.boot_id))
+    )
+      throw new Error("Contributor process parent or exact executable differs");
+  }
   process.kill(pid);
 }
 async function stopNames(names) {

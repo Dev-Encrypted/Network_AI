@@ -7,6 +7,8 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { setTimeout as delay } from "node:timers/promises";
+import { connect } from "node:net";
+import { createSocket } from "node:dgram";
 import {
   config,
   runtime,
@@ -26,6 +28,7 @@ const { values: a } = parseArgs({
   options: {
     fault: { type: "boolean", default: false },
     contributors: { type: "boolean", default: false },
+    containment: { type: "boolean", default: false },
   },
 });
 const c = await config(),
@@ -36,6 +39,15 @@ assert.equal(
   "Enable the installed route's QUIC transport first",
 );
 const portable = profile.worker_supervision === "portable_contributors";
+if (a.containment) {
+  assert.equal(process.platform, "win32");
+  assert.equal(portable, true);
+  assert.equal(
+    a.fault,
+    true,
+    "Containment evidence requires the owned crash campaign",
+  );
+}
 assert.equal(
   portable,
   a.contributors,
@@ -50,16 +62,22 @@ const db = new Pool({
 });
 const directory = join(
   runtime,
-  portable ? "contributor-campaigns" : "rpc-route-campaigns",
+  a.containment
+    ? "guardian-campaigns"
+    : portable
+      ? "contributor-campaigns"
+      : "rpc-route-campaigns",
   randomUUID(),
 );
 await mkdir(directory, { recursive: true, mode: 0o700 });
 await protectDirectory(directory);
 const report = {
   schema_version: 1,
-  evidence_type: portable
-    ? "REAL_INSTALLED_32B_PORTABLE_CONTRIBUTORS"
-    : "REAL_INSTALLED_32B_GUARDED_RPC_OVER_QUIC",
+  evidence_type: a.containment
+    ? "REAL_INSTALLED_32B_WINDOWS_JOB_CONTAINMENT"
+    : portable
+      ? "REAL_INSTALLED_32B_PORTABLE_CONTRIBUTORS"
+      : "REAL_INSTALLED_32B_GUARDED_RPC_OVER_QUIC",
   observed_at: new Date().toISOString(),
   physical_hosts: 1,
   physical_resource_domains: 1,
@@ -70,6 +88,9 @@ const report = {
   unit: "LAB_TU",
   transport: profile.rpc_transport,
   worker_supervision: portable ? "portable_contributors" : "root_cluster",
+  process_containment: a.containment
+    ? "windows_job_kill_on_close"
+    : "not_measured_by_this_campaign",
   relay_enabled: false,
   cash_payments: false,
   database_observations_fabricated: false,
@@ -86,6 +107,37 @@ const pass = (name) => {
   report.checks.push(name);
   console.log(`PASS ${name}`);
 };
+function alive(pid) {
+  assert.ok(Number.isSafeInteger(pid) && pid > 0);
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (e) {
+    return e.code !== "ESRCH";
+  }
+}
+function tcpOpen(port) {
+  return new Promise((resolve) => {
+    const socket = connect(port, "127.0.0.1");
+    const done = (value) => {
+      socket.destroy();
+      resolve(value);
+    };
+    socket.once("connect", () => done(true));
+    socket.once("error", () => done(false));
+    socket.setTimeout(500, () => done(false));
+  });
+}
+function udpFree(port) {
+  return new Promise((resolve) => {
+    const socket = createSocket("udp4");
+    socket.once("error", () => {
+      socket.close();
+      resolve(false);
+    });
+    socket.bind(port, "127.0.0.1", () => socket.close(() => resolve(true)));
+  });
+}
 async function api(path, method = "GET", body) {
   const r = await fetch(`http://127.0.0.1:${c.control_port}/api/v1${path}`, {
     method,
@@ -302,6 +354,14 @@ try {
       const { profile: worker, state, pin } = await loadProfile(path);
       const s = await workerStatus(path);
       assert.ok(s.live && s.ready);
+      if (a.containment) {
+        assert.equal(s.containment?.kind, "windows_job");
+        assert.equal(s.containment.parent_pid, s.pid);
+        assert.equal(s.containment.boot_id, s.boot_id);
+        assert.ok(alive(s.containment.guardian_pid));
+        assert.equal(s.containment.kill_on_close, true);
+        assert.equal(s.containment.breakaway_allowed, false);
+      }
       const generated = componentConfigs(worker, state);
       assert.equal(generated.stage.readiness_mode, "coordinator_route_lease");
       for (const forbidden of [
@@ -321,6 +381,14 @@ try {
         engine_files_verified: pin.files.length,
         http_binary_sha256: worker.binaries.http.sha256,
         rpc_binary_sha256: worker.binaries.rpc.sha256,
+        ...(a.containment
+          ? {
+              guardian_binary_sha256: worker.binaries.guardian.sha256,
+              process_tree_containment: "windows_job",
+              kill_on_close: true,
+              breakaway_allowed: false,
+            }
+          : {}),
         backend_credentials_present: false,
         coordinator_secrets_present: false,
         source: "strict_profile_and_derived_component_configuration",
@@ -351,9 +419,11 @@ try {
   assert.ok(new Date(pair[1].started_at) >= new Date(pair[0].finished_at));
   pass("concurrent_consumers_serialize_on_the_single_physical_domain");
   for (const component of a.fault
-    ? portable
-      ? ["control_link", "worker"]
-      : ["rpc_link"]
+    ? a.containment
+      ? ["supervisor", "guardian", "worker"]
+      : portable
+        ? ["control_link", "worker"]
+        : ["rpc_link"]
     : []) {
     const response = await fetch(
       `http://127.0.0.1:${c.gateway_port}/v1/chat/completions`,
@@ -387,6 +457,16 @@ try {
       }
     })().catch(() => {});
     await until(async () => (await api(`/sessions/${id}`)).state === "RUNNING");
+    const before = a.containment
+      ? await workerStatus(
+          join(runtime, "cpu-route/portable/operator-2/worker.json"),
+        )
+      : null;
+    const sibling = a.containment
+      ? await workerStatus(
+          join(runtime, "cpu-route/portable/operator-1/worker.json"),
+        )
+      : null;
     needsRecovery = true;
     const faultAt = Date.now();
     if (portable) await faultContributorComponent(2, component);
@@ -421,10 +501,40 @@ try {
         const s = await workerStatus(
           join(runtime, "cpu-route", "portable", "operator-2", "worker.json"),
         );
-        return s.phase === "FAILED" && !s.live && s;
+        return (
+          (a.containment ? !s.process_alive : s.phase === "FAILED") &&
+          !s.live &&
+          s
+        );
       });
       fault.contributor_failure = stopped.failure;
       fault.contributor_phase = stopped.phase;
+      if (a.containment) {
+        const group = [
+          before.pid,
+          before.containment.guardian_pid,
+          ...Object.values(before.component_pids),
+        ];
+        await until(() => group.every((pid) => !alive(pid)));
+        for (const port of [43226, 43142, 43841, 43843])
+          assert.equal(await tcpOpen(port), false);
+        for (const port of [43931, 43954])
+          assert.equal(await udpFree(port), true);
+        for (const pid of [
+          sibling.pid,
+          sibling.containment.guardian_pid,
+          ...Object.values(sibling.component_pids),
+        ])
+          assert.ok(alive(pid));
+        fault.owned_processes_terminated = group.length;
+        fault.all_owned_tcp_and_udp_ports_released = true;
+        fault.sibling_contributor_processes_survived = true;
+        fault.supervisor_no_longer_running = true;
+        fault.last_status_is_diagnostic_only_after_hard_crash = [
+          "supervisor",
+          "guardian",
+        ].includes(component);
+      }
       report.faults.push(fault);
     } else report.fault = fault;
     pass(

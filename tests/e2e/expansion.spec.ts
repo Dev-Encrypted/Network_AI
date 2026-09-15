@@ -3,6 +3,7 @@
 import { test, expect } from "@playwright/test";
 import { readFile, mkdir } from "node:fs/promises";
 import { randomUUID, createHash } from "node:crypto";
+import { expectReadyRoute } from "./readiness";
 const config = JSON.parse(
   await readFile(".runtime/private-lab/config.json", "utf8"),
 );
@@ -28,6 +29,7 @@ test("private expansion forms bind support, preserve retry identity and explain 
   const auth = { headers: { Origin: config.web_origin } },
     me = await (await page.request.get("/api/v1/me")).json();
   const self = me.user ?? me;
+  await expectReadyRoute(page.request, profile.route_id);
   const created = await page.request.post("/api/v1/cooperative/pools", {
     ...auth,
     data: {
@@ -257,22 +259,18 @@ test("private expansion forms bind support, preserve retry identity and explain 
       .getByText("Administrar declarações econômicas privadas", { exact: true })
       .click();
     await mkdir(".runtime/private-lab/screenshots", { recursive: true });
-    await panel
-      .locator(".expansion-panel")
-      .screenshot({
-        path: ".runtime/private-lab/screenshots/expansion-desktop.png",
-      });
+    await panel.locator(".expansion-panel").screenshot({
+      path: ".runtime/private-lab/screenshots/expansion-desktop.png",
+    });
     await page.setViewportSize({ width: 390, height: 844 });
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     ).toBe(true);
-    await panel
-      .locator(".expansion-panel")
-      .screenshot({
-        path: ".runtime/private-lab/screenshots/expansion-mobile.png",
-      });
+    await panel.locator(".expansion-panel").screenshot({
+      path: ".runtime/private-lab/screenshots/expansion-mobile.png",
+    });
     await panel
       .getByText("Administrar declarações econômicas privadas", { exact: true })
       .click();

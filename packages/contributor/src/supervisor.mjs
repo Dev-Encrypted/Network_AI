@@ -16,6 +16,7 @@ import {
 } from "./profile.mjs";
 import { protectDirectory } from "./permissions.mjs";
 import { atomicJson, StatusPublisher } from "./state.mjs";
+import { startGuardian } from "./guardian.mjs";
 
 async function json(file, value) {
   await atomicJson(file, value);
@@ -81,6 +82,7 @@ export async function startWorker(file) {
   const children = [],
     logs = [];
   let agent,
+    containment = null,
     timer,
     phase = "STARTING",
     stopping = false,
@@ -102,6 +104,7 @@ export async function startWorker(file) {
       ready: Boolean(ready && !stopping),
       failure,
       component_pids: Object.fromEntries(children.map((p) => [p.label, p.pid])),
+      containment,
       readiness_source: "coordinator_route_lease",
       scope: "private_contributor_processes; not physical-host qualification",
     });
@@ -176,6 +179,7 @@ export async function startWorker(file) {
     });
     for (const port of [c.node.http_port, ...Object.values(c.ports)])
       requireValue(await tcpFree(port), "worker_port_occupied");
+    containment = await startGuardian(c.binaries.guardian, boot);
     await publish(false);
     const configs = componentConfigs(c, state),
       controlFile = join(state, "control-link.json"),

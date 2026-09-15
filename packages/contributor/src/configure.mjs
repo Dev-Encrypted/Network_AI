@@ -71,6 +71,7 @@ export async function ensureIdentity(directory) {
 export const settingsSchema = profileSchema
   .omit({ node: true, control: true, rpc: true })
   .extend({
+    binaries: profileSchema.shape.binaries.required({ guardian: true }),
     node: profileSchema.shape.node.omit({
       id: true,
       invite: true,

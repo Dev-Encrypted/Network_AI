@@ -16,6 +16,7 @@ import {
   verifyPinnedFiles,
 } from "../../packages/contributor/src/profile.mjs";
 import { requestStop } from "../../packages/contributor/src/supervisor.mjs";
+import { upgradeGuardianProfile } from "../../packages/contributor/src/upgrade.mjs";
 const node = randomUUID();
 const settings = {
   schema_version: 1,
@@ -42,6 +43,10 @@ const settings = {
   binaries: {
     http: { path: "network-ai-link.exe", sha256: "c".repeat(64) },
     rpc: { path: "network-ai-rpc-link.exe", sha256: "d".repeat(64) },
+    guardian: {
+      path: "network-ai-contributor-guardian.exe",
+      sha256: "e".repeat(64),
+    },
   },
   threads: 8,
   startup_compute_commands: 4,
@@ -70,6 +75,12 @@ test("contributor configuration keeps only its own keys and refuses implicit coo
   const c = JSON.parse(await readFile(result.path, "utf8"));
   assert.equal(c.node.id, node);
   assert.deepEqual(await configureWorker(dir, invitation, settings), result);
+  const oldSettings = structuredClone(settings);
+  delete oldSettings.binaries.guardian;
+  await assert.rejects(configureWorker(dir, invitation, oldSettings));
+  const legacyProfile = structuredClone(c);
+  delete legacyProfile.binaries.guardian;
+  assert.equal(validateProfile(legacyProfile).binaries.guardian, undefined);
   await assert.rejects(
     configureWorker(dir, { ...invitation, operator: undefined }, settings),
   );
@@ -167,4 +178,23 @@ test("engine verification rejects modified or unexpected loadable files", async 
   await assert.rejects(verifyPinnedFiles(dir, pins), {
     code: "worker_engine_file_set",
   });
+});
+
+test("a containment upgrade refuses a live supervisor before changing its private profile", async (t) => {
+  const dir = await directory(t);
+  const { path } = await configureWorker(dir, invitation, settings);
+  const original = await readFile(path, "utf8");
+  await mkdir(join(dir, "state"));
+  await writeFile(
+    join(dir, "state", "worker.lock"),
+    JSON.stringify({ pid: process.pid, boot_id: randomUUID() }),
+  );
+  await assert.rejects(
+    upgradeGuardianProfile(path, {
+      path: "not-verified-or-executed.exe",
+      sha256: "0".repeat(64),
+    }),
+    { code: "worker_upgrade_requires_stopped" },
+  );
+  assert.equal(await readFile(path, "utf8"), original);
 });

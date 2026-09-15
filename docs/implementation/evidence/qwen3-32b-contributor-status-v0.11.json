@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "evidence_type": "REAL_32B_WITH_WINDOWS_STATUS_READ_LOCK",
+  "observed_at": "2026-09-15T12:33:10.860Z",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "physical_resource_domains": 1,
+  "compute": "CPU",
+  "unit": "LAB_TU",
+  "lock_requested_ms": 9000,
+  "new_lab_grants": 0,
+  "os_isolation_established": false,
+  "public_network_operation_approved": false,
+  "stale_status_did_not_claim_readiness": true,
+  "live_guard_ready_during_stale_telemetry": true,
+  "session_state_during_lock": "RUNNING",
+  "lock_elapsed_ms": 9033,
+  "same_supervisor_boot_and_children_survived": true,
+  "session": {
+    "state": "COMPLETED",
+    "billing_state": "SETTLED",
+    "prompt_tokens": 23,
+    "completion_tokens": 128,
+    "charged_microtu": "407000",
+    "provider_paid_microtu": "325600",
+    "platform_fee_microtu": "81400",
+    "accepted_receipts": 3,
+    "physical_domains": 1
+  },
+  "ledger_projection_mismatches": 0,
+  "result": "PASS",
+  "diagnostics": [
+    {
+      "event": "worker_status_degraded",
+      "code": "EPERM",
+      "operation": "replace"
+    },
+    {
+      "event": "worker_status_recovered"
+    }
+  ],
+  "process_containment": "windows_job_kill_on_close",
+  "measurement_notes": [
+    "Regression of the v0.10.1 status replacement fix with the v0.11 guardian active on the installed 32B CPU contributors.",
+    "A controlled Windows FileShare.Read lock lasted 9033 ms during actual RUNNING inference. Stale diagnostic status did not assert readiness; live guard health and actual accepted work continued.",
+    "The same supervisor boot and worker/transport process IDs were compared across the lock. Private model text was consumed without being retained.",
+    "One Windows computer, one account, one CPU domain and existing LAB_TU only. This does not establish independent providers, public economics or OS access isolation."
+  ]
+}

@@ -6,7 +6,7 @@ The [cooperative fund guide](implementation/COOPERATIVE_FUNDS.md) explains the i
 
 ## Reading paths
 
-The [contributor guide](implementation/PORTABLE_CONTRIBUTORS.md) explains independently supervised worker processes, participant-only credentials, signed readiness, pinned engines and standalone packaging. The [v0.10.1 correction](implementation/CONTRIBUTOR_STATUS_RECOVERY.md) explains Windows status-file recovery and its real 32B test. The [v0.9 transport guide](implementation/GUARDED_RPC_TRANSPORT.md) explains the model-stage RPC path over paired QUIC identities. The installed 32B demonstration uses one physical computer and retains the private trust boundary.
+The [contributor guide](implementation/PORTABLE_CONTRIBUTORS.md) explains independently supervised worker processes, participant-only credentials, signed readiness, pinned engines and standalone packaging. [Version 0.11](implementation/CONTRIBUTOR_PROCESS_CONTAINMENT.md) adds Windows crash containment; the [v0.10.1 correction](implementation/CONTRIBUTOR_STATUS_RECOVERY.md) covers status-file recovery. The [v0.9 transport guide](implementation/GUARDED_RPC_TRANSPORT.md) explains the model-stage RPC path over paired QUIC identities. The installed 32B demonstration uses one physical computer and retains the private trust boundary.
 
 | Reader | Start here | Continue with |
 |---|---|---|

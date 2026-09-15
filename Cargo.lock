@@ -2685,6 +2685,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "network-ai-contributor-guardian"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "network-ai-gateway"
 version = "0.4.0"
 dependencies = [

@@ -39,6 +39,10 @@
     "rpc": {
       "path": "C:/NetworkAI/bin/network-ai-rpc-link.exe",
       "sha256": "REPLACE_WITH_VERIFIED_RPC_BINARY_SHA256"
+    },
+    "guardian": {
+      "path": "C:/NetworkAI/bin/network-ai-contributor-guardian.exe",
+      "sha256": "REPLACE_WITH_VERIFIED_GUARDIAN_BINARY_SHA256"
     }
   },
   "threads": 8,

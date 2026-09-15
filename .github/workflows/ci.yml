@@ -38,6 +38,23 @@ jobs:
       - run: cargo +1.93.1 test --locked
       - run: cargo +1.93.1 clippy --locked --all-targets -- -D warnings
 
+  windows-contributor:
+    name: Windows contributor containment
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.13.0'
+      - run: npm install --global pnpm@10.33.0
+      - run: pnpm install --frozen-lockfile
+      - run: rustup toolchain install 1.93.1 --profile minimal --component clippy
+      - run: cargo +1.93.1 build --locked -p network-ai-contributor-guardian
+      - run: cargo +1.93.1 test --locked -p network-ai-contributor-guardian
+      - run: cargo +1.93.1 clippy --locked -p network-ai-contributor-guardian --all-targets -- -D warnings
+      - run: pnpm test:guardian
+
   product:
     name: Private application and PostgreSQL
     runs-on: ubuntu-latest
