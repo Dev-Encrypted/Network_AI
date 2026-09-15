@@ -1,7 +1,7 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 // A separate persistent process owns exactly one service and its descendants.
 import { spawn } from "node:child_process";
-import { readFile, writeFile, open } from "node:fs/promises";
+import { writeFile, open } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
@@ -21,8 +21,13 @@ import {
   processIdentity,
   serviceFiles,
   prepareWindowsQueries,
+  serviceStopRequested,
 } from "./service-process.mjs";
-export async function runService(profilePath, boot) {
+export async function runService(
+  profilePath,
+  boot,
+  { prepareQueries = prepareWindowsQueries } = {},
+) {
   const profile = await readServiceProfile(profilePath);
   if (profile.boot_id !== boot || process.platform !== "win32")
     throw new Error("Service profile boot/platform mismatch");
@@ -47,6 +52,14 @@ export async function runService(profilePath, boot) {
     phase = "STARTING",
     exitCode = 1;
   const publisher = new StatusPublisher(files.status),
+    cancelled = Object.assign(new Error("Service startup was cancelled"), {
+      code: "SERVICE_START_CANCELLED",
+    }),
+    stopRequested = () =>
+      serviceStopRequested(profilePath, boot, identity.profile_sha256),
+    checkStartupStop = async () => {
+      if (await stopRequested()) throw cancelled;
+    },
     publish = () =>
       publisher.publish({
         schema_version: 1,
@@ -80,16 +93,36 @@ export async function runService(profilePath, boot) {
     done.resolve();
   }
   try {
+    await checkStartupStop();
     identity.containment = await startGuardian(profile.guardian, boot);
     await atomicJson(files.identity, identity);
     await publish();
     // OS-query bootstrap also creates a child process. Establish the job
     // before that helper exists, then record the observed runner identity.
-    await prepareWindowsQueries();
-    identity.runner = await processIdentity(process.pid);
+    // A cold query can take up to 20 seconds. Monitor the boot-bound stop while
+    // preparing metadata; exiting the host also removes the helper from its job.
+    const monitoring = new AbortController();
+    const stopped = (async () => {
+      for (;;) {
+        await checkStartupStop();
+        await delay(100, undefined, { signal: monitoring.signal });
+      }
+    })();
+    try {
+      identity.runner = await Promise.race([
+        (async () => {
+          await prepareQueries();
+          return processIdentity(process.pid);
+        })(),
+        stopped,
+      ]);
+    } finally {
+      monitoring.abort();
+    }
     if (!identity.runner)
       throw new Error("Service runner identity unavailable");
     await atomicJson(files.identity, identity);
+    await checkStartupStop();
     child = spawn(profile.program, profile.args, {
       cwd: profile.cwd,
       windowsHide: true,
@@ -120,13 +153,7 @@ export async function runService(profilePath, boot) {
       finished = true;
     });
     while (!finished) {
-      let request;
-      try {
-        request = JSON.parse(await readFile(files.stop, "utf8"));
-      } catch (e) {
-        if (e.code !== "ENOENT") throw e;
-      }
-      if (request?.boot_id === boot) await stop("requested");
+      if (await stopRequested()) await stop("requested");
       if (finished) break;
       await publish();
       await Promise.race([done.promise, delay(500)]);
@@ -134,15 +161,16 @@ export async function runService(profilePath, boot) {
     phase = stopping ? "STOPPED" : "CHILD_EXITED";
     await publish();
   } catch (error) {
-    phase = "FAILED";
-    exitCode = 1;
-    console.error(
-      JSON.stringify({
-        event: "service_host_failed",
-        code: error.code ?? "SERVICE_LIFECYCLE_FAILURE",
-        name: profile.name,
-      }),
-    );
+    phase = error === cancelled ? "STOPPED" : "FAILED";
+    exitCode = error === cancelled ? 0 : 1;
+    if (error !== cancelled)
+      console.error(
+        JSON.stringify({
+          event: "service_host_failed",
+          code: error.code ?? "SERVICE_LIFECYCLE_FAILURE",
+          name: profile.name,
+        }),
+      );
   } finally {
     if (child && child.exitCode === null && child.signalCode === null)
       child.kill();

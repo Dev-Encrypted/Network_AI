@@ -92,7 +92,7 @@ async function api(path, method = "GET", body) {
     headers: {
       Cookie: cookie,
       Origin: c.web_origin,
-      "Content-Type": "application/json",
+      ...(body === undefined ? {} : { "Content-Type": "application/json" }),
     },
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: AbortSignal.timeout(15000),
@@ -609,7 +609,16 @@ try {
   report.error = e.message;
   throw e;
 } finally {
-  if (key) await api(`/keys/${key.id}`, "DELETE").catch(() => {});
+  if (key) {
+    try {
+      assert.equal((await api(`/keys/${key.id}`, "DELETE")).revoked, true);
+      report.cleanup_key_revoked = true;
+    } catch {
+      report.cleanup_key_revoked = false;
+      report.result = "FAIL";
+      process.exitCode = 1;
+    }
+  }
   if (recovery) {
     try {
       await stopDeviceRoute(recipe.id);

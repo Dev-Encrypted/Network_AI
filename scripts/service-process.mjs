@@ -409,11 +409,33 @@ export async function serviceStatus(profilePath) {
     scope: "owned_process_tree_only; application_readiness_is_separate",
   };
 }
-export async function requestServiceStop(profilePath) {
-  const current = await serviceStatus(profilePath);
-  if (!current.live) return false;
+export async function serviceStopRequested(profilePath, boot, profileHash) {
+  let request;
+  try {
+    request = JSON.parse(
+      await readFile(serviceFiles(profilePath).stop, "utf8"),
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+  return (
+    request?.schema_version === 1 &&
+    request.boot_id === boot &&
+    request.profile_sha256 === profileHash
+  );
+}
+export async function requestServiceStop(profilePath, expectedBoot) {
+  const profile = await readServiceProfile(profilePath);
+  if (expectedBoot !== undefined && profile.boot_id !== expectedBoot)
+    throw new Error("Service stop boot does not match the launch intent");
+  // A stop is durable desired state for this immutable boot, not authority to
+  // kill a PID. It must be accepted before the runner can be observed by CIM.
+  // The host checks both bindings against the profile it actually loaded.
   await atomicJson(serviceFiles(profilePath).stop, {
-    boot_id: current.boot_id,
+    schema_version: 1,
+    boot_id: profile.boot_id,
+    profile_sha256: await hashFile(profilePath),
   });
   return true;
 }

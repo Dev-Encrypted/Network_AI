@@ -1,6 +1,6 @@
 # Current advancement and launch gates
 
-Status reflects the preserved F0 evidence and private implementation through v0.13, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). CPU/CUDA contributor budgets, unequal placement, signed readiness, contributor containment and managed Windows service ownership are implemented. Actual root-model failure, process cleanup, refund, sibling preservation and reload were measured on one computer. Independent-host, broader OS/GPU, public-trust and economic gates remain open. A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
+Status reflects the preserved F0 evidence and private implementation through the v0.13.1 source-tooling patch, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). CPU/CUDA contributor budgets, unequal placement, signed readiness, contributor containment, managed Windows service ownership and startup cancellation are implemented. Actual root-model failure, process cleanup, refund, sibling preservation and reload were measured on one computer. The fixed functional campaign accepted 10/16 samples across two routes; it does not pass full functional acceptance. Independent-host, broader model/OS/GPU, public-trust and economic gates remain open. A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
 
 | Gate | Current evidence | Still required |
 |---|---|---|

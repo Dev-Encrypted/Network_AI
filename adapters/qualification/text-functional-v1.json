@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "id": "text-functional-v1",
+  "description": "Original, synthetic functional probes. Not a general model-quality benchmark or a hidden holdout.",
+  "author": "Dev-Encrypted",
+  "license": "Apache-2.0",
+  "cases": [
+    {
+      "id": "integer-arithmetic",
+      "max_tokens": 16,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Compute 17 * 19 - 23. Reply with only the integer result."
+        }
+      ],
+      "expected": { "kind": "text", "value": "300" }
+    },
+    {
+      "id": "structured-extraction",
+      "max_tokens": 64,
+      "messages": [
+        {
+          "role": "user",
+          "content": "A synthetic order contains 3 blue mugs at 7 units each and 2 red cups at 4 units each. Return only a JSON object with exactly these keys: mugs (quantity), cups (quantity), total (total cost). No markdown."
+        }
+      ],
+      "expected": {
+        "kind": "json",
+        "value": { "mugs": 3, "cups": 2, "total": 29 }
+      }
+    },
+    {
+      "id": "conversation-correction",
+      "max_tokens": 24,
+      "messages": [
+        {
+          "role": "user",
+          "content": "For this fictional shipment, remember that the destination is Recife."
+        },
+        { "role": "assistant", "content": "The destination is Recife." },
+        {
+          "role": "user",
+          "content": "Correction: the destination is now Manaus. Reply with only the current destination."
+        }
+      ],
+      "expected": { "kind": "text", "value": "Manaus" }
+    },
+    {
+      "id": "portuguese-classification",
+      "max_tokens": 24,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Classifique o sentimento desta frase como positivo, negativo ou neutro: 'A entrega chegou antes do prazo e o produto funciona perfeitamente.' Responda apenas com a classificação em letras minúsculas."
+        }
+      ],
+      "expected": { "kind": "text", "value": "positivo" }
+    },
+    {
+      "id": "longer-structured-output",
+      "max_tokens": 128,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Return only a JSON array containing every integer from 1 through 32, in ascending order. Include all 32 integers. No markdown or explanation."
+        }
+      ],
+      "expected": {
+        "kind": "json",
+        "value": [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
+        ]
+      }
+    },
+    {
+      "id": "retrieval-start",
+      "max_tokens": 24,
+      "retrieval": { "rows": 36, "target": 0 }
+    },
+    {
+      "id": "retrieval-middle",
+      "max_tokens": 24,
+      "retrieval": { "rows": 36, "target": 18 }
+    },
+    {
+      "id": "retrieval-end",
+      "max_tokens": 24,
+      "retrieval": { "rows": 36, "target": 35 }
+    }
+  ]
+}

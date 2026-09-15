@@ -69,6 +69,14 @@ Version 0.13 adds no database migration, grant, model download, route identity o
 
 ## Stop and recover
 
+The source-tooling patch in **0.13.1** also handles a stop that arrives while a service is starting. The stop file binds the immutable boot identifier and loaded profile hash. The command records it before requiring a CIM-observed runner, including when the registry still has `pid: null`. The launcher checks the pending stop before spawning a host. The host checks before creating its guardian, watches during metadata initialization and checks again before starting the actual service child.
+
+An accepted stop means the desired state was saved; process disappearance is a separate observation. A stop that races past the final pre-spawn check follows the normal running-service shutdown path. The metadata-stage watcher polls at 100 ms, but that interval is not an operating-system latency guarantee. Once the job exists, host exit also removes its query helper. Old boot directories retain their cancellation fence, and an old stop cannot cancel a later boot. This is cooperative local command coordination, not protection against a hostile process with the same OS privileges.
+
+Three additional real Windows fixtures cover a stop before identity creation, a deterministic pause during metadata preparation with an actual contained helper, and cancellation of a launch reservation followed by an independent new boot. The metadata fixture injects a startup barrier; it does not simulate measured CIM performance. The full 17-case Windows contributor/service suite passed locally. A separate check requires a mismatched profile hash to leave the current service running. [Patch evidence](validation-v0.13.1.json).
+
+Existing hosts keep the code loaded when they started. Drain commitments and restart managed services to apply the patch to those hosts. This patch changes source scripts only: the native guardian and transport pins, the v0.12 contributor archive and the v0.13 application packages are retained.
+
 `pnpm lab:stop` addresses only tracked owned services. Its stop request names the current boot. Contributors receive their existing boot-bound graceful-stop request; model launchers receive their private shutdown file. The host waits up to ten seconds for a configured graceful stop, then terminates the child and exits. Closing the job also cleans up remaining normal descendants. Other service types terminate their owned child directly. This is bounded cleanup, not a promise that every engine flushes state successfully.
 
 There is no automatic process respawn. Inspect the affected session, billing state, receipts and resource claims before an explicit restart. Existing coordinator epochs, receipt reconciliation and contract rules remain responsible for accounting; the operating-system job does not settle credit balances.

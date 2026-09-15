@@ -936,9 +936,13 @@ async function stopNames(names) {
   const processes = await readProcesses();
   for (const name of names) {
     const entry = processes[name];
+    // A durable launch reservation may still have pid:null. Queue its stop
+    // before probing ownership or deleting the reservation, so the originating
+    // launcher cannot start work after an apparently successful lab stop.
+    if (entry?.service)
+      await requestServiceStop(entry.service.profile, entry.service.boot_id);
     if (await owned(entry)) {
       if (entry.service) {
-        await requestServiceStop(entry.service.profile);
         for (let i = 0; i < 40 && (await owned(entry)); i++) await delay(250);
         if (await owned(entry))
           throw new Error(

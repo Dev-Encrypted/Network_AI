@@ -1,6 +1,6 @@
 {
   "name": "network-ai",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -47,7 +47,9 @@
     "test:guardian": "node --test tests/guardian/*.test.mjs",
     "test:containment": "node scripts/rpc-route-acceptance.mjs --contributors --containment --fault",
     "lab:device-route": "node scripts/device-route.mjs",
-    "test:devices": "node scripts/device-route-acceptance.mjs"
+    "test:devices": "node scripts/device-route-acceptance.mjs",
+    "model:qualify": "node scripts/model-qualification.mjs",
+    "model:review": "node scripts/model-qualification-review.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

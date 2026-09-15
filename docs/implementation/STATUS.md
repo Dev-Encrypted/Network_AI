@@ -1,5 +1,17 @@
 # Private-preview implementation and validation status
 
+## Version 0.13.1 startup cancellation and functional qualification
+
+The source-tooling patch accepts boot/profile-bound stops before an observed runner exists, monitors cancellation during metadata initialization and prevents a cancelled reservation from starting the service child. It preserves the next boot and unrelated services. Seventeen real Windows contributor/service fixtures and 41 Node unit/socket cases passed locally. The application packages remain v0.13.0 and the contributor source archive remains v0.12.0; no native binary, model profile or migration changed. Existing service hosts load the patch on their next start. [Lifecycle details](SERVICE_SUPERVISION.md), [patch validation](validation-v0.13.1.json).
+
+The fixed eight-case functional corpus ran once through each of the existing CPU and CPU/CUDA 32B routes. **Five cases passed per route: 10/16 samples.** All 16 sessions completed, settled, supplied a root receipt plus two stage receipts and released their physical claims. The routes returned identical response bytes for all eight cases, including their errors. Arithmetic returned the wrong integer; conversation correction exhausted its 24-token allowance; the longer array included prohibited Markdown fences. This campaign fails its full functional acceptance criterion. It does not identify whether the underlying answer behavior comes from the model, its prompt/template processing or another common execution component.
+
+The largest observed input was 526 engine-reported tokens (1,141 input bytes), and the largest output was 96 tokens. Request wall time reached 48,671 ms; it includes gateway work, inference and receipts on this shared computer. The initial evaluator omitted the separately stored root receipt, and an intermediate review read its node identity from the wrong envelope. Both errors are preserved; corrected read-only reassessment leaves every original answer, allowance and semantic score unchanged. [Procedure and selected evidence](MODEL_QUALIFICATION.md).
+
+The campaign also exposed a bodyless-DELETE header error that prevented temporary-key revocation. The exact campaign key was revoked and checked in PostgreSQL. The new runner and four affected older acceptance commands now send JSON headers only with a body and report failed cleanup as failure. A separate two-request smoke checked the corrected evaluator and automatic revocation; those requests are excluded from the original functional denominator. The original failed-cleanup report remains preserved. Other historical temporary keys were not revoked by this patch.
+
+These results broaden the local evidence and expose the next model-qualification work. They do not close full-context, broader quality, independent-host, public-trust, economic or commercial gates. The preceding versioned campaigns remain historical records below.
+
 ## Version 0.13 managed service supervision
 
 Windows service ownership now covers the coordinator, gateway, interface, node agents, private links and root-model launcher. Each persistent service host establishes a pinned kill-on-close job before starting its child. Durable boot identities and a global path-bound registry mutex prevent duplicate launch and lost registry updates after an interrupted command. A read-only status viewer does not terminate healthy work. [Installation, ownership and recovery](SERVICE_SUPERVISION.md).

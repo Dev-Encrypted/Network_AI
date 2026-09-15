@@ -1,0 +1,66 @@
+{
+  "version": "0.13.1-private-qualification-preview",
+  "scope": "Source-tooling patch on the existing private Windows application; models evaluated on this computer only",
+  "local_automated": {
+    "node_unit_and_socket": 41,
+    "windows_contributor_and_service": 17,
+    "distinct_cases": 58,
+    "new_node_cases": 5,
+    "new_windows_cases": 3,
+    "failures": 0,
+    "skipped": 0
+  },
+  "local_commands": [
+    "pnpm test:unit",
+    "pnpm test:guardian",
+    "pnpm model:qualify --model qwen3-32b-route-private --model qwen3-32b-mixed-private",
+    "pnpm model:review --directory PRIVATE_CAMPAIGN_DIRECTORY"
+  ],
+  "model_campaign": {
+    "report": "evidence/functional-32b-v0.13.1.json",
+    "scheduled": 16,
+    "accepted": 10,
+    "functional_result": "FAIL",
+    "completed_settled": 16,
+    "complete_receipt_sets": 16,
+    "retained_claims": 0,
+    "new_grants": 0,
+    "postfix_smoke_requests": 2,
+    "postfix_smoke_result": "PASS",
+    "postfix_key_revoked_in_database": true
+  },
+  "startup_cancellation": {
+    "queued_before_identity": true,
+    "monitored_during_metadata_preparation": true,
+    "metadata_fixture_uses_injected_barrier": true,
+    "actual_host_guardian_and_helper": true,
+    "cancelled_reservation_prevents_child": true,
+    "next_boot_unaffected_by_old_stop": true,
+    "mismatched_profile_hash_ignored": true,
+    "siblings_preserved": true
+  },
+  "cleanup_regression": {
+    "legacy_bodyless_delete_with_json_header_http": 400,
+    "corrected_bodyless_delete_http": 200,
+    "original_campaign_key_revoked_confirmed": true,
+    "affected_older_acceptance_helpers_corrected": 4,
+    "cleanup_failure_can_no_longer_report_pass": true,
+    "preexisting_other_temporary_keys_not_revoked_by_this_patch": true
+  },
+  "package_versions": {
+    "source_checkout": "0.13.1",
+    "application": "0.13.0",
+    "contributor_source_archive": "0.12.0"
+  },
+  "unchanged": {
+    "native_guardian_and_transport_pins": true,
+    "models_and_execution_profiles": true,
+    "applied_migrations_001_through_010": true,
+    "original_F0_sources_and_evidence": true
+  },
+  "previous_validation": "validation-v0.13.json",
+  "previous_suite_not_relabelled_as_fresh": true,
+  "github_checks": "Exact-commit check results are published with the release; historical v0.13 evidence is retained",
+  "public_operation_approved": false,
+  "full_network_complete": false
+}

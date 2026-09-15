@@ -17,6 +17,7 @@
 - [Windows contributor crash containment and v0.11 upgrade](CONTRIBUTOR_PROCESS_CONTAINMENT.md)
 - [CPU/CUDA selection, memory budgets, unequal placement and managed recipes](HETEROGENEOUS_CONTRIBUTORS.md)
 - [Windows service ownership, concurrent launch and root-model recovery](SERVICE_SUPERVISION.md)
+- [Functional model qualification, streamed timing and preserved result review](MODEL_QUALIFICATION.md)
 - [Funded availability and temporary quotas](AVAILABILITY.md)
 - [Verified model artifacts and the trusted CPU cluster adapter](MODEL_ARTIFACTS.md)
 - [Complete routes, stage agents, consent and participant settlement](COMPLETE_ROUTES.md)

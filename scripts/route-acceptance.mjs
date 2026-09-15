@@ -106,7 +106,7 @@ async function api(path, method = "GET", body) {
     headers: {
       Cookie: cookie,
       Origin: c.web_origin,
-      "Content-Type": "application/json",
+      ...(body === undefined ? {} : { "Content-Type": "application/json" }),
     },
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: AbortSignal.timeout(10000),
@@ -473,17 +473,22 @@ try {
     await readFile(join(engineDirectory, "status.json"), "utf8"),
   );
   delete report.engine.pids;
-  await writeFile(
-    join(directory, "report.json"),
-    JSON.stringify(report, null, 2) + "\n",
-    { mode: 0o600 },
-  );
-  console.log(
-    `Private route evidence saved: ${join(directory, "report.json")}`,
-  );
+  report.result = "PASS";
+} catch (error) {
+  report.result = "FAIL";
+  throw error;
 } finally {
   stopping = true;
-  if (key) await api(`/keys/${key.id}`, "DELETE").catch(() => {});
+  if (key) {
+    try {
+      assert.equal((await api(`/keys/${key.id}`, "DELETE")).revoked, true);
+      report.cleanup_key_revoked = true;
+    } catch {
+      report.cleanup_key_revoked = false;
+      report.result = "FAIL";
+      process.exitCode = 1;
+    }
+  }
   if (route)
     await api(`/admin/routes/${route.id}/qualify`, "POST", {
       state: "REVOKED",
@@ -511,4 +516,12 @@ try {
     if (child.exitCode === null && !child.killed) child.kill();
   for (const log of logs) log.end();
   if (cookie) await api("/auth/logout", "POST", {}).catch(() => {});
+  await writeFile(
+    join(directory, "report.json"),
+    JSON.stringify(report, null, 2) + "\n",
+    { mode: 0o600, flush: true },
+  );
+  console.log(
+    `Private route evidence saved: ${join(directory, "report.json")}`,
+  );
 }

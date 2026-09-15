@@ -16,6 +16,7 @@ import {
   withProcessLock,
   discoverServiceRunner,
   prepareWindowsQueries,
+  serviceStopRequested,
 } from "./service-process.mjs";
 const json = async (file) => JSON.parse(await readFile(file, "utf8"));
 export async function ensureServiceGuardian(root, runtime) {
@@ -187,6 +188,15 @@ export async function launchService(
   });
   if (reserved.reused) return reserved.entry;
   const entry = reserved.entry;
+  await hooks.reserved?.(entry);
+  if (
+    await serviceStopRequested(
+      entry.service.profile,
+      entry.service.boot_id,
+      await hashFile(entry.service.profile),
+    )
+  )
+    return entry;
   const out = await open(join(runtime, `${name}.out.log`), "a"),
     err = await open(join(runtime, `${name}.err.log`), "a");
   try {
@@ -214,9 +224,18 @@ export async function launchService(
     child.unref();
     entry.pid = child.pid;
     await hooks.spawned?.(entry); // Exercises the durable-intent crash boundary.
-    await updateRegistry(root, runtime, (records) => {
-      if (records[name]?.service?.boot_id !== entry.service.boot_id)
+    await updateRegistry(root, runtime, async (records) => {
+      if (records[name]?.service?.boot_id !== entry.service.boot_id) {
+        if (
+          await serviceStopRequested(
+            entry.service.profile,
+            entry.service.boot_id,
+            await hashFile(entry.service.profile),
+          )
+        )
+          return; // The stop retained its fence while removing this reservation.
         throw new Error("Service launch intent changed");
+      }
       records[name] = entry;
     });
     return entry;

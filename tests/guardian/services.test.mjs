@@ -103,7 +103,7 @@ async function fixture(t) {
     assert.equal(status.containment.parent_pid, status.pid);
     return { entry, tree, status, output };
   }
-  return { runtime, launch };
+  return { runtime, launch, entries };
 }
 for (const fault of ["host", "guardian", "child_exit"]) {
   test(
@@ -161,9 +161,169 @@ test(
     await delay(750);
     assert.equal(await serviceOwned(a.entry), true);
     assert.equal(await reachable(a.tree.port), true);
+    await writeFile(
+      serviceFiles(a.entry.service.profile).stop,
+      JSON.stringify({
+        schema_version: 1,
+        boot_id: a.entry.service.boot_id,
+        profile_sha256: "0".repeat(64),
+      }),
+    );
+    await delay(750);
+    assert.equal(await reachable(a.tree.port), true);
+    await assert.rejects(
+      requestServiceStop(a.entry.service.profile, randomUUID()),
+      /does not match/,
+    );
     await requestServiceStop(a.entry.service.profile);
     await until(async () => !(await serviceOwned(a.entry)));
     await until(async () => !(await reachable(a.tree.descendant.port)));
+  },
+);
+
+for (const moment of ["before_claim", "metadata_pending"]) {
+  test(
+    `a stop queued ${moment} prevents the service child`,
+    options,
+    async (t) => {
+      const f = await fixture(t),
+        sibling = await f.launch("sibling"),
+        guardian = await ensureServiceGuardian(root, f.runtime),
+        boot = randomUUID(),
+        directory = join(f.runtime, "cancelled", boot),
+        profile = join(directory, "profile.json"),
+        output = join(directory, "forbidden-child.json"),
+        marker = join(directory, "metadata-helper.json");
+      await mkdir(directory, { recursive: true });
+      await writeFile(
+        profile,
+        JSON.stringify({
+          schema_version: 1,
+          name: "cancelled",
+          boot_id: boot,
+          program: process.execPath,
+          args: [
+            join(root, "tests/guardian/fixtures/service-tree.mjs"),
+            output,
+            "tree",
+          ],
+          cwd: root,
+          guardian,
+          environment: {},
+          shutdown_file: null,
+          worker_config: null,
+          shutdown_timeout_ms: 1000,
+        }),
+      );
+      if (moment === "before_claim") {
+        assert.equal(await requestServiceStop(profile, boot), true);
+        await assert.rejects(readFile(serviceFiles(profile).identity), {
+          code: "ENOENT",
+        });
+      }
+      const host = spawn(
+        process.execPath,
+        moment === "metadata_pending"
+          ? [
+              join(root, "tests/guardian/fixtures/starting-service.mjs"),
+              profile,
+              boot,
+              marker,
+            ]
+          : [
+              join(root, "scripts/service-host.mjs"),
+              "--profile",
+              profile,
+              "--boot-id",
+              boot,
+            ],
+        { windowsHide: true, stdio: "ignore" },
+      );
+      const exited = new Promise((resolve, reject) => {
+        host.once("exit", resolve);
+        host.once("error", reject);
+      });
+      t.after(() => {
+        if (host.exitCode === null && host.signalCode === null) host.kill();
+      });
+      let helper;
+      if (moment === "metadata_pending") {
+        helper = await until(() => json(marker).catch(() => null));
+        const pending = await json(serviceFiles(profile).identity);
+        assert.equal(pending.runner, null);
+        assert.equal(pending.child, null);
+        assert.equal(pending.containment.kind, "windows_job");
+        assert.equal(await requestServiceStop(profile, boot), true);
+        assert.equal(await requestServiceStop(profile, boot), true);
+      }
+      assert.equal(await exited, 0);
+      const identity = await json(serviceFiles(profile).identity);
+      const status = await json(serviceFiles(profile).status);
+      assert.equal(status.phase, "STOPPED");
+      assert.equal(identity.child, null);
+      await assert.rejects(readFile(output), { code: "ENOENT" });
+      if (helper) {
+        await until(async () => !(await processIdentity(helper.helper_pid)));
+        await until(
+          async () =>
+            !(await processIdentity(identity.containment.guardian_pid)),
+        );
+      } else {
+        assert.equal(identity.containment, null);
+      }
+      assert.equal(
+        (await serviceStatus(sibling.entry.service.profile)).pid,
+        sibling.status.pid,
+      );
+      assert.equal(await reachable(sibling.tree.port), true);
+    },
+  );
+}
+
+test(
+  "a stopped launch reservation cannot create work and the next boot is independent",
+  options,
+  async (t) => {
+    const f = await fixture(t),
+      name = "reservation",
+      output = join(f.runtime, name + ".tree.json");
+    const cancelled = await launchService(
+      root,
+      f.runtime,
+      name,
+      process.execPath,
+      [join(root, "tests/guardian/fixtures/service-tree.mjs"), output, "tree"],
+      0,
+      {},
+      {},
+      {
+        reserved: async (entry) => {
+          assert.equal(entry.pid, null);
+          await requestServiceStop(
+            entry.service.profile,
+            entry.service.boot_id,
+          );
+          await updateRegistry(root, f.runtime, (records) => {
+            assert.equal(records[name].service.boot_id, entry.service.boot_id);
+            delete records[name];
+          });
+        },
+      },
+    );
+    assert.equal(cancelled.pid, null);
+    await assert.rejects(readFile(output), { code: "ENOENT" });
+    const replacement = await f.launch(name);
+    assert.notEqual(
+      replacement.entry.service.boot_id,
+      cancelled.service.boot_id,
+    );
+    await requestServiceStop(
+      cancelled.service.profile,
+      cancelled.service.boot_id,
+    );
+    await delay(750);
+    assert.equal(await serviceOwned(replacement.entry), true);
+    assert.equal(await reachable(replacement.tree.port), true);
   },
 );
 test(
