@@ -404,19 +404,43 @@ async function readProcesses() {
     ? JSON.parse(await readFile(processesPath, "utf8"))
     : {};
 }
+async function rpcStatusReady(entry) {
+  try {
+    const s = JSON.parse(await readFile(entry.options.rpcStatusFile, "utf8"));
+    return (
+      s.pid === entry.pid &&
+      s.transport === "iroh-direct-quic-guarded-rpc" &&
+      Math.abs(Date.now() - s.observed_at_unix_ms) < 5000
+    );
+  } catch {
+    return false;
+  }
+}
+async function waitLaunched(entry, health) {
+  if (entry.options?.rpcStatusFile) {
+    for (let i = 0; i < 30; i++) {
+      if (await rpcStatusReady(entry)) return;
+      await delay(500);
+    }
+    throw new Error(
+      "RPC transport did not report a fresh status for its tracked process",
+    );
+  }
+  await waitHealth(
+    health,
+    entry.options?.healthSeconds ?? 45,
+    entry.options?.healthKeyFile,
+  );
+}
 export async function launch(name, program, args, port, health, options = {}) {
   const c = await config();
   const processes = await readProcesses();
   if (await owned(processes[name])) {
-    await waitHealth(
-      health,
-      options.healthSeconds ?? 45,
-      options.healthKeyFile,
-    );
+    await waitLaunched(processes[name], health);
     console.log(`${name}: já está em execução`);
     return;
   }
-  if (await listening(port)) {
+  if (!options.udp && (await listening(port))) {
     throw new Error(`Port ${port} is already occupied by an untracked process`);
   }
   if (options.shutdownFile) {
@@ -458,7 +482,7 @@ export async function launch(name, program, args, port, health, options = {}) {
     options,
   };
   await privateJson(processesPath, processes);
-  await waitHealth(health, options.healthSeconds ?? 45, options.healthKeyFile);
+  await waitLaunched(processes[name], health);
   console.log(`${name}: pronto em 127.0.0.1:${port}`);
 }
 async function owned(entry) {
@@ -502,6 +526,8 @@ export async function start(options = {}) {
       "network-ai-node",
       "-p",
       "network-ai-gateway",
+      "-p",
+      "network-ai-link",
       "--locked",
     ]);
   }
@@ -580,6 +606,10 @@ export async function stopCpu() {
     "route_root",
     "cpu_node",
     "route_cluster",
+    "route_rpc_root_1",
+    "route_rpc_root_2",
+    "route_rpc_stage_1",
+    "route_rpc_stage_2",
     "route_stage_1",
     "route_stage_2",
     "cpu_cluster",
@@ -593,11 +623,20 @@ export async function stop() {
     "cpu_node",
     "node",
     "route_cluster",
+    "route_rpc_root_1",
+    "route_rpc_root_2",
+    "route_rpc_stage_1",
+    "route_rpc_stage_2",
     "route_stage_1",
     "route_stage_2",
     "cpu_cluster",
     "control",
   ]);
+}
+// Bounded fault injection for the installed private route; ownership is checked by stopNames.
+export async function stopRouteRpcStage(index) {
+  if (![1, 2].includes(index)) throw new Error("Choose installed stage 1 or 2");
+  await stopNames([`route_rpc_stage_${index}`]);
 }
 async function stopNames(names) {
   const processes = await readProcesses();
@@ -657,6 +696,9 @@ export async function startCpuCluster(cpu) {
 }
 export async function startCpuRoute(profile) {
   const directory = join(runtime, "cpu-route");
+  const useQuic = profile.rpc_transport === "iroh-direct-quic-guarded-rpc";
+  if (profile.rpc_transport && !useQuic)
+    throw new Error("Unknown route RPC transport");
   for (let i = 1; i <= 2; i++)
     await launch(
       `route_stage_${i}`,
@@ -671,10 +713,51 @@ export async function startCpuRoute(profile) {
         String(43839 + i),
         "--startup-compute-commands",
         "4",
+        ...(useQuic
+          ? [
+              "--route-binding",
+              join(directory, "rpc-link", `stage-${i}`, "binding.json"),
+            ]
+          : []),
       ],
       43124 + i,
       `http://127.0.0.1:${43124 + i}/health`,
     );
+  if (useQuic) {
+    const binary = join(
+      root,
+      `target/debug/network-ai-rpc-link${process.platform === "win32" ? ".exe" : ""}`,
+    );
+    for (let i = 1; i <= 2; i++) {
+      for (const role of ["stage", "root"]) {
+        const folder = join(directory, "rpc-link", `${role}-${i}`);
+        const file = join(folder, "rpc.json");
+        const rpc = JSON.parse(await readFile(file, "utf8"));
+        if (
+          rpc.role !== role ||
+          rpc.binding.route_id !== profile.route_id ||
+          rpc.binding.stage_node_id !== profile.node_ids[i] ||
+          rpc.local_port !== (role === "root" ? 43843 + i : 43841 + i)
+        )
+          throw new Error(
+            "Managed RPC configuration does not match this installed route",
+          );
+        await launch(
+          `route_rpc_${role}_${i}`,
+          binary,
+          ["--config", file],
+          role === "root"
+            ? rpc.local_port
+            : Number(rpc.bind_addr.split(":").at(-1)),
+          null,
+          {
+            rpcStatusFile: join(folder, "rpc-status.json"),
+            udp: role === "stage",
+          },
+        );
+      }
+    }
+  }
   const engine = join(directory, "engine");
   await launch(
     "route_cluster",
@@ -696,7 +779,8 @@ export async function startCpuRoute(profile) {
       "--rpc-port",
       "43840",
       "--rpc-forward-port",
-      "43842",
+      useQuic ? "43844" : "43842",
+      ...(useQuic ? ["--rpc-transport", "iroh-direct-quic-guarded-rpc"] : []),
       "--threads",
       "8",
     ],
@@ -746,8 +830,16 @@ export async function status() {
   for (const [name, entry] of Object.entries(processes))
     result[name] = {
       running: await owned(entry),
-      listening: await listening(entry.port),
+      listening: entry.options?.rpcStatusFile
+        ? await rpcStatusReady(entry)
+        : await listening(entry.port),
       port: entry.port,
+      ...(entry.options?.rpcStatusFile
+        ? {
+            transport: "iroh-direct-quic-guarded-rpc",
+            status_basis: "tracked_pid_and_fresh_transport_status",
+          }
+        : {}),
     };
   console.log(JSON.stringify(result, null, 2));
 }

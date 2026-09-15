@@ -2,6 +2,8 @@
 
 Version 0.4 adds an executable route containing one root agent and one or more stage agents. A real Qwen3-32B Q4_K_M model was run through two CPU workers with separately signed stage identities. All agents and workers were on **one physical computer, under one operator account**. This closes a local protocol and accounting gap; it does not qualify independent providers, WAN transport, or a public marketplace.
 
+Version 0.9 adds an optional [authenticated RPC data path](GUARDED_RPC_TRANSPORT.md) for this installed route. Its paired links carry actual weight and compute traffic, bind the node/route/manifest before opening the guard, and preserve existing claims, receipts and refunds. The observed deployment still uses one computer.
+
 ## What a route represents
 
 A route is a complete offer for one immutable model profile. The root runs the model server's inference interface. Each stage guards a configured local llama.cpp RPC worker. Registering a stage alone does not offer an executable model. The scheduler only admits a route when its root, every stage, every provider and the exact model are eligible.

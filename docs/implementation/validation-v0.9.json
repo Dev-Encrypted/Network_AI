@@ -1,0 +1,73 @@
+{
+  "version": "0.9.0-private-rpc-preview",
+  "validation_local_dates": [
+    "2026-09-15"
+  ],
+  "timezone": "America/Sao_Paulo",
+  "scope": "Private Windows installation, one physical computer/account/CPU domain. Real Qwen3-32B route over two pinned Iroh QUIC pairs; no independent-host or WAN qualification.",
+  "tests": {
+    "integration_and_integer_accounting": 91,
+    "artifact_acquisition": 3,
+    "rpc_socket_guard": 4,
+    "new_rpc_configuration_and_stage_binding": 2,
+    "rust_runtime": 4,
+    "rust_http_private_link": 3,
+    "new_rust_rpc_transport": 5,
+    "rust_f0": 2,
+    "python_f0": 21,
+    "browser": 10,
+    "total_automated_distinct": 145
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_economic_sources_unchanged": true,
+    "applied_migrations_001_through_009_bytes_preserved": true
+  },
+  "live_campaign": {
+    "report": "evidence/qwen3-32b-rpc-quic.json",
+    "completed_requests": 4,
+    "receipts_per_completed_request": 3,
+    "prompt_tokens_per_completed_request": 18,
+    "completion_tokens_per_completed_request": 6,
+    "charge_microtu_per_completed_request": "36000",
+    "fault_state": "FAILED",
+    "fault_billing_state": "REFUNDED",
+    "fault_charge_microtu": "0",
+    "fault_physical_claims_remaining": 0,
+    "fault_detection_ms": 2098,
+    "client_cancellation_injected": false,
+    "whole_route_restart_and_actual_inference_recovered": true,
+    "new_node_or_operator_identities": false,
+    "new_lab_grants": 0,
+    "ledger_projection_mismatches": 0
+  },
+  "browser": {
+    "distinct_passed": 10,
+    "installed_32b_transport": "iroh-direct-quic-guarded-rpc",
+    "cooperative_renewal_and_expansion_regressions_passed": true,
+    "ci_scope": "CI runs three model-independent browser journeys. The seven other journeys depend on local model installation or private working state."
+  },
+  "restore": {
+    "report": "evidence/rpc-quic-backup-restore.json",
+    "source_scope": "PRIVATE_WORKING_DATABASE",
+    "journal_entries": 364,
+    "active_complete_route_windows": 0,
+    "all_checked_projection_mismatches": 0,
+    "runtime_permissions_preserved": true
+  },
+  "boundaries": [
+    "one-host managed CPU installer; cross-host worker supervision/readiness and placement remain",
+    "untrusted RPC engine isolation and independent numerical/work verification",
+    "heterogeneous GPU, distinct host, WAN/NAT/relay and sustained performance qualification",
+    "real 24-hour recovery, independently observed costs and successful mature economic study",
+    "approved issuance/exposure, evidence correction policy and distributed continuity",
+    "cash commerce, payouts/disputes and independently funded public pilots"
+  ],
+  "validation_notes": [
+    "Windows blocked the first full Rust command while the managed RPC executable was in use. The owned CPU group was stopped; the complete Rust suite then passed, and the installation was restarted before all browser journeys.",
+    "F0 research artifacts and previously published evidence remain unchanged."
+  ]
+}

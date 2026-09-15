@@ -1,0 +1,314 @@
+{
+  "schema_version": 1,
+  "evidence_type": "REAL_INSTALLED_32B_GUARDED_RPC_OVER_QUIC",
+  "observed_at": "2026-09-15T03:36:45.680Z",
+  "physical_hosts": 1,
+  "physical_resource_domains": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "agent_identities": 3,
+  "compute": "CPU",
+  "unit": "LAB_TU",
+  "transport": "iroh-direct-quic-guarded-rpc",
+  "relay_enabled": false,
+  "cash_payments": false,
+  "database_observations_fabricated": false,
+  "public_operation_approved": false,
+  "sustainable_economics_established": false,
+  "sessions": [
+    {
+      "label": "quic_complete_route",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "elapsed_ms": 3890,
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000",
+      "provider_paid_microtu": "28800",
+      "platform_fee_microtu": "7200",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        }
+      ],
+      "transfer_deltas": [
+        {
+          "root": {
+            "root_to_stage_bytes": 137466,
+            "stage_to_root_bytes": 122928
+          },
+          "stage": {
+            "root_to_stage_bytes": 137466,
+            "stage_to_root_bytes": 122928
+          }
+        },
+        {
+          "root": {
+            "root_to_stage_bytes": 139368,
+            "stage_to_root_bytes": 3646512
+          },
+          "stage": {
+            "root_to_stage_bytes": 139368,
+            "stage_to_root_bytes": 3646512
+          }
+        }
+      ],
+      "started_at": "2026-09-15T03:36:45.850Z",
+      "finished_at": "2026-09-15T03:36:48.370Z"
+    },
+    {
+      "label": "concurrent_a",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "elapsed_ms": 3981,
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000",
+      "provider_paid_microtu": "28800",
+      "platform_fee_microtu": "7200",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        }
+      ],
+      "transfer_deltas": [
+        {
+          "root": {
+            "root_to_stage_bytes": 160377,
+            "stage_to_root_bytes": 122928
+          },
+          "stage": {
+            "root_to_stage_bytes": 183288,
+            "stage_to_root_bytes": 163904
+          }
+        },
+        {
+          "root": {
+            "root_to_stage_bytes": 162596,
+            "stage_to_root_bytes": 3646512
+          },
+          "stage": {
+            "root_to_stage_bytes": 185824,
+            "stage_to_root_bytes": 4254264
+          }
+        }
+      ],
+      "started_at": "2026-09-15T03:36:49.774Z",
+      "finished_at": "2026-09-15T03:36:52.353Z"
+    },
+    {
+      "label": "concurrent_b",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "elapsed_ms": 6862,
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000",
+      "provider_paid_microtu": "28800",
+      "platform_fee_microtu": "7200",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        }
+      ],
+      "transfer_deltas": [
+        {
+          "root": {
+            "root_to_stage_bytes": 274932,
+            "stage_to_root_bytes": 245856
+          },
+          "stage": {
+            "root_to_stage_bytes": 274932,
+            "stage_to_root_bytes": 245856
+          }
+        },
+        {
+          "root": {
+            "root_to_stage_bytes": 278736,
+            "stage_to_root_bytes": 7293024
+          },
+          "stage": {
+            "root_to_stage_bytes": 278736,
+            "stage_to_root_bytes": 7293024
+          }
+        }
+      ],
+      "started_at": "2026-09-15T03:36:52.681Z",
+      "finished_at": "2026-09-15T03:36:55.232Z"
+    },
+    {
+      "label": "after_whole_route_restart",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "elapsed_ms": 5531,
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000",
+      "provider_paid_microtu": "28800",
+      "platform_fee_microtu": "7200",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 6,
+          "request_bytes": "959340",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 6,
+          "request_bytes": "906204",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        }
+      ],
+      "transfer_deltas": [
+        {
+          "root": {
+            "root_to_stage_bytes": 1470199,
+            "stage_to_root_bytes": 471168
+          },
+          "stage": {
+            "root_to_stage_bytes": 1470199,
+            "stage_to_root_bytes": 471168
+          }
+        },
+        {
+          "root": {
+            "root_to_stage_bytes": 1418965,
+            "stage_to_root_bytes": 3646592
+          },
+          "stage": {
+            "root_to_stage_bytes": 1418965,
+            "stage_to_root_bytes": 3646592
+          }
+        }
+      ],
+      "started_at": "2026-09-15T03:40:52.069Z",
+      "finished_at": "2026-09-15T03:40:56.213Z"
+    }
+  ],
+  "checks": [
+    "both_rpc_pairs_bound_loaded_and_guarded_on_one_physical_domain",
+    "32b_output_three_receipts_conserved_payout_and_measured_quic_bytes",
+    "concurrent_consumers_serialize_on_the_single_physical_domain",
+    "mid_execution_quic_loss_ends_session_without_charge_or_retained_physical_claim",
+    "same_profile_reload_restores_real_32b_execution_without_new_identities",
+    "existing_credits_only_with_zero_ledger_projection_mismatches"
+  ],
+  "model": {
+    "parameters": "32.8B",
+    "artifact_sha256": "efd971561896866f0e910cce52761ca77b1b138090c7f15fe284676d57d1f689",
+    "revision": "938a7432affaec9157f883a87164e2646ae17555",
+    "manifest_sha256": "83905ac483b2812e77666b571c7fb3c2b159f861c824907e2c794566052bd2eb",
+    "route_sha256": "17a6419a52eacb3bce805fb4c0734de580f58ff11327d0b2f5b6c3e8009bc318"
+  },
+  "engine": {
+    "schema_version": 1,
+    "physical_hosts": 1,
+    "workers": 2,
+    "transport": "iroh-direct-quic-guarded-rpc",
+    "transport_evidence": "operator_configuration; verify independent link counters and session receipts",
+    "host": "127.0.0.1",
+    "port": 43224,
+    "model": "Qwen/Qwen3-32B-GGUF",
+    "revision": "938a7432affaec9157f883a87164e2646ae17555",
+    "artifact_sha256": "efd971561896866f0e910cce52761ca77b1b138090c7f15fe284676d57d1f689",
+    "engine_sha256": "aa2e1f5c67be55f11be26ae58d643a545ca07c6de498f6f870330ac2f4dfec73",
+    "context": 2048,
+    "slots": 1,
+    "threads_per_worker": 8,
+    "cpu_repack": false,
+    "rpc_guarded": true,
+    "ready_ms": 206889
+  },
+  "loaded_transport": [
+    {
+      "root": {
+        "accepted_tunnels": 8,
+        "active_tunnels": 1,
+        "closed_tunnels": 7,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 9616743510,
+        "stage_to_root_bytes": 514457
+      },
+      "stage": {
+        "accepted_tunnels": 8,
+        "active_tunnels": 1,
+        "closed_tunnels": 7,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 9616743510,
+        "stage_to_root_bytes": 514457
+      }
+    },
+    {
+      "root": {
+        "accepted_tunnels": 8,
+        "active_tunnels": 1,
+        "closed_tunnels": 7,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 9706191537,
+        "stage_to_root_bytes": 4256600
+      },
+      "stage": {
+        "accepted_tunnels": 8,
+        "active_tunnels": 1,
+        "closed_tunnels": 7,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 9706191537,
+        "stage_to_root_bytes": 4256600
+      }
+    }
+  ],
+  "fault": {
+    "injected": "terminate_only_tracked_second_stage_quic_link",
+    "state": "FAILED",
+    "billing_state": "REFUNDED",
+    "charged_microtu": "0",
+    "physical_claims_remaining": 0,
+    "detection_ms": 2098,
+    "client_cancel_injected": false
+  },
+  "new_lab_grants": 0,
+  "ledger_projection_mismatches": 0,
+  "result": "PASS",
+  "measurement_notes": [
+    "The four elapsed_ms observations include request, settled-session inspection and a deliberate 1250 ms wait for private transport counter snapshots. They are acceptance durations, not a throughput benchmark.",
+    "Concurrent-call byte deltas can overlap and are not attributed billing meters. Loaded counters are cumulative since process boot and include discovery, weights and earlier accepted work.",
+    "The existing debug Rust build and pinned Windows CPU engine were used. One physical host, one account and one CPU/RAM domain; no GPU takeover, external peer or relay.",
+    "An initial acceptance harness incorrectly searched the stage-receipt join for the root receipt. The corrected full run checks the dedicated root receipt record plus both stage receipts. The initial harness failure and private logs were retained."
+  ]
+}

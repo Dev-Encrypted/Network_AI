@@ -22,6 +22,7 @@ const { values: a } = parseArgs({
       "port",
       "rpc-port",
       "rpc-forward-port",
+      "rpc-transport",
       "threads",
     ].map((k) => [k, { type: "string" }]),
   ),
@@ -52,6 +53,14 @@ if (
   threads > 32
 )
   throw new Error("Invalid cluster bounds");
+if (
+  a["rpc-transport"] &&
+  (a["rpc-transport"] !== "iroh-direct-quic-guarded-rpc" ||
+    !a["rpc-forward-port"])
+)
+  throw new Error(
+    "Invalid declared RPC transport; a guarded forward port is required",
+  );
 const manifest = JSON.parse(await readFile(resolve(a.manifest), "utf8"));
 if (manifest.files.length !== 1 || !manifest.files[0].path.endsWith(".gguf"))
   throw new Error("This adapter requires one complete GGUF");
@@ -234,7 +243,11 @@ try {
         schema_version: 1,
         physical_hosts: 1,
         workers,
-        transport: workers ? "loopback-ggml-rpc" : "local-cpu",
+        transport: workers
+          ? (a["rpc-transport"] ?? "loopback-ggml-rpc")
+          : "local-cpu",
+        transport_evidence:
+          "operator_configuration; verify independent link counters and session receipts",
         host: "127.0.0.1",
         port,
         model: manifest.model_id,

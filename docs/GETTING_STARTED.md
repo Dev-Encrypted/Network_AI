@@ -77,6 +77,8 @@ If a stage goes offline, it stops earning eligible readiness time. The other com
 
 For cooperative funds, **Cooperação → Renovação automática com limites** adds optional continuation. The manager sets maximum windows, separate gross working/reserve limits and expiry. Each provider signs in separately and authorizes its own participation. Revoking that permission stops future windows while accepted windows retain their deadlines. Contributions alone do not enable automatic spending. The [step-by-step renewal guide](implementation/BOUNDED_RENEWALS.md) explains the controls and a real 32B example.
 
+An installed 32B route can also use the [v0.9 authenticated model-stage transport](implementation/GUARDED_RPC_TRANSPORT.md). This is a private operator setting; the chat/API contract and credit unit stay the same. The guide explains activation, status, interruption and recovery.
+
 New v0.8 plans also expose **Expansão conforme a demanda** (Demand-backed expansion). This shows why extra capacity can or cannot start. An administrator records actual private account classifications and operational support; the manager and each provider separately choose the expansion purpose. Working funds must remain above the essential floor, the reserve must be complete, and funded demand must exceed covered free slots. One computer with one account does not establish independent demand by running more agents. Follow the [full expansion walkthrough](implementation/DEMAND_BACKED_EXPANSION.md); the original essential-only plans keep their accepted terms.
 
 | Outcome | Meaning | Next step |

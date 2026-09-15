@@ -1,5 +1,6 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 //! An authenticated, bounded bridge for private node protocols. Not a general proxy.
+pub mod rpc;
 use anyhow::{Context, Result, ensure};
 use axum::{
     Router,

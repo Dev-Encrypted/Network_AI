@@ -6,6 +6,8 @@ The [cooperative fund guide](implementation/COOPERATIVE_FUNDS.md) explains the i
 
 ## Reading paths
 
+The [v0.9 transport guide](implementation/GUARDED_RPC_TRANSPORT.md) explains the actual model-stage RPC path over pinned QUIC, including identities, exact route bindings, setup, bounded resources and recovery. The installed 32B demonstration uses one physical computer and retains the private trust boundary.
+
 | Reader | Start here | Continue with |
 |---|---|---|
 | New to AI infrastructure | [Beginner guide](GETTING_STARTED.md) | [Glossary](GLOSSARY.md), [full article](ARTICLE.md) |

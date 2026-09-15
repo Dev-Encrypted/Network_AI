@@ -33,6 +33,10 @@ Private material lives in `.runtime/private-lab/`, excluded from Git. Windows in
 
 Application listeners and the published database port bind to loopback. Node ports range from 43103 to 43299; choose unused ports and preserve the optional backend's port when enabled. Version 0.3 can connect an invited node through the [private QUIC bridge](PRIVATE_LINK.md) while retaining these local HTTP listeners. Distinct hosts, relays/CGNAT, public admission, adversarial operators and distributed continuity still need qualification. Changing the bind address is not a public deployment procedure.
 
+## Optional authenticated model-stage transport
+
+After installing the measured 32B route, build `network-ai-rpc-link` and run `pnpm lab:route-rpc enable` outside active sessions and accepted readiness windows. This creates two private QUIC pairs and reloads the owned CPU group. Subsequent start/stop commands include those processes. Private status records verify the tracked PID and freshness without probing the model TCP slot. Use `pnpm test:rpc-route --fault` for real inference, interruption/refund and reloaded recovery; `pnpm lab:route-rpc disable` explicitly restores guarded loopback transport. The [full guide](GUARDED_RPC_TRANSPORT.md) explains keys, route bindings, local ports, limits and the remaining cross-host boundary.
+
 ## Use the interface
 
 The current interface is PT-BR. The [beginner guide](../GETTING_STARTED.md) maps navigation labels to English.

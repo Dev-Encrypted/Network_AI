@@ -1,12 +1,12 @@
 # Current advancement and launch gates
 
-Status reflects the preserved F0 evidence and private implementation through v0.8, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
+Status reflects the preserved F0 evidence and private implementation through v0.9, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
 
 | Gate | Current evidence | Still required |
 |---|---|---|
 | FC01: contract coherence | Candidate v6 preserved; private full-route readiness, fund recycling, bounded renewal and demand-backed expansion tested, including rollback and restoration | Approved issuance/exposure contracts, independent evidence correction/verification and distributed lifecycle consistency |
 | FC02: economics and liquidity | Event study completed; fictional parameters rejected; existing-credit circulation and expansion predicates executed privately | New calibration, observed independent costs/behavior, fresh holdout, real recovery, mature cohort acceptance and public economic qualification |
-| FC03: capacity and exchange | Official 32.8B Q4_K_M executed through a root and two guarded signed CPU stages; shared-domain admission, stage failure and readiness draining measured on one computer | Distinct-device and physical-host routes, heterogeneous GPUs, broader quality/context/performance qualification and measured exchange ratios |
+| FC03: capacity and exchange | Official 32.8B Q4_K_M executed through a root and two guarded signed CPU stages; route-bound RPC over QUIC, shared-domain admission, zero-charge link failure, reloaded recovery and readiness draining measured on one computer | Distinct-device and physical-host routes, heterogeneous GPUs, broader quality/context/performance qualification and measured exchange ratios |
 | FC04: optional commerce | Historical adapter reference only | Responsible seller, bounded payments, finality, payouts, disputes and exit |
 | FC05: trust and continuity | Local transport controls, node epochs, receipt outbox and database restore | Independent operators, quorum, adversarial verification, partitions and replacement gateway recovery |
 | FC06: funded pilot and opening | Private application and time-bounded in-kind support declarations available | Independently confirmed operating/closure resources, named responsibilities and actual 7/30-day pilots |

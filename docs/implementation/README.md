@@ -1,4 +1,4 @@
-# Private demand-backed expansion preview v0.8
+# Private guarded RPC transport preview v0.9
 
 **Created and directed by Dev-Encrypted.** This release connects the interface, control service, PostgreSQL, Rust gateway, and Rust node to a real local inference engine. It is an executable private environment. Public decentralized operation and the proposed cooperative economy still require qualification.
 
@@ -11,6 +11,7 @@
 - [Implementation decisions](PRIVATE_PREVIEW.md)
 - [Interface design](DESIGN.md)
 - [Authenticated private node links](PRIVATE_LINK.md)
+- [Guarded model-stage RPC transport, installation and recovery](GUARDED_RPC_TRANSPORT.md)
 - [Funded availability and temporary quotas](AVAILABILITY.md)
 - [Verified model artifacts and the trusted CPU cluster adapter](MODEL_ARTIFACTS.md)
 - [Complete routes, stage agents, consent and participant settlement](COMPLETE_ROUTES.md)

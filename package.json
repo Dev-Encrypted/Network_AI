@@ -1,6 +1,6 @@
 {
   "name": "network-ai",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -36,7 +36,10 @@
     "test:route-availability": "node scripts/route-availability-acceptance.mjs",
     "test:cooperative": "node scripts/cooperative-acceptance.mjs",
     "test:renewal": "node scripts/renewal-acceptance.mjs",
-    "test:expansion": "node scripts/expansion-acceptance.mjs"
+    "test:expansion": "node scripts/expansion-acceptance.mjs",
+    "lab:rpc-config": "node scripts/rpc-config.mjs",
+    "lab:route-rpc": "node scripts/route-rpc-transport.mjs",
+    "test:rpc-route": "node scripts/rpc-route-acceptance.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

@@ -26,6 +26,7 @@ import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { createRequire } from "node:module";
 import { protectDirectory } from "./lab.mjs";
+import { validateRpcBinding, matchesRpcBinding } from "./rpc-binding.mjs";
 const { z } = createRequire(
   new URL("../apps/control-api/package.json", import.meta.url),
 )("zod");
@@ -196,6 +197,13 @@ export async function createStageAgent(raw, options) {
       backend_api_key: z.string().min(1),
     })
     .parse(raw);
+  const routeBinding = options.routeBinding
+    ? validateRpcBinding(options.routeBinding)
+    : null;
+  requireValue(
+    !routeBinding || routeBinding.stage_node_id === c.node_id,
+    "transport_node_binding",
+  );
   const backend = new URL(c.backend_url);
   requireValue(
     backend.origin === c.backend_url &&
@@ -401,6 +409,10 @@ export async function createStageAgent(raw, options) {
         /^[a-f0-9]{64}$/.test(value.route_sha256),
       "capability_scope",
     );
+    requireValue(
+      !routeBinding || matchesRpcBinding(routeBinding, value),
+      "transport_route_binding",
+    );
     return value;
   }
   async function heartbeat() {
@@ -522,6 +534,7 @@ export async function createStageAgent(raw, options) {
               running: active ? 1 : 0,
               startup_compute_commands: startup.completed_commands,
               startup_budget_closed: startupClosed,
+              rpc_route_bound: routeBinding !== null,
             }),
           );
           return;
@@ -734,6 +747,7 @@ if (
       "rpc-listen-port": { type: "string" },
       "rpc-target-port": { type: "string" },
       "startup-compute-commands": { type: "string" },
+      "route-binding": { type: "string" },
     },
   });
   requireValue(
@@ -746,6 +760,9 @@ if (
       rpcListenPort: a["rpc-listen-port"],
       rpcTargetPort: a["rpc-target-port"],
       startupComputeCommands: a["startup-compute-commands"],
+      routeBinding: a["route-binding"]
+        ? JSON.parse(await readFile(resolve(a["route-binding"]), "utf8"))
+        : undefined,
     },
   );
   console.log(
