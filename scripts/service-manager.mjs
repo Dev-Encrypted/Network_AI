@@ -15,10 +15,14 @@ import {
   serviceStatus,
   withProcessLock,
   discoverServiceRunner,
+  prepareWindowsQueries,
 } from "./service-process.mjs";
 const json = async (file) => JSON.parse(await readFile(file, "utf8"));
 export async function ensureServiceGuardian(root, runtime) {
   if (process.platform !== "win32") return null;
+  // Prepare OS metadata queries before acquiring any registry mutex or
+  // reserving a launch. A cold shell is not an ownership observation.
+  await prepareWindowsQueries();
   const directory = join(runtime, "service-supervision"),
     file = join(directory, "guardian.json");
   await mkdir(directory, { recursive: true, mode: 0o700 });

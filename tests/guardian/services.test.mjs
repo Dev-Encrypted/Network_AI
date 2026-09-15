@@ -19,10 +19,12 @@ import {
   serviceFiles,
   requestServiceStop,
   processIdentity,
+  prepareWindowsQueries,
 } from "../../scripts/service-process.mjs";
 const root = resolve("."),
   options = { skip: process.platform !== "win32", timeout: 60000 };
 const json = async (file) => JSON.parse(await readFile(file, "utf8"));
+let bootstrapReported = false;
 async function until(probe, fixtureErrorLog) {
   const end = Date.now() + 20000;
   do {
@@ -52,6 +54,14 @@ function reachable(port) {
   });
 }
 async function fixture(t) {
+  const bootstrap = await prepareWindowsQueries();
+  assert.equal(bootstrap.ready, true);
+  if (!bootstrapReported) {
+    bootstrapReported = true;
+    t.diagnostic(
+      `Windows query initialization: ${bootstrap.duration_ms} ms; identity queries retain a ${bootstrap.identity_query_limit_ms} ms limit`,
+    );
+  }
   // Exercise real process-command ownership with non-ASCII private paths.
   const runtime = join(
     root,

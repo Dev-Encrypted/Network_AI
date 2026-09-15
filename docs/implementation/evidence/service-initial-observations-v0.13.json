@@ -267,6 +267,16 @@
     ],
     "diagnosis": "The measured stall is tied to module discovery during system-module import. Both an inherited module path and an empty search path completed the controlled probe; a system-only path, directory variables and disabled analysis caching did not. The exact internal PowerShell routine was not instrumented.",
     "correction": "Use an empty PSModulePath, explicitly import the required Windows system modules, close stdin, emit UTF-8 and keep the 5000ms limit. No user module path or coordinator credential is inherited by the query.",
+    "cold_initialization_followup": {
+      "run": "https://github.com/Dev-Encrypted/Network_AI/actions/runs/34998123802",
+      "windows_passed": 11,
+      "windows_failed": 3,
+      "observation": "The first three identity queries timed out during cold startup; subsequent queries and the remaining process fixtures passed with empty module discovery. That intermediate result did not complete Windows CI validation.",
+      "initialization_limit_ms": 20000,
+      "subsequent_identity_query_limit_ms": 5000,
+      "correction": "Prepare the OS query runtime once before registry locks or launch reservations, using a read-only self-query and an exact acknowledgement. A persistent service host establishes its native job before preparing its own query helper. Failed initialization refuses startup; steady identity queries retain their original limit.",
+      "bootstrap_is_not_application_or_model_readiness": true
+    },
     "local_regression": {
       "actual_windows_cases_passed": 14,
       "actual_windows_cases_failed": 0,

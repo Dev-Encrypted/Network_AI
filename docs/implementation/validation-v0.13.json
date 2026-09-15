@@ -58,7 +58,7 @@
     "release": "https://github.com/Dev-Encrypted/Network_AI/releases/tag/v0.12.0-private-device-preview"
   },
   "final_runtime_observation": {
-    "observed_at": "2026-09-15T16:53:58.859Z",
+    "observed_at": "2026-09-15T17:07:52.215Z",
     "schema_version": 1,
     "physical_hosts": 1,
     "applied_migrations_checked_read_only": 10,
@@ -362,6 +362,7 @@
     "The selected real-model campaign uses the final global-namespace guardian and preserved transport pins. Later Windows query discovery/UTF-8 changes are checked by all fourteen actual process fixtures and the final read-only runtime observation. Earlier real-model reports remain preserved.",
     "No migration, original contributor profile, model artifact, stage identity, provider account or route definition was changed by the service upgrade. The first prototype service pin was explicitly replaced after all managed services stopped.",
     "The backup is an isolated restore of the working database snapshot at its own observation time, before the final model and browser campaigns. It does not claim to contain later journal entries.",
+    "The source RPC close operation has separate Rust validation, including immediate address reuse and a retained-endpoint error. The real model campaign did not replace the previously installed transport executables. Diagnostic environment matrices are not included in the automated case total.",
     "The source RPC close operation has separate Rust validation, including immediate address reuse and a retained-endpoint error. The real model campaign did not replace the previously installed transport executables. Diagnostic environment matrices are not included in the automated case total."
   ],
   "boundaries": [
@@ -378,5 +379,14 @@
     "failure_reported_when_address_retained": true,
     "live_model_transport_pins_unchanged": true,
     "rebuilt_transport_binary_distributed": false
+  },
+  "windows_process_queries": {
+    "initialization_limit_ms": 20000,
+    "identity_query_limit_ms": 5000,
+    "empty_module_search_path": true,
+    "explicit_system_imports": true,
+    "utf8": true,
+    "preparation_precedes_registry_lock_and_launch_intent": true,
+    "service_host_job_precedes_query_helper": true
   }
 }

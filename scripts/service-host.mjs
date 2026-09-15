@@ -20,6 +20,7 @@ import {
   readServiceProfile,
   processIdentity,
   serviceFiles,
+  prepareWindowsQueries,
 } from "./service-process.mjs";
 export async function runService(profilePath, boot) {
   const profile = await readServiceProfile(profilePath);
@@ -30,12 +31,11 @@ export async function runService(profilePath, boot) {
   // This boot directory belongs to one immutable launch intent. Exclusive
   // creation prevents a repeated launcher from running the same intent twice.
   const claim = await open(files.identity, "wx", 0o600);
-  const runner = await processIdentity(process.pid);
   const identity = {
     schema_version: 1,
     boot_id: boot,
     profile_sha256: await hashFile(profilePath),
-    runner,
+    runner: null,
     child: null,
     containment: null,
   };
@@ -83,6 +83,13 @@ export async function runService(profilePath, boot) {
     identity.containment = await startGuardian(profile.guardian, boot);
     await atomicJson(files.identity, identity);
     await publish();
+    // OS-query bootstrap also creates a child process. Establish the job
+    // before that helper exists, then record the observed runner identity.
+    await prepareWindowsQueries();
+    identity.runner = await processIdentity(process.pid);
+    if (!identity.runner)
+      throw new Error("Service runner identity unavailable");
+    await atomicJson(files.identity, identity);
     child = spawn(profile.program, profile.args, {
       cwd: profile.cwd,
       windowsHide: true,

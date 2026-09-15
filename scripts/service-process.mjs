@@ -16,7 +16,12 @@ const { z } = createRequire(
   new URL("../packages/contributor/package.json", import.meta.url),
 )("zod");
 const exec = promisify(execFile);
-async function windowsQuery(script, variables, maxBuffer = 131072) {
+async function executeWindowsQuery(
+  script,
+  variables,
+  maxBuffer = 131072,
+  timeout = 5000,
+) {
   const environment = workerEnvironment();
   const windows = Object.entries(environment).find(
     ([key]) => key.toLowerCase() === "systemroot",
@@ -39,7 +44,7 @@ async function windowsQuery(script, variables, maxBuffer = 131072) {
     {
       windowsHide: true,
       encoding: "utf8",
-      timeout: 5000,
+      timeout,
       maxBuffer,
       env: {
         ...environment,
@@ -54,6 +59,33 @@ async function windowsQuery(script, variables, maxBuffer = 131072) {
   // pipe or inherit user/module discovery settings in a detached service.
   pending.child.stdin.end();
   return pending;
+}
+let windowsQueryBootstrap;
+export function prepareWindowsQueries() {
+  if (process.platform !== "win32") return Promise.resolve(null);
+  if (!windowsQueryBootstrap) {
+    const started = Date.now();
+    windowsQueryBootstrap = executeWindowsQuery(
+      "$null=Get-CimInstance Win32_Process -Filter ('ProcessId = '+$PID);[Console]::WriteLine('NETWORK_AI_QUERY_READY')",
+      {},
+      8192,
+      20000,
+    ).then(({ stdout }) => {
+      if (stdout.trim() !== "NETWORK_AI_QUERY_READY")
+        throw new Error("Unexpected Windows query bootstrap acknowledgement");
+      return Object.freeze({
+        ready: true,
+        duration_ms: Date.now() - started,
+        initialization_limit_ms: 20000,
+        identity_query_limit_ms: 5000,
+      });
+    });
+  }
+  return windowsQueryBootstrap;
+}
+async function windowsQuery(script, variables, maxBuffer = 131072) {
+  await prepareWindowsQueries();
+  return executeWindowsQuery(script, variables, maxBuffer);
 }
 const binary = z
   .object({
