@@ -1,14 +1,14 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 //! Private, pinned transport for a single guarded ggml RPC stage.
 //! The worker-side guard still owns capabilities, compute limits and receipts.
-use anyhow::{Result, bail, ensure};
+use anyhow::{Context, Result, bail, ensure};
 use iroh::{
     Endpoint, EndpointAddr, PublicKey, RelayMode, SecretKey,
     endpoint::{Connection, QuicTransportConfig, RecvStream, SendStream, presets},
 };
 use serde::{Deserialize, Serialize};
 use std::{
-    net::{Ipv4Addr, SocketAddr},
+    net::{Ipv4Addr, SocketAddr, UdpSocket},
     sync::{
         Arc,
         atomic::{AtomicU64, Ordering},
@@ -156,10 +156,12 @@ pub struct RpcLink {
     pub local_addr: Option<SocketAddr>,
     counters: Arc<Counters>,
     task: JoinHandle<()>,
+    bind_addr: SocketAddr,
 }
 impl RpcLink {
     pub async fn start(config: Config) -> Result<Self> {
         config.validate()?;
+        let bind_addr = config.bind_addr;
         let listener = if config.role == Role::Root {
             Some(TcpListener::bind((Ipv4Addr::LOCALHOST, config.local_port)).await?)
         } else {
@@ -214,6 +216,7 @@ impl RpcLink {
             local_addr,
             counters,
             task,
+            bind_addr,
         })
     }
     pub fn snapshot(&self) -> Snapshot {
@@ -227,10 +230,37 @@ impl RpcLink {
             stage_to_root_bytes: c.stage_to_root.load(Ordering::Relaxed),
         }
     }
-    pub async fn close(self) {
+    /// Drain owned tasks and confirm that the direct UDP address is released.
+    /// An externally retained endpoint clone or occupied address is an error,
+    /// not a successful close. This does not terminate another address owner.
+    pub async fn close(self) -> Result<()> {
         self.endpoint.close().await;
-        self.task.abort();
-        let _ = self.task.await;
+        // Listener loops drain their JoinSets before returning. Aborting only
+        // the listener drops its JoinSet without waiting for endpoint clones in
+        // those child tasks, so an immediate restart can still find a bound UDP
+        // socket even though close() has returned.
+        self.task.await.context("RPC listener shutdown failed")?;
+        drop(self.endpoint);
+        // Iroh keeps the OS socket until all endpoint/driver references drop.
+        // Observe the real bind state after dropping ours; a fixed sleep or a
+        // retry of the next model connection would conceal incomplete cleanup.
+        tokio::time::timeout(Duration::from_secs(3), async {
+            loop {
+                match UdpSocket::bind(self.bind_addr) {
+                    Ok(socket) => {
+                        drop(socket);
+                        return Ok::<_, std::io::Error>(());
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::AddrInUse => {
+                        tokio::time::sleep(Duration::from_millis(10)).await;
+                    }
+                    Err(error) => return Err(error),
+                }
+            }
+        })
+        .await
+        .context("RPC UDP address remains occupied after shutdown")??;
+        Ok(())
     }
 }
 
@@ -295,6 +325,7 @@ async fn accept_tcp(app: Arc<App>, listener: TcpListener) {
     let mut tasks = JoinSet::new();
     loop {
         tokio::select! {
+            _ = app.endpoint.closed() => break,
             _ = tasks.join_next(), if !tasks.is_empty() => {},
             accepted = listener.accept() => {
                 let Ok((tcp, _)) = accepted else { break; };
@@ -324,6 +355,7 @@ async fn accept_tcp(app: Arc<App>, listener: TcpListener) {
             }
         }
     }
+    tasks.shutdown().await;
 }
 async fn accept_quic(app: Arc<App>) {
     let pending = Arc::new(Semaphore::new(4));
@@ -360,4 +392,5 @@ async fn accept_quic(app: Arc<App>) {
             }
         }
     }
+    tasks.shutdown().await;
 }

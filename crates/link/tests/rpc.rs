@@ -1,9 +1,11 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
-use anyhow::Result;
+use anyhow::{Context, Result};
 use iroh::{Endpoint, EndpointAddr, RelayMode, SecretKey, endpoint::presets};
 use network_ai_link::rpc::{ALPN, Binding, Config, HEADER_LIMIT, Role, RpcLink};
 use std::{
+    collections::HashSet,
     net::{Ipv4Addr, TcpListener, UdpSocket},
+    sync::{LazyLock, Mutex},
     time::Duration,
 };
 use tokio::{
@@ -13,18 +15,28 @@ use tokio::{
 };
 
 fn tcp() -> u16 {
-    TcpListener::bind((Ipv4Addr::LOCALHOST, 0))
-        .unwrap()
-        .local_addr()
-        .unwrap()
-        .port()
+    static CLAIMED: LazyLock<Mutex<HashSet<u16>>> = LazyLock::new(|| Mutex::new(HashSet::new()));
+    let mut claimed = CLAIMED.lock().unwrap();
+    loop {
+        let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        if claimed.insert(port) {
+            return port;
+        }
+    }
 }
 fn udp() -> u16 {
-    UdpSocket::bind((Ipv4Addr::LOCALHOST, 0))
-        .unwrap()
-        .local_addr()
-        .unwrap()
-        .port()
+    // The OS may return a just-probed port again before the endpoint owns it.
+    // Do not assign that number to a second fixture in this concurrent suite.
+    static CLAIMED: LazyLock<Mutex<HashSet<u16>>> = LazyLock::new(|| Mutex::new(HashSet::new()));
+    let mut claimed = CLAIMED.lock().unwrap();
+    loop {
+        let socket = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
+        let port = socket.local_addr().unwrap().port();
+        if claimed.insert(port) {
+            return port;
+        }
+    }
 }
 fn configs(target: u16) -> (Config, Config) {
     let binding = Binding {
@@ -142,8 +154,8 @@ async fn streamed_payload_backpressure_slot_and_keepalive() -> Result<()> {
     idle(&root).await?;
     idle(&stage).await?;
     let _ = echo.await?;
-    root.close().await;
-    stage.close().await;
+    root.close().await?;
+    stage.close().await?;
     Ok(())
 }
 
@@ -208,7 +220,7 @@ async fn identities_headers_and_protocol_rejected_before_guard_connection() -> R
     assert!(stage.snapshot().rejected_tunnels >= 11);
     intruder.close().await;
     root.close().await;
-    stage.close().await;
+    stage.close().await?;
     Ok(())
 }
 
@@ -245,7 +257,7 @@ async fn stage_enforces_one_tunnel_even_across_pinned_peer_connections() -> Resu
     idle(&stage).await?;
     assert_eq!(stage.snapshot().closed_tunnels, 1);
     root.close().await;
-    stage.close().await;
+    stage.close().await?;
     Ok(())
 }
 
@@ -253,29 +265,59 @@ async fn stage_enforces_one_tunnel_even_across_pinned_peer_connections() -> Resu
 async fn broken_link_closes_tcp_and_restarted_peer_can_reconnect() -> Result<()> {
     let target = tokio::net::TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).await?;
     let (r, s) = configs(target.local_addr()?.port());
-    let stage = RpcLink::start(s.clone()).await?;
-    let root = RpcLink::start(r).await?;
+    let stage_address = s.bind_addr;
+    let root_address = r.bind_addr;
+    let stage = RpcLink::start(s.clone())
+        .await
+        .context("initial stage bind")?;
+    let root = RpcLink::start(r).await.context("initial root bind")?;
     let mut client = TcpStream::connect(root.local_addr.unwrap()).await?;
     let (mut worker, _) = timeout(Duration::from_secs(5), target.accept()).await??;
     worker.write_all(b"partial").await?;
     let mut partial = [0; 7];
     client.read_exact(&mut partial).await?;
     assert_eq!(&partial, b"partial");
-    stage.close().await;
+    stage.close().await?;
+    // A completed close must release the actual port before any retry/delay.
+    drop(UdpSocket::bind(stage_address).context("stage UDP port retained after close")?);
     ended(&mut client).await?;
     ended(&mut worker).await?;
     idle(&root).await?;
-    let stage = RpcLink::start(s).await?;
+    let stage = RpcLink::start(s).await.context("restarted stage bind")?;
     let mut client = TcpStream::connect(root.local_addr.unwrap()).await?;
     let (mut worker, _) = timeout(Duration::from_secs(5), target.accept()).await??;
     client.write_all(b"new-model-connection").await?;
     let mut actual = [0; 20];
     worker.read_exact(&mut actual).await?;
     assert_eq!(&actual, b"new-model-connection");
-    root.close().await;
+    root.close().await?;
+    drop(UdpSocket::bind(root_address).context("root UDP port retained after close")?);
     ended(&mut client).await?;
     ended(&mut worker).await?;
-    stage.close().await;
+    stage.close().await?;
+    drop(UdpSocket::bind(stage_address).context("restarted stage UDP port retained after close")?);
+    Ok(())
+}
+
+#[tokio::test]
+async fn close_reports_an_externally_retained_endpoint() -> Result<()> {
+    let (_, s) = configs(12345);
+    let address = s.bind_addr;
+    let stage = RpcLink::start(s).await?;
+    let retained = stage.endpoint.clone();
+    let error = stage.close().await.unwrap_err();
+    assert!(error.to_string().contains("UDP address remains occupied"));
+    assert!(UdpSocket::bind(address).is_err());
+    drop(retained);
+    timeout(Duration::from_secs(3), async {
+        loop {
+            if UdpSocket::bind(address).is_ok() {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await?;
     Ok(())
 }
 

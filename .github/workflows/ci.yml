@@ -53,6 +53,8 @@ jobs:
       - run: cargo +1.93.1 build --locked -p network-ai-contributor-guardian
       - run: cargo +1.93.1 test --locked -p network-ai-contributor-guardian
       - run: cargo +1.93.1 clippy --locked -p network-ai-contributor-guardian --all-targets -- -D warnings
+      - name: Diagnose Windows query environment without exposing values
+        run: node tests/guardian/fixtures/windows-query-probe.mjs
       - run: pnpm test:guardian
 
   product:

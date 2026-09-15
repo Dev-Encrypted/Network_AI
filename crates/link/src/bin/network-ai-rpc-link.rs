@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
             }
         }
     }
-    link.close().await;
+    link.close().await?;
     let _ = tokio::fs::remove_file(status_path).await;
     Ok(())
 }
