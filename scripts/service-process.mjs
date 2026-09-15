@@ -31,6 +31,7 @@ async function windowsQuery(script, variables, maxBuffer = 131072) {
       "-NonInteractive",
       "-Command",
       "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';" +
+        "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);" +
         "Import-Module ($PSHOME+'\\Modules\\CimCmdlets\\CimCmdlets.psd1');" +
         "Import-Module ($PSHOME+'\\Modules\\Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1');" +
         script,
@@ -42,7 +43,9 @@ async function windowsQuery(script, variables, maxBuffer = 131072) {
       maxBuffer,
       env: {
         ...environment,
-        PSModulePath: join(shellDirectory, "Modules"),
+        // A populated search path can stall Windows PowerShell module
+        // discovery on hosted Windows. Import only the OS modules above.
+        PSModulePath: "",
         ...variables,
       },
     },

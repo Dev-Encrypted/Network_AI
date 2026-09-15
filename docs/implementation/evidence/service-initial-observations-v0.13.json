@@ -92,5 +92,202 @@
     "new_model_downloads": 0,
     "model_or_account_identity_replacements": 0
   },
-  "boundary": "These observations distinguish harness corrections, a real process-inspection race and an OS namespace design correction. They do not establish public or independent-host readiness."
+  "boundary": "Initial harness, module-discovery, process-observation, namespace and transport shutdown failures remain recorded. Local corrections and CI checks do not establish public or independent-host model readiness.",
+  "windows_ci_startup": {
+    "first_run": "https://github.com/Dev-Encrypted/Network_AI/actions/runs/34993515077",
+    "first_source_commit": "7e4738d8306f8656f580163a6b721e55e7681ac1",
+    "first_windows_suite": {
+      "passed": 6,
+      "failed": 7,
+      "total": 13
+    },
+    "diagnostic_run": "https://github.com/Dev-Encrypted/Network_AI/actions/runs/34994212813",
+    "observation": "Windows PowerShell process-identity queries exceeded the unchanged 5000ms limit under the filtered service environment, before service readiness. Original fixtures discarded the startup stderr; the diagnostic change preserved it.",
+    "intermediate_attempt": "Explicit system-module imports and a populated system-only module search path passed locally but did not fix hosted Windows. The third run passed five of fourteen Windows cases; this attempt is not credited as a CI fix.",
+    "environment_matrix_run": "https://github.com/Dev-Encrypted/Network_AI/actions/runs/34996234550",
+    "environment_matrix": [
+      {
+        "case": "system_drive",
+        "success": false,
+        "duration_ms": 8021,
+        "killed": true,
+        "phases": []
+      },
+      {
+        "case": "base",
+        "success": false,
+        "duration_ms": 8033,
+        "killed": true,
+        "phases": []
+      },
+      {
+        "case": "user_identity",
+        "success": false,
+        "duration_ms": 8061,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      },
+      {
+        "case": "user_directories",
+        "success": false,
+        "duration_ms": 8071,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      },
+      {
+        "case": "module_path",
+        "success": true,
+        "duration_ms": 3470,
+        "killed": false,
+        "phases": [
+          "started",
+          "cim_loaded",
+          "queried",
+          "utility_loaded"
+        ]
+      },
+      {
+        "case": "shell",
+        "success": false,
+        "duration_ms": 8025,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      },
+      {
+        "case": "control_inherited",
+        "success": true,
+        "duration_ms": 332,
+        "killed": false,
+        "phases": [
+          "started",
+          "cim_loaded",
+          "queried",
+          "utility_loaded"
+        ]
+      },
+      {
+        "case": "all_os_directories",
+        "success": false,
+        "duration_ms": 8025,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      }
+    ],
+    "module_path_matrix_run": "https://github.com/Dev-Encrypted/Network_AI/actions/runs/34996960403",
+    "module_path_matrix": [
+      {
+        "case": "base",
+        "success": false,
+        "duration_ms": 8058,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      },
+      {
+        "case": "system_only",
+        "success": false,
+        "duration_ms": 8179,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      },
+      {
+        "case": "system_inherited_spelling",
+        "success": false,
+        "duration_ms": 8025,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      },
+      {
+        "case": "system_and_all_users",
+        "success": false,
+        "duration_ms": 8030,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      },
+      {
+        "case": "discovery_disabled",
+        "success": true,
+        "duration_ms": 1854,
+        "killed": false,
+        "phases": [
+          "started",
+          "cim_loaded",
+          "queried",
+          "utility_loaded"
+        ]
+      },
+      {
+        "case": "module_path",
+        "success": true,
+        "duration_ms": 345,
+        "killed": false,
+        "phases": [
+          "started",
+          "cim_loaded",
+          "queried",
+          "utility_loaded"
+        ]
+      },
+      {
+        "case": "control_inherited",
+        "success": true,
+        "duration_ms": 265,
+        "killed": false,
+        "phases": [
+          "started",
+          "cim_loaded",
+          "queried",
+          "utility_loaded"
+        ]
+      },
+      {
+        "case": "analysis_cache_disabled",
+        "success": false,
+        "duration_ms": 8027,
+        "killed": true,
+        "phases": [
+          "started"
+        ]
+      }
+    ],
+    "diagnosis": "The measured stall is tied to module discovery during system-module import. Both an inherited module path and an empty search path completed the controlled probe; a system-only path, directory variables and disabled analysis caching did not. The exact internal PowerShell routine was not instrumented.",
+    "correction": "Use an empty PSModulePath, explicitly import the required Windows system modules, close stdin, emit UTF-8 and keep the 5000ms limit. No user module path or coordinator credential is inherited by the query.",
+    "local_regression": {
+      "actual_windows_cases_passed": 14,
+      "actual_windows_cases_failed": 0,
+      "non_ascii_private_paths": true,
+      "inherited_shadow_module_ignored": true
+    },
+    "scope": "These probes only inspect local processes and print phase markers. Their eight-case matrices are diagnostic observations, not extra automated test counts or real-model evidence."
+  },
+  "rpc_shutdown": {
+    "initial_run": "https://github.com/Dev-Encrypted/Network_AI/actions/runs/34994212813",
+    "observed_error": "Failed to bind sockets: Address already in use (os error 98)",
+    "initial_bind_phase_recorded": false,
+    "local_followup": "A stricter test reproduced an occupied stage UDP address immediately after close returned, even after an intermediate change drained the owned task sets.",
+    "observed_local_error": "stage UDP port retained after close (os error 10048)",
+    "correction": "Drain owned listener tasks, drop the endpoint reference, then observe actual UDP address release within 3000ms. Return an error if another reference or owner retains it. Fixture port selection also avoids reusing a probed number within the concurrent suite, and bind phases are named in errors.",
+    "regression": {
+      "rpc_cases_passed": 6,
+      "rpc_cases_failed": 0,
+      "successful_close_requires_immediate_rebind": true,
+      "externally_retained_endpoint_returns_error": true
+    },
+    "scope": "Source-library lifecycle validation, including the hosted Linux Rust suite. Existing model-route transport binaries and their pins remain unchanged; the 32B campaign does not prove a rebuilt transport executable."
+  }
 }

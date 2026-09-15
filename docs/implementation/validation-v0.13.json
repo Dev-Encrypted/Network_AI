@@ -8,13 +8,13 @@
   "tests": {
     "integration_and_integer_accounting": 95,
     "node_unit_and_socket": 36,
-    "rust_total": 17,
+    "rust_total": 18,
     "rust_guardian_parser": 3,
     "rust_guardian_parser_included_in_total": true,
     "python_f0": 21,
     "browser": 11,
-    "windows_contributor_and_service_process_fixtures": 13,
-    "total_automated_distinct": 193
+    "windows_contributor_and_service_process_fixtures": 14,
+    "total_automated_distinct": 195
   },
   "build_and_checks": {
     "typescript_typecheck": true,
@@ -31,7 +31,7 @@
       "completed_requests": 4,
       "faulted_refunded_requests": 1,
       "unchanged_sibling_services": 19,
-      "terminal_and_cleanup_ms": 31390
+      "terminal_and_cleanup_ms": 29686
     },
     "core_recovery": {
       "report": "evidence/service-core-recovery-v0.13.json",
@@ -58,7 +58,7 @@
     "release": "https://github.com/Dev-Encrypted/Network_AI/releases/tag/v0.12.0-private-device-preview"
   },
   "final_runtime_observation": {
-    "observed_at": "2026-09-15T16:05:19.542Z",
+    "observed_at": "2026-09-15T16:53:58.859Z",
     "schema_version": 1,
     "physical_hosts": 1,
     "applied_migrations_checked_read_only": 10,
@@ -113,9 +113,9 @@
           "buffer_budget_mib": 3072,
           "reserve_mib": 1024,
           "memory_total_mib": 24564,
-          "memory_free_mib": 2383,
+          "memory_free_mib": 2702,
           "observation_source": "nvidia-smi",
-          "observed_at_unix_ms": 1789487415939,
+          "observed_at_unix_ms": 1789490318667,
           "os_memory_isolation": false
         },
         "rpc_memory": {
@@ -146,9 +146,9 @@
           "buffer_budget_mib": 20480,
           "reserve_mib": 8192,
           "memory_total_mib": 130755,
-          "memory_free_mib": 21845,
+          "memory_free_mib": 26841,
           "observation_source": "node:os",
-          "observed_at_unix_ms": 1789487415940,
+          "observed_at_unix_ms": 1789490318668,
           "os_memory_isolation": false
         },
         "rpc_memory": {
@@ -358,10 +358,11 @@
   "validation_notes": [
     "Counts identify distinct cases. Repeated checks and live campaigns are not added to the automated total. Rust guardian parser cases are included in rust_total.",
     "Windows fixtures use actual disposable processes, including the final global mutex, sibling preservation, incomplete launcher recovery, invalid-pin rejection and read-only status-viewer recovery. No model weights are used in those fixtures.",
-    "The full browser suite ran against the private working application and real configured models. Linux CI runs three model-independent browser journeys; Windows CI runs all thirteen process fixtures. CI also exercises installed-recipe discovery through the direct lab CLI without model weights.",
-    "The initial root-host campaign passed with the earlier private prototype guardian. The selected main campaign was repeated with the final global-namespace guardian pin and final launch source. Earlier private reports remain preserved.",
+    "The full browser suite ran against the private working application and real configured models. Linux CI runs three model-independent browser journeys; Windows CI runs all fourteen process fixtures. CI also exercises installed-recipe discovery through the direct lab CLI without model weights.",
+    "The selected real-model campaign uses the final global-namespace guardian and preserved transport pins. Later Windows query discovery/UTF-8 changes are checked by all fourteen actual process fixtures and the final read-only runtime observation. Earlier real-model reports remain preserved.",
     "No migration, original contributor profile, model artifact, stage identity, provider account or route definition was changed by the service upgrade. The first prototype service pin was explicitly replaced after all managed services stopped.",
-    "The backup is an isolated restore of the working database snapshot at its own observation time, before the final model and browser campaigns. It does not claim to contain later journal entries."
+    "The backup is an isolated restore of the working database snapshot at its own observation time, before the final model and browser campaigns. It does not claim to contain later journal entries.",
+    "The source RPC close operation has separate Rust validation, including immediate address reuse and a retained-endpoint error. The real model campaign did not replace the previously installed transport executables. Diagnostic environment matrices are not included in the automated case total."
   ],
   "boundaries": [
     "ordinary child process lifecycle containment, not OS user/filesystem/network/resource isolation or malicious-engine safety",
@@ -369,5 +370,13 @@
     "no installed Windows service, reboot recovery, automatic respawn/update or public HA",
     "one computer and account; independent GPU/host/OS/WAN/model-quality qualification remains",
     "public verification, distributed continuity, calibrated exchange, approved issuance, funded pilots and cash settlement remain unfinished"
-  ]
+  ],
+  "source_rpc_shutdown": {
+    "rust_cases_total": 18,
+    "rpc_cases_included": 6,
+    "address_release_bound_ms": 3000,
+    "failure_reported_when_address_retained": true,
+    "live_model_transport_pins_unchanged": true,
+    "rebuilt_transport_binary_distributed": false
+  }
 }

@@ -52,7 +52,12 @@ function reachable(port) {
   });
 }
 async function fixture(t) {
-  const runtime = join(root, ".runtime", `service-fixture-${randomUUID()}`);
+  // Exercise real process-command ownership with non-ASCII private paths.
+  const runtime = join(
+    root,
+    ".runtime",
+    `service-fixture-ação-雪-${randomUUID()}`,
+  );
   await mkdir(runtime, { recursive: true });
   const entries = [];
   t.after(async () => {

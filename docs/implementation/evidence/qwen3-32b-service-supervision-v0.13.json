@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_type": "REAL_WINDOWS_SERVICE_FAILURE_WITH_MIXED_32B_INFERENCE",
-  "observed_at": "2026-09-15T15:43:06.107Z",
+  "observed_at": "2026-09-15T16:32:16.016Z",
   "physical_hosts": 1,
   "operator_accounts": 1,
   "independent_operators": 0,
@@ -81,8 +81,8 @@
       "model": "qwen3-32b-mixed-private",
       "state": "COMPLETED",
       "billing_state": "SETTLED",
-      "started_at": "2026-09-15T15:43:07.474Z",
-      "finished_at": "2026-09-15T15:43:11.396Z",
+      "started_at": "2026-09-15T16:32:17.628Z",
+      "finished_at": "2026-09-15T16:32:22.243Z",
       "prompt_tokens": 18,
       "completion_tokens": 6,
       "charged_microtu": "36000",
@@ -92,14 +92,14 @@
         {
           "ordinal": 1,
           "completed_commands": 6,
-          "request_bytes": "205964",
+          "request_bytes": "156",
           "response_bytes": "144",
           "paid_microtu": "12960"
         },
         {
           "ordinal": 2,
           "completed_commands": 6,
-          "request_bytes": "1659580",
+          "request_bytes": "156",
           "response_bytes": "144",
           "paid_microtu": "12960"
         }
@@ -110,8 +110,8 @@
       "model": "qwen3-32b-mixed-private",
       "state": "COMPLETED",
       "billing_state": "SETTLED",
-      "started_at": "2026-09-15T15:43:11.554Z",
-      "finished_at": "2026-09-15T15:43:14.021Z",
+      "started_at": "2026-09-15T16:32:22.385Z",
+      "finished_at": "2026-09-15T16:32:24.716Z",
       "prompt_tokens": 18,
       "completion_tokens": 6,
       "charged_microtu": "36000",
@@ -139,8 +139,8 @@
       "model": "qwen3-32b-mixed-private",
       "state": "COMPLETED",
       "billing_state": "SETTLED",
-      "started_at": "2026-09-15T15:43:14.151Z",
-      "finished_at": "2026-09-15T15:43:16.610Z",
+      "started_at": "2026-09-15T16:32:24.966Z",
+      "finished_at": "2026-09-15T16:32:27.257Z",
       "prompt_tokens": 18,
       "completion_tokens": 6,
       "charged_microtu": "36000",
@@ -168,8 +168,8 @@
       "model": "qwen3-32b-mixed-private",
       "state": "COMPLETED",
       "billing_state": "SETTLED",
-      "started_at": "2026-09-15T15:50:28.604Z",
-      "finished_at": "2026-09-15T15:50:32.564Z",
+      "started_at": "2026-09-15T16:38:46.690Z",
+      "finished_at": "2026-09-15T16:38:50.315Z",
       "prompt_tokens": 18,
       "completion_tokens": 6,
       "charged_microtu": "36000",
@@ -261,9 +261,9 @@
         "buffer_budget_mib": 3072,
         "reserve_mib": 1024,
         "memory_total_mib": 24564,
-        "memory_free_mib": 2716,
+        "memory_free_mib": 2383,
         "observation_source": "nvidia-smi",
-        "observed_at_unix_ms": 1789486918243,
+        "observed_at_unix_ms": 1789487415939,
         "os_memory_isolation": false
       },
       "rpc_memory": {
@@ -282,8 +282,8 @@
         "active_tunnels": 1,
         "closed_tunnels": 8,
         "rejected_tunnels": 0,
-        "root_to_stage_bytes": 2166408511,
-        "stage_to_root_bytes": 42119
+        "root_to_stage_bytes": 2167125334,
+        "stage_to_root_bytes": 513287
       }
     },
     {
@@ -294,9 +294,9 @@
         "buffer_budget_mib": 20480,
         "reserve_mib": 8192,
         "memory_total_mib": 130755,
-        "memory_free_mib": 23093,
+        "memory_free_mib": 21845,
         "observation_source": "node:os",
-        "observed_at_unix_ms": 1789486918245,
+        "observed_at_unix_ms": 1789487415940,
         "os_memory_isolation": false
       },
       "rpc_memory": {
@@ -315,8 +315,8 @@
         "active_tunnels": 1,
         "closed_tunnels": 8,
         "rejected_tunnels": 0,
-        "root_to_stage_bytes": 17153637372,
-        "stage_to_root_bytes": 611178
+        "root_to_stage_bytes": 17155809713,
+        "stage_to_root_bytes": 4257770
       }
     }
   ],
@@ -329,9 +329,9 @@
         "buffer_budget_mib": 3072,
         "reserve_mib": 1024,
         "memory_total_mib": 24564,
-        "memory_free_mib": 2716,
+        "memory_free_mib": 2383,
         "observation_source": "nvidia-smi",
-        "observed_at_unix_ms": 1789486918243,
+        "observed_at_unix_ms": 1789487415939,
         "os_memory_isolation": false
       },
       "rpc_memory": {
@@ -350,8 +350,8 @@
         "active_tunnels": 1,
         "closed_tunnels": 8,
         "rejected_tunnels": 0,
-        "root_to_stage_bytes": 2167400266,
-        "stage_to_root_bytes": 759143
+        "root_to_stage_bytes": 2167491910,
+        "stage_to_root_bytes": 841095
       }
     },
     {
@@ -362,9 +362,9 @@
         "buffer_budget_mib": 20480,
         "reserve_mib": 8192,
         "memory_total_mib": 130755,
-        "memory_free_mib": 23093,
+        "memory_free_mib": 21845,
         "observation_source": "node:os",
-        "observed_at_unix_ms": 1789486918245,
+        "observed_at_unix_ms": 1789487415940,
         "os_memory_isolation": false
       },
       "rpc_memory": {
@@ -383,8 +383,8 @@
         "active_tunnels": 1,
         "closed_tunnels": 8,
         "rejected_tunnels": 0,
-        "root_to_stage_bytes": 17156065221,
-        "stage_to_root_bytes": 10335290
+        "root_to_stage_bytes": 17156181361,
+        "stage_to_root_bytes": 13374050
       }
     }
   ],
@@ -410,7 +410,7 @@
     "threads_per_worker": 8,
     "cpu_repack": false,
     "rpc_guarded": true,
-    "ready_ms": 261511
+    "ready_ms": 223555
   },
   "service_faults": [
     {
@@ -420,7 +420,7 @@
       "billing_state": "REFUNDED",
       "charged_microtu": "0",
       "retained_claims": 0,
-      "terminal_and_cleanup_ms": 31390,
+      "terminal_and_cleanup_ms": 29686,
       "owned_host_guardian_cluster_and_model_server_gone": true,
       "unchanged_live_sibling_services": 19,
       "client_cancel_injected": false
