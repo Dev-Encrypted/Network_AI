@@ -201,17 +201,18 @@ mod windows {
     }
 }
 fn main() {
-    let result = settings(&std::env::args().skip(1).collect::<Vec<_>>()).and_then(|c| {
-        #[cfg(windows)]
-        {
-            windows::run(&c)
-        }
-        #[cfg(not(windows))]
-        {
-            let _ = c;
-            Err("guardian_platform_not_supported")
-        }
-    });
+    let result: Result<(), &'static str> = settings(&std::env::args().skip(1).collect::<Vec<_>>())
+        .and_then(|c| {
+            #[cfg(windows)]
+            {
+                windows::run(&c)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = c;
+                Err("guardian_platform_not_supported")
+            }
+        });
     if let Err(code) = result {
         let _ = writeln!(io::stderr(), "{}", serde_json::json!({ "error": code }));
         std::process::exit(1);

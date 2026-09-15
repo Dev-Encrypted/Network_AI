@@ -188,7 +188,8 @@
     "The existing 27B LM Studio backend had to be restored for browser coverage. Its model bytes were checked against the preserved fingerprint, and its context was set to 8192 rather than the historical 128000. This is functional browser evidence, not a reproduction of the original backend performance or binary fingerprint.",
     "The final extracted-package check verified both current READY/fresh contributors, actual guardian parent/boot bindings, unchanged original private profile fields, the reloaded root, the original local-model node, the rendered 0.11 UI and all nine migration hashes without writes.",
     "The native process-containment binary is a local SHA-256-pinned build. It protects normal contributor descendants, not root/coordinator services, OS file/network access or hardware resource budgets. Windows job nesting can refuse startup; there is no unprotected fallback.",
-    "Public fault check labels are selected summaries of the concrete fault records. Historical tags, source packages, migration bytes and F0 sources remain unchanged."
+    "Public fault check labels are selected summaries of the concrete fault records. Historical tags, source packages, migration bytes and F0 sources remain unchanged.",
+    "The initial Linux CI build found an unconstrained Result type in the unsupported-platform branch. An explicit Result<(), &'static str> annotation fixes compilation without changing the Windows path. The native parser and all four Windows lifecycle fixtures passed again after this correction. The actual 32B campaigns preceded this type-only correction; installed measured native snapshots and their hashes were preserved. Final CI verifies the corrected release source."
   ],
   "boundaries": [
     "one physical Windows CPU host and account, not independent providers",
