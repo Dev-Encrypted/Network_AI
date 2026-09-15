@@ -1458,6 +1458,16 @@ export default function Home() {
                                 "Reserva de disponibilidade",
                               AVAILABILITY_PAYMENT: "Disponibilidade observada",
                               AVAILABILITY_REFUND: "Devolução do contrato",
+                              ROUTE_AVAILABILITY_RESERVE:
+                                "Reserva da rota completa",
+                              ROUTE_AVAILABILITY_PAYMENT:
+                                "Prontidão da rota observada",
+                              ROUTE_AVAILABILITY_REFUND:
+                                "Devolução da janela da rota",
+                              COOPERATIVE_FUNDING:
+                                "Contribuição ao fundo cooperativo",
+                              COOPERATIVE_CONSUMPTION_REFUND:
+                                "Devolução de consumo cooperativo",
                             }[row.kind] ?? row.kind}
                           </span>
                         </td>
