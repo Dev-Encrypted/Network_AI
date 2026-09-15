@@ -23,14 +23,21 @@ import {
 const root = resolve("."),
   options = { skip: process.platform !== "win32", timeout: 60000 };
 const json = async (file) => JSON.parse(await readFile(file, "utf8"));
-async function until(probe) {
+async function until(probe, fixtureErrorLog) {
   const end = Date.now() + 20000;
   do {
     const result = await probe();
     if (result) return result;
     await delay(50);
   } while (Date.now() < end);
-  throw new Error("Service fixture observation timed out");
+  // These logs come only from disposable fixtures with no application secrets.
+  // Preserve the startup error instead of reporting an opaque readiness timeout.
+  const detail = fixtureErrorLog
+    ? await readFile(fixtureErrorLog, "utf8").catch(() => "")
+    : "";
+  throw new Error(
+    `Service fixture observation timed out${detail ? `: ${detail.slice(-4096)}` : ""}`,
+  );
 }
 function reachable(port) {
   return new Promise((res) => {
@@ -68,7 +75,10 @@ async function fixture(t) {
       {},
     );
     entries.push(entry);
-    const tree = await until(() => json(output).catch(() => null));
+    const tree = await until(
+      () => json(output).catch(() => null),
+      join(runtime, name + ".err.log"),
+    );
     const status = await until(async () => {
       const s = await serviceStatus(entry.service.profile);
       return s.live && s.child_alive && s.phase === "RUNNING" ? s : null;
@@ -195,10 +205,13 @@ test(
     await interruptedCaller(f.runtime, "launch");
     const initial = (await json(join(f.runtime, "processes.json"))).interrupted;
     assert.equal(initial.pid, null);
-    const old = await until(async () => {
-      const s = await serviceStatus(initial.service.profile);
-      return s.live && s.child_alive ? s : null;
-    });
+    const old = await until(
+      async () => {
+        const s = await serviceStatus(initial.service.profile);
+        return s.live && s.child_alive ? s : null;
+      },
+      join(f.runtime, "interrupted.err.log"),
+    );
     const resumed = await f.launch("interrupted");
     assert.equal(resumed.status.pid, old.pid);
     assert.equal(resumed.entry.service.boot_id, initial.service.boot_id);
