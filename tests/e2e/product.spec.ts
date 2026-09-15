@@ -450,6 +450,217 @@ test("logout fences a delayed quote and clears conversation state", async ({
   expect(inferenceRequests).toBe(0);
 });
 
+test("bounded renewal controls preserve retry identity and revoke only future operator participation", async ({
+  page,
+}) => {
+  test.setTimeout(90000);
+  page.setDefaultTimeout(10000);
+  const profile = await readFile(".runtime/private-lab/cpu-route.json", "utf8")
+    .then(JSON.parse)
+    .catch(() => null);
+  test.skip(
+    !profile,
+    "Requires the installed 32B route; no fabricated capacity is substituted.",
+  );
+  await page.goto("/");
+  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
+  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Cooperação", exact: true }),
+  ).toBeVisible();
+  const auth = { headers: { Origin: config.web_origin } };
+  const created = await page.request.post("/api/v1/cooperative/pools", {
+    ...auth,
+    data: {
+      name: `Browser bounded renewal ${randomUUID().slice(0, 8)}`,
+      support_until: new Date(Date.now() + 3600000).toISOString(),
+      idempotency_key: randomUUID(),
+      groups: [
+        {
+          key: "essential",
+          route_ids: [profile.route_id],
+          duration_seconds: 30,
+          rate_microtu_per_second: "100",
+        },
+      ],
+    },
+  });
+  expect(created.status()).toBe(201);
+  const p = await created.json();
+  const funded = await page.request.post(
+    `/api/v1/cooperative/pools/${p.id}/fund`,
+    {
+      ...auth,
+      data: {
+        destination: "WORKING",
+        amount_microtu: "6000",
+        policy_sha256: p.policy_sha256,
+        consent: "COMMITTED_LAB_CREDITS_NO_REDEMPTION",
+        idempotency_key: randomUUID(),
+      },
+    },
+  );
+  expect(funded.status()).toBe(201);
+  let authorityId: string | undefined,
+    mandateId: string | undefined,
+    dropped = false;
+  await page.route(`**/cooperative/pools/${p.id}/renewals`, async (route) => {
+    if (!dropped && route.request().method() === "POST") {
+      dropped = true;
+      const r = await route.fetch();
+      expect(r.status()).toBe(201);
+      authorityId = (await r.json()).id;
+      await route.abort("failed");
+    } else await route.continue();
+  });
+  const current = async () =>
+    (
+      await page.request.get(`/api/v1/cooperative/pools/${p.id}/renewals`)
+    ).json();
+  try {
+    await page.getByRole("button", { name: "Cooperação", exact: true }).click();
+    const card = page.locator(`[data-pool-id="${p.id}"]`);
+    await card
+      .getByText("Renovação automática com limites", { exact: true })
+      .click();
+    const panel = card.getByRole("region", {
+      name: "Autorizações de renovação",
+    });
+    await panel.getByText("Autorizar gastos do fundo", { exact: true }).click();
+    await panel
+      .getByLabel("Motivo da autorização do fundo", { exact: true })
+      .fill(
+        "Browser authorizes bounded gross commitments without limit replenishment",
+      );
+    await panel
+      .getByLabel("Autorizo estes compromissos brutos", { exact: false })
+      .check();
+    await panel
+      .getByRole("button", { name: "Registrar limite do fundo", exact: true })
+      .click();
+    await expect(panel.getByRole("alert")).toBeVisible();
+    const retry = page.waitForResponse(
+      (r) =>
+        r.url().endsWith(`/cooperative/pools/${p.id}/renewals`) &&
+        r.request().method() === "POST",
+    );
+    await panel
+      .getByRole("button", { name: "Registrar limite do fundo", exact: true })
+      .click();
+    expect((await (await retry).json()).id).toBe(authorityId);
+    expect((await current()).authorizations).toHaveLength(1);
+    expect((await current()).runs).toHaveLength(0);
+    await panel
+      .getByText("Autorizar minha participação como operador", { exact: true })
+      .click();
+    await panel
+      .getByRole("combobox", { name: "Minha rota autorizada", exact: true })
+      .selectOption(profile.route_id);
+    await panel
+      .getByLabel("Motivo da minha autorização", { exact: true })
+      .fill("Browser operator authorizes readiness-only bounded participation");
+    await panel
+      .getByLabel("Aceito receber por prontidão", { exact: false })
+      .check();
+    const accepted = page.waitForResponse(
+      (r) =>
+        r.url().endsWith(`/cooperative/pools/${p.id}/provider-mandates`) &&
+        r.request().method() === "POST",
+    );
+    await panel
+      .getByRole("button", { name: "Registrar minha autorização", exact: true })
+      .click();
+    mandateId = (await (await accepted).json()).id;
+    expect(mandateId).toBeTruthy();
+    await expect
+      .poll(async () => (await current()).runs.length, { timeout: 12000 })
+      .toBe(1);
+    const revoke = page.waitForResponse((r) =>
+      r.url().endsWith(`/provider-mandates/${mandateId}/revoke`),
+    );
+    await panel
+      .getByRole("button", { name: "Revogar participação futura", exact: true })
+      .click();
+    expect((await (await revoke).json()).state).toBe("REVOKED");
+    const preserved = (await current()).runs[0];
+    expect(preserved.state).toBe("ACTIVE");
+    await expect
+      .poll(
+        async () =>
+          BigInt((await current()).runs[0].paid_microtu) >
+          BigInt(preserved.paid_microtu),
+        { timeout: 12000 },
+      )
+      .toBe(true);
+    await expect(
+      panel.locator(`[data-provider-mandate="${mandateId}"]`),
+    ).toContainText("Revogada");
+    await panel.getByText("Autorizar gastos do fundo", { exact: true }).click();
+    await panel
+      .getByText("Autorizar minha participação como operador", { exact: true })
+      .click();
+    await mkdir(".runtime/private-lab/screenshots", { recursive: true });
+    await panel.screenshot({
+      path: ".runtime/private-lab/screenshots/renewal-desktop.png",
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await panel.scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await panel.screenshot({
+      path: ".runtime/private-lab/screenshots/renewal-mobile.png",
+    });
+    await expect
+      .poll(async () => (await current()).runs[0].state, { timeout: 35000 })
+      .toBe("COMPLETED");
+    await expect
+      .poll(async () => (await current()).authorizations[0].last_status, {
+        timeout: 12000,
+      })
+      .toBe("WAITING_FOR_OPERATORS");
+    expect((await current()).runs).toHaveLength(1);
+    await panel
+      .getByRole("button", { name: "Revogar limite do fundo", exact: true })
+      .click();
+    await expect(
+      panel.locator(`[data-renewal-authorization="${authorityId}"]`),
+    ).toContainText("Revogada");
+  } finally {
+    const state = await current();
+    for (const m of state.mandates)
+      await page.request.post(
+        `/api/v1/cooperative/provider-mandates/${m.id}/revoke`,
+        { ...auth, data: {} },
+      );
+    for (const a of state.authorizations)
+      await page.request.post(`/api/v1/cooperative/renewals/${a.id}/revoke`, {
+        ...auth,
+        data: {},
+      });
+    await page.request.post(`/api/v1/cooperative/pools/${p.id}/manage`, {
+      ...auth,
+      data: {
+        paused: true,
+        reason:
+          "Browser renewal acceptance completed; future commitments paused, existing windows preserved",
+      },
+    });
+    await expect
+      .poll(
+        async () =>
+          (await current()).runs.every((r: any) =>
+            ["COMPLETED", "CANCELLED", "EXPIRED"].includes(r.state),
+          ),
+        { timeout: 40000 },
+      )
+      .toBe(true);
+  }
+});
+
 test("cooperative plan, funding retry, readiness consent and opted-in chat work in the browser", async ({
   page,
 }) => {

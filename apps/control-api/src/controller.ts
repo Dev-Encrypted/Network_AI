@@ -17,6 +17,7 @@ import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
 import { RouteAvailability } from "./route-availability.js";
+import { Renewals } from "./renewals.js";
 import { Cooperative } from "./cooperative.js";
 import { Routes } from "./routes.js";
 import { capacity } from "./capacity.js";
@@ -32,6 +33,7 @@ export class ApiController {
     @Inject(Sessions) readonly sessions: Sessions,
     @Inject(Availability) readonly availability: Availability,
     @Inject(RouteAvailability) readonly routeAvailability: RouteAvailability,
+    @Inject(Renewals) readonly renewals: Renewals,
     @Inject(Cooperative) readonly cooperative: Cooperative,
     @Inject(Routes) readonly routes: Routes,
   ) {}
@@ -123,6 +125,38 @@ export class ApiController {
     return {
       data: await this.availability.list(await this.auth.authenticate(req)),
     };
+  }
+  @Get("cooperative/pools/:id/renewals") async renewalView(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.renewals.view(await this.auth.authenticate(req), id);
+  }
+  @Post("cooperative/pools/:id/renewals") async renewalAuthority(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.renewals.authorize(await this.auth.authenticate(req), id, body);
+  }
+  @Post("cooperative/pools/:id/provider-mandates") async renewalMandate(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.renewals.mandate(await this.auth.authenticate(req), id, body);
+  }
+  @Post("cooperative/renewals/:id/revoke") async revokeRenewal(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.renewals.revoke(await this.auth.authenticate(req), id, false);
+  }
+  @Post("cooperative/provider-mandates/:id/revoke") async revokeMandate(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+  ) {
+    return this.renewals.revoke(await this.auth.authenticate(req), id, true);
   }
   @Get("cooperative/pools") async pools(@Req() req: FastifyRequest) {
     return {

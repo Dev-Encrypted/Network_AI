@@ -2,6 +2,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatTU } from "@network-ai/contracts";
+import { RenewalsPanel } from "./renewals";
 
 export type CooperativePool = {
   id: string;
@@ -294,7 +295,15 @@ export function CooperativePanel({ user, request, onChange }: Props) {
         <p>Nenhum plano criado. Comece com uma rota completa já qualificada.</p>
       )}
       {pools.map((p) => (
-        <PoolCard key={p.id} p={p} user={user} busy={busy} mutate={mutate} />
+        <PoolCard
+          key={p.id}
+          p={p}
+          user={user}
+          busy={busy}
+          mutate={mutate}
+          request={request}
+          onChange={onChange}
+        />
       ))}
     </section>
   );
@@ -305,10 +314,14 @@ function PoolCard({
   user,
   busy,
   mutate,
+  request,
+  onChange,
 }: {
   p: CooperativePool;
   user: Props["user"];
   busy: boolean;
+  request: Request;
+  onChange: () => Promise<void>;
   mutate: (
     path: string,
     body: Record<string, unknown>,
@@ -473,6 +486,12 @@ function PoolCard({
           </form>
         </details>
       )}
+      <RenewalsPanel
+        pool={p}
+        user={user}
+        request={request}
+        onChange={onChange}
+      />
       <details>
         <summary>Consumo e destino dos créditos</summary>
         <p>

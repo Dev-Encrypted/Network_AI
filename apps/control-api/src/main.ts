@@ -23,6 +23,7 @@ import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
 import { RouteAvailability } from "./route-availability.js";
+import { Renewals } from "./renewals.js";
 import { Cooperative } from "./cooperative.js";
 import { Routes } from "./routes.js";
 import { ApiController } from "./controller.js";
@@ -35,6 +36,7 @@ const sessions = new Sessions(db, config);
 const availability = new Availability(db);
 const routeAvailability = new RouteAvailability(db);
 const cooperative = new Cooperative(db);
+const renewals = new Renewals(db);
 @Module({
   controllers: [ApiController],
   providers: [
@@ -44,6 +46,7 @@ const cooperative = new Cooperative(db);
     { provide: Sessions, useValue: sessions },
     { provide: Availability, useValue: availability },
     { provide: RouteAvailability, useValue: routeAvailability },
+    { provide: Renewals, useValue: renewals },
     { provide: Cooperative, useValue: cooperative },
     { provide: Routes, useValue: new Routes(db, auth) },
   ],
@@ -152,6 +155,7 @@ await sessions.reap();
 await availability.reconcile();
 await routeAvailability.reconcile();
 await cooperative.reconcile();
+await renewals.reconcile();
 let reaping = false;
 const timer = setInterval(() => {
   if (reaping) return;
@@ -161,6 +165,7 @@ const timer = setInterval(() => {
     .then(() => availability.reconcile())
     .then(() => routeAvailability.reconcile())
     .then(() => cooperative.reconcile())
+    .then(() => renewals.reconcile())
     .catch(() => process.stderr.write("Reconciliation retry pending\n"))
     .finally(() => {
       reaping = false;

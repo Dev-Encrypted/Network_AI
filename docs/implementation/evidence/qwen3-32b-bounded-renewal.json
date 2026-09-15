@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "evidence_type": "REAL_INSTALLED_32B_BOUNDED_AUTOMATIC_RENEWAL",
+  "observed_at": "2026-09-15T01:51:05.654Z",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "compute": "CPU",
+  "model_id": "qwen3-32b-route-private",
+  "unit": "LAB_TU",
+  "cash_payments": false,
+  "fabricated_database_observations": false,
+  "sustainable_economics_established": false,
+  "public_operation_approved": false,
+  "checks": [
+    {
+      "name": "fund_authority_alone_cannot_commit_credits_without_provider_consent",
+      "passed": true
+    },
+    {
+      "name": "coordinator_atomically_funds_and_accepts_first_window_with_exact_bounded_mandate",
+      "passed": true
+    },
+    {
+      "name": "real_32b_consumption_recycles_credits_without_an_additional_inference_payout",
+      "passed": true
+    },
+    {
+      "name": "automatic_second_window_is_preserved_and_keeps_earning_after_future_consent_revocation",
+      "passed": true
+    },
+    {
+      "name": "revocation_prevents_third_window_despite_available_funds_capacity_and_unused_fund_authority",
+      "passed": true
+    }
+  ],
+  "inference": {
+    "elapsed_ms": 4109,
+    "state": "COMPLETED",
+    "billing_state": "SETTLED",
+    "prompt_tokens": 19,
+    "completion_tokens": 7,
+    "charged_microtu": "40000",
+    "recycled_working_microtu": "40000",
+    "participant_inference_payout_microtu": "0"
+  },
+  "first_window": {
+    "state": "COMPLETED",
+    "budget_microtu": "3000",
+    "paid_microtu": "3000",
+    "joint_ready_ms": "30000",
+    "components": [
+      {
+        "ordinal": 0,
+        "role": "ROOT",
+        "paid_microtu": "300",
+        "credited_ms": "30000",
+        "bounded_mandate_recorded": true
+      },
+      {
+        "ordinal": 1,
+        "role": "STAGE",
+        "paid_microtu": "1350",
+        "credited_ms": "30000",
+        "bounded_mandate_recorded": true
+      },
+      {
+        "ordinal": 2,
+        "role": "STAGE",
+        "paid_microtu": "1350",
+        "credited_ms": "30000",
+        "bounded_mandate_recorded": true
+      }
+    ]
+  },
+  "renewal": {
+    "automatic": true,
+    "funding_source": "RECYCLED_WORKING_CREDITS",
+    "additional_contributions_microtu": "0",
+    "initial_existing_funding_microtu": "3000",
+    "gross_working_committed_microtu": "6000",
+    "maximum_authorized_windows": 3
+  },
+  "revocation": {
+    "during_second_window": true,
+    "paid_at_revocation_microtu": "0",
+    "paid_after_revocation_microtu": "195",
+    "accepted_members_withdrawn": 0
+  },
+  "second_window": {
+    "state": "COMPLETED",
+    "budget_microtu": "3000",
+    "paid_microtu": "3000",
+    "joint_ready_ms": "30000",
+    "components": [
+      {
+        "ordinal": 0,
+        "role": "ROOT",
+        "paid_microtu": "300",
+        "credited_ms": "30000",
+        "bounded_mandate_recorded": true
+      },
+      {
+        "ordinal": 1,
+        "role": "STAGE",
+        "paid_microtu": "1350",
+        "credited_ms": "30000",
+        "bounded_mandate_recorded": true
+      },
+      {
+        "ordinal": 2,
+        "role": "STAGE",
+        "paid_microtu": "1350",
+        "credited_ms": "30000",
+        "bounded_mandate_recorded": true
+      }
+    ]
+  },
+  "final": {
+    "balances": {
+      "working": "37000",
+      "reserve": "0",
+      "burned": "0",
+      "held": "0"
+    },
+    "state": "RECOVERY",
+    "renewal_status": "WAITING_FOR_OPERATORS",
+    "windows_used": 2,
+    "gross_working_committed_microtu": "6000",
+    "provider_mandate_state": "REVOKED",
+    "unused_authorized_windows": 1,
+    "capacity_still_ready": true,
+    "new_lab_grants": 0,
+    "journal_projection_mismatches": 0
+  },
+  "result": "PASS"
+}

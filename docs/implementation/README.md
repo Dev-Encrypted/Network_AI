@@ -1,4 +1,4 @@
-# Private cooperative preview v0.6
+# Private bounded-renewal preview v0.7
 
 **Created and directed by Dev-Encrypted.** This release connects the interface, control service, PostgreSQL, Rust gateway, and Rust node to a real local inference engine. It is an executable private environment. Public decentralized operation and the proposed cooperative economy still require qualification.
 
@@ -16,6 +16,7 @@
 - [Complete routes, stage agents, consent and participant settlement](COMPLETE_ROUTES.md)
 - [Complete-route readiness budgets, component obligations and refunds](ROUTE_AVAILABILITY.md)
 - [Cooperative funding, readiness-only terms, recycling and exact refunds](COOPERATIVE_FUNDS.md)
+- [Bounded automatic renewal, spending authority and provider mandates](BOUNDED_RENEWALS.md)
 
 ## Components and data flow
 
@@ -62,3 +63,5 @@ Original code: [Apache 2.0](../../LICENSE). Original documentation: [CC BY 4.0](
 
 
 Version 0.6 adds opt-in cooperative funds. Existing credits finance accepted whole-route windows; verified consumption replenishes the fund using a deterministic floor-first allocation. The real installed 32B route funded its next window from recycled consumption without another contribution. The interface includes plans, transparent compartments, provider consent and the chat's explicit consumption destination. [Full guide and limitations](COOPERATIVE_FUNDS.md), [versioned validation](validation-v0.6.json).
+
+Version 0.7 adds automatic continuation within explicit limits. A fund manager authorizes finite gross working/reserve commitments and window counts; each provider separately authorizes its exact route participation. The coordinator funds and accepts a complete window atomically when all permissions, deadlines, capacity and funds permit. The actual one-host 32B campaign renewed a second window from consumed credits and blocked a third after provider revocation. [Contracts, API and recovery](BOUNDED_RENEWALS.md), [versioned validation](validation-v0.7.json).

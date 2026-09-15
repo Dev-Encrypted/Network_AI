@@ -2,6 +2,8 @@
 
 Version 0.6 private preview · Dev-Encrypted · CC BY 4.0
 
+The fund rules and original v0.6 campaign below remain valid. Version 0.7 adds optional [bounded automatic renewal](BOUNDED_RENEWALS.md) with separate manager and provider permissions; existing manual windows retain their original consent flow.
+
 NETWORK AI can now connect three real operations: people contribute existing laboratory credits, a fund contracts a complete model route, and opted-in consumption replenishes that fund. Providers explicitly accept payment for observed readiness. They do not receive an additional inference split for sessions charged to that fund.
 
 This is an executable private accounting mechanism. It does not establish public decentralization, sustainable prices, independent earnings or approval of the proposed token issuer. The first live campaign used one existing 32B model, three signed agents, one physical computer and one operator account. The preserved [economic study](../execution/ECONOMY_V1_RESULTS.md) remains rejected; its historical inputs and holdout results have not been modified.
@@ -140,7 +142,7 @@ Restoration checks the same exported PostgreSQL snapshot used by the dump, inclu
 
 The coordinator samples every two seconds. A gap over six seconds resets continuous recovery qualification. An isolated database-clock test exercises the 24-hour transition; the real 32B campaign did **not** run for 24 hours and stayed in `RECOVERY` with small test funding.
 
-These states govern this bounded private essential plan. Demand-backed expansion, tariff notice periods, contributor issuance, public quorum, diversity/rotation policy and independent access cohorts remain unqualified. Windows are explicitly proposed and accepted; no unattended renewal is implied by this interface.
+These states govern this bounded private essential plan. Demand-backed expansion, tariff notice periods, contributor issuance, public quorum, diversity/rotation policy and independent access cohorts remain unqualified. The original v0.6 windows are explicitly proposed and accepted. The optional [v0.7 renewal mechanism](BOUNDED_RENEWALS.md) requires additional finite authority; creating a fund alone never authorizes unattended spending.
 
 ## Endpoints and bounded use
 

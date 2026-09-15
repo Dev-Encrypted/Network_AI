@@ -2,7 +2,7 @@
 
 The maintained documentation is in English. It explains both the long-term cooperative network and the private software that can run today. Begin with the guide matching your experience, then follow the technical references.
 
-The [v0.6 cooperative fund guide](implementation/COOPERATIVE_FUNDS.md) explains the implemented credit cycle and its actual one-computer 32B evidence.
+The [cooperative fund guide](implementation/COOPERATIVE_FUNDS.md) explains the implemented credit cycle. The [v0.7 bounded-renewal guide](implementation/BOUNDED_RENEWALS.md) adds automatic continuation with separate spending limits and provider consent, including actual one-computer 32B evidence.
 
 ## Reading paths
 

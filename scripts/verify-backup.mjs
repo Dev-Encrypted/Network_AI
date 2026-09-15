@@ -104,6 +104,11 @@ try {
     "cooperative_settlements",
     "cooperative_refunds",
     "cooperative_events",
+    "cooperative_renewal_authorizations",
+    "cooperative_provider_mandates",
+    "cooperative_renewal_runs",
+    "cooperative_mandate_usages",
+    "cooperative_renewal_events",
   ];
   const routeCounts = {};
   for (const table of routeTables) {
@@ -201,6 +206,46 @@ try {
     () => restored.query("DELETE FROM cooperative_settlements"),
     { code: "42501" },
   );
+  const renewalProjection =
+    await restored.query(`SELECT a.id FROM cooperative_renewal_authorizations a
+    LEFT JOIN cooperative_renewal_runs rr ON rr.authorization_id=a.id GROUP BY a.id
+    HAVING count(rr.lease_id)<>a.windows_used OR coalesce(sum(rr.committed_microtu) FILTER(WHERE rr.source='WORKING'),0)<>a.working_committed_microtu
+    OR coalesce(sum(rr.committed_microtu) FILTER(WHERE rr.source='RESERVE'),0)<>a.reserve_committed_microtu`);
+  const mandateProjection =
+    await restored.query(`SELECT m.id FROM cooperative_provider_mandates m
+    LEFT JOIN cooperative_mandate_usages u ON u.mandate_id=m.id GROUP BY m.id HAVING count(u.lease_id)<>m.windows_used`);
+  const renewalBindings =
+    await restored.query(`SELECT rr.lease_id FROM cooperative_renewal_runs rr
+    JOIN cooperative_renewal_authorizations a ON a.id=rr.authorization_id JOIN cooperative_windows cw ON cw.lease_id=rr.lease_id
+    JOIN route_availability_leases l ON l.id=rr.lease_id WHERE a.pool_id<>cw.pool_id OR a.group_key<>cw.group_key
+    OR rr.source<>cw.funding_source OR rr.committed_microtu<>l.budget_microtu OR l.ends_ms>floor(extract(epoch FROM a.expires_at)*1000)
+    OR l.terms->'cooperative'->'renewal'->>'authorization_id' IS DISTINCT FROM a.id::text
+    OR l.terms->'cooperative'->'renewal'->>'authorization_terms_sha256' IS DISTINCT FROM a.terms_sha256
+    OR EXISTS(SELECT DISTINCT am.provider_id FROM route_availability_members am WHERE am.lease_id=l.id
+      EXCEPT SELECT provider_id FROM cooperative_mandate_usages WHERE lease_id=l.id)`);
+  const mandateBindings =
+    await restored.query(`SELECT u.lease_id FROM cooperative_mandate_usages u JOIN cooperative_provider_mandates m ON m.id=u.mandate_id
+    JOIN route_availability_leases l ON l.id=u.lease_id LEFT JOIN route_availability_acceptances ac ON ac.lease_id=l.id AND ac.provider_id=u.provider_id
+    WHERE u.provider_id<>m.provider_id OR u.terms_sha256<>m.terms_sha256 OR m.route_id<>l.route_id OR m.route_sha256<>l.route_sha256
+    OR ac.provider_mandate_id IS DISTINCT FROM m.id OR ac.terms_sha256 IS DISTINCT FROM l.terms_sha256
+    OR l.ends_ms>floor(extract(epoch FROM m.expires_at)*1000)
+    OR NOT EXISTS(SELECT 1 FROM route_availability_members am WHERE am.lease_id=l.id AND am.provider_id=u.provider_id)`);
+  for (const result of [
+    renewalProjection,
+    mandateProjection,
+    renewalBindings,
+    mandateBindings,
+  ])
+    assert.equal(result.rowCount, 0);
+  for (const statement of [
+    "UPDATE cooperative_renewal_authorizations SET windows_used=0",
+    "UPDATE cooperative_renewal_authorizations SET maximum_working_microtu=maximum_working_microtu",
+    "UPDATE cooperative_provider_mandates SET terms=terms",
+    "UPDATE cooperative_provider_mandates SET windows_used=0",
+    "DELETE FROM cooperative_renewal_runs",
+    "DELETE FROM cooperative_mandate_usages",
+  ])
+    await assert.rejects(() => restored.query(statement), { code: "42501" });
   const report = {
     evidence_type: "ISOLATED_POSTGRES_RESTORE",
     source_comparison: "same exported PostgreSQL snapshot as pg_dump",
@@ -209,6 +254,11 @@ try {
     balance_sum: "0",
     projection_mismatches: 0,
     cooperative_settlement_mismatches: 0,
+    renewal_authority_projection_mismatches: 0,
+    provider_mandate_projection_mismatches: 0,
+    renewal_contract_binding_mismatches: 0,
+    provider_mandate_binding_mismatches: 0,
+    runtime_renewal_limits_terms_and_usage_writes_denied: true,
     runtime_cooperative_policy_and_history_writes_denied: true,
     runtime_balance_write_denied: true,
     availability_contracts: leases.rows[0].n,

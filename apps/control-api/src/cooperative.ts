@@ -520,155 +520,176 @@ export class Cooperative {
       })
       .strict()
       .parse(body);
-    const request = hash(canonical({ pool_id: id, ...data }));
-    return this.db.transaction(async (tx) => {
-      // Match the standalone sponsor lock order before the pool and ledger locks.
-      const info = (
-        await tx.query("SELECT creator_id FROM cooperative_pools WHERE id=$1", [
-          id,
-        ])
-      ).rows[0];
-      need(info, 404, "pool_missing", "Fundo não encontrado.");
+    return this.db.transaction((tx) =>
+      this.offerTransaction(tx, user, id, data),
+    );
+  }
+  async offerTransaction(
+    tx: PoolClient,
+    user: User,
+    id: string,
+    data: {
+      group_key: string;
+      source: "WORKING" | "RESERVE";
+      reason: string;
+      idempotency_key: string;
+    },
+    options?: { eligibleRoutes?: string[]; renewal?: Record<string, unknown> },
+  ) {
+    const request = hash(
+      canonical({
+        pool_id: id,
+        ...data,
+        ...(options?.renewal ? { renewal: options.renewal } : {}),
+      }),
+    );
+    // Match the standalone sponsor lock order before the pool and ledger locks.
+    const info = (
+      await tx.query("SELECT creator_id FROM cooperative_pools WHERE id=$1", [
+        id,
+      ])
+    ).rows[0];
+    need(info, 404, "pool_missing", "Fundo não encontrado.");
+    need(
+      info.creator_id === user.id || user.role === "admin",
+      403,
+      "pool_manager",
+      "Somente o responsável pode contratar capacidade.",
+    );
+    await tx.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [
+      info.creator_id,
+    ]);
+    const p = await locked(tx, id);
+    const prior = (
+      await tx.query(
+        "SELECT * FROM route_availability_leases WHERE sponsor_id=$1 AND idempotency_key=$2",
+        [p.creator_id, data.idempotency_key],
+      )
+    ).rows[0];
+    if (prior) {
       need(
-        info.creator_id === user.id || user.role === "admin",
-        403,
-        "pool_manager",
-        "Somente o responsável pode contratar capacidade.",
-      );
-      await tx.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [
-        info.creator_id,
-      ]);
-      const p = await locked(tx, id);
-      const prior = (
-        await tx.query(
-          "SELECT * FROM route_availability_leases WHERE sponsor_id=$1 AND idempotency_key=$2",
-          [p.creator_id, data.idempotency_key],
-        )
-      ).rows[0];
-      if (prior) {
-        need(
-          prior.terms.cooperative?.request_sha256 === request,
-          409,
-          "idempotency_conflict",
-          "Identificador usado com outros termos.",
-        );
-        const { writer_xid, ...visible } = prior;
-        return visible;
-      }
-      const s = await cooperativeSnapshot(tx, p),
-        g = s.groups.find((v) => v.group_key === data.group_key);
-      need(g, 404, "group_missing", "Grupo não encontrado.");
-      need(
-        !p.paused &&
-          new Date(p.support_until).getTime() >
-            Date.now() + (g.duration_seconds + 10) * 1000,
+        prior.terms.cooperative?.request_sha256 === request,
         409,
-        "support_window",
-        "O apoio operacional não cobre esta janela.",
+        "idempotency_conflict",
+        "Identificador usado com outros termos.",
       );
-      const occupied = (
-        await tx.query(
-          `SELECT 1 FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
+      const { writer_xid, ...visible } = prior;
+      return visible;
+    }
+    const s = await cooperativeSnapshot(tx, p),
+      g = s.groups.find((v) => v.group_key === data.group_key);
+    need(g, 404, "group_missing", "Grupo não encontrado.");
+    need(
+      !p.paused &&
+        new Date(p.support_until).getTime() >
+          Date.now() + (g.duration_seconds + 10) * 1000,
+      409,
+      "support_window",
+      "O apoio operacional não cobre esta janela.",
+    );
+    const occupied = (
+      await tx.query(
+        `SELECT 1 FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
         WHERE cw.pool_id=$1 AND cw.group_key=$2 AND l.state IN ('OFFERED','ACTIVE','DRAINING')`,
-          [id, g.group_key],
-        )
-      ).rowCount;
-      need(
-        !occupied,
-        409,
-        "group_committed",
-        "Este grupo já tem uma janela financiada; aguarde o encerramento.",
-      );
-      const r = (
-        await tx.query(
-          `SELECT cr.* FROM cooperative_routes cr JOIN ready_execution_offers o ON o.route_id=cr.route_id
-        WHERE cr.pool_id=$1 AND cr.group_key=$2 AND NOT EXISTS(SELECT 1 FROM availability_domain_claims ac WHERE ac.resource_domain_id=ANY(o.domain_ids))
+        [id, g.group_key],
+      )
+    ).rowCount;
+    need(
+      !occupied,
+      409,
+      "group_committed",
+      "Este grupo já tem uma janela financiada; aguarde o encerramento.",
+    );
+    const r = (
+      await tx.query(
+        `SELECT cr.* FROM cooperative_routes cr JOIN ready_execution_offers o ON o.route_id=cr.route_id
+        WHERE cr.pool_id=$1 AND cr.group_key=$2 AND ($3::uuid[] IS NULL OR cr.route_id=ANY($3::uuid[])) AND NOT EXISTS(SELECT 1 FROM availability_domain_claims ac WHERE ac.resource_domain_id=ANY(o.domain_ids))
         ORDER BY (SELECT max(l.created_at) FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
           WHERE cw.pool_id=$1 AND l.route_id=cr.route_id) ASC NULLS FIRST,cr.route_id LIMIT 1`,
-          [id, g.group_key],
-        )
-      ).rows[0];
+        [id, g.group_key, options?.eligibleRoutes ?? null],
+      )
+    ).rows[0];
+    need(
+      r,
+      409,
+      "route_not_ready",
+      "Nenhuma alternativa completa está pronta e livre de outro contrato.",
+    );
+    const budget =
+      BigInt(g.rate_microtu_per_second) * BigInt(g.duration_seconds);
+    let incident: string | null = null;
+    if (data.source === "RESERVE") {
       need(
-        r,
+        s.working < budget,
         409,
-        "route_not_ready",
-        "Nenhuma alternativa completa está pronta e livre de outro contrato.",
+        "reserve_protected",
+        "Use capital de giro: a reserva só atende uma renovação essencial que ele não consegue financiar.",
       );
-      const budget =
-        BigInt(g.rate_microtu_per_second) * BigInt(g.duration_seconds);
-      let incident: string | null = null;
-      if (data.source === "RESERVE") {
-        need(
-          s.working < budget,
-          409,
-          "reserve_protected",
-          "Use capital de giro: a reserva só atende uma renovação essencial que ele não consegue financiar.",
-        );
-        need(
-          s.reserve >= budget,
-          402,
-          "insufficient_credits",
-          "Reserva insuficiente para a rota inteira.",
-        );
-        incident = randomUUID();
-        await tx.query(
-          `INSERT INTO cooperative_incidents(id,pool_id,group_key,route_id,policy_sha256,budget_microtu,deadline,reason,evidence)
-          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-          [
-            incident,
-            id,
-            g.group_key,
-            r.route_id,
-            p.policy_sha256,
-            budget.toString(),
-            p.support_until,
-            data.reason,
-            {
-              working_microtu: s.working.toString(),
-              state: s.state,
-              trigger: "ESSENTIAL_WORKING_SHORTFALL",
-              request_sha256: request,
-            },
-          ],
-        );
-      }
-      const context = {
-        pool_id: id,
-        group_key: g.group_key,
-        policy_sha256: p.policy_sha256,
-        funding_source: data.source,
-        incident_id: incident,
-        request_sha256: request,
-        support_until: new Date(p.support_until).toISOString(),
-        compensation: "READINESS_ONLY",
-      };
-      const lease = await new RouteAvailability(this.db).offerTransaction(
-        tx,
-        { ...user, id: p.creator_id },
-        {
-          route_id: r.route_id,
-          duration_seconds: g.duration_seconds,
-          rate_microtu_per_second: g.rate_microtu_per_second,
-          purpose: "SCHEDULED",
-          reason: data.reason,
-          idempotency_key: data.idempotency_key,
-        },
-        {
-          account:
-            data.source === "WORKING" ? p.working_account : p.reserve_account,
-          terms: context,
-        },
+      need(
+        s.reserve >= budget,
+        402,
+        "insufficient_credits",
+        "Reserva insuficiente para a rota inteira.",
       );
+      incident = randomUUID();
       await tx.query(
-        "INSERT INTO cooperative_windows(lease_id,pool_id,group_key,funding_source,incident_id) VALUES($1,$2,$3,$4,$5)",
-        [lease.id, id, g.group_key, data.source, incident],
+        `INSERT INTO cooperative_incidents(id,pool_id,group_key,route_id,policy_sha256,budget_microtu,deadline,reason,evidence)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        [
+          incident,
+          id,
+          g.group_key,
+          r.route_id,
+          p.policy_sha256,
+          budget.toString(),
+          p.support_until,
+          data.reason,
+          {
+            working_microtu: s.working.toString(),
+            state: s.state,
+            trigger: "ESSENTIAL_WORKING_SHORTFALL",
+            request_sha256: request,
+          },
+        ],
       );
-      await this.event(tx, id, user.id, "window_funded", {
-        lease_id: lease.id,
-        ...context,
-      });
-      return lease;
+    }
+    const context = {
+      pool_id: id,
+      group_key: g.group_key,
+      policy_sha256: p.policy_sha256,
+      funding_source: data.source,
+      incident_id: incident,
+      request_sha256: request,
+      support_until: new Date(p.support_until).toISOString(),
+      compensation: "READINESS_ONLY",
+      ...(options?.renewal ? { renewal: options.renewal } : {}),
+    };
+    const lease = await new RouteAvailability(this.db).offerTransaction(
+      tx,
+      { ...user, id: p.creator_id },
+      {
+        route_id: r.route_id,
+        duration_seconds: g.duration_seconds,
+        rate_microtu_per_second: g.rate_microtu_per_second,
+        purpose: "SCHEDULED",
+        reason: data.reason,
+        idempotency_key: data.idempotency_key,
+      },
+      {
+        account:
+          data.source === "WORKING" ? p.working_account : p.reserve_account,
+        terms: context,
+      },
+    );
+    await tx.query(
+      "INSERT INTO cooperative_windows(lease_id,pool_id,group_key,funding_source,incident_id) VALUES($1,$2,$3,$4,$5)",
+      [lease.id, id, g.group_key, data.source, incident],
+    );
+    await this.event(tx, id, user.id, "window_funded", {
+      lease_id: lease.id,
+      ...context,
     });
+    return lease;
   }
   async reconcile() {
     const ids = (

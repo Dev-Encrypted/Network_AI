@@ -75,6 +75,8 @@ If a stage goes offline, it stops earning eligible readiness time. The other com
 
 ## Understand common outcomes
 
+For cooperative funds, **Cooperação → Renovação automática com limites** adds optional continuation. The manager sets maximum windows, separate gross working/reserve limits and expiry. Each provider signs in separately and authorizes its own participation. Revoking that permission stops future windows while accepted windows retain their deadlines. Contributions alone do not enable automatic spending. The [step-by-step renewal guide](implementation/BOUNDED_RENEWALS.md) explains the controls and a real 32B example.
+
 | Outcome | Meaning | Next step |
 |---|---|---|
 | Model unavailable | No qualified, eligible node currently serves it | Check qualification, loaded model, heartbeat, and node state |

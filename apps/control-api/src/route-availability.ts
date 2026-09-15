@@ -40,7 +40,7 @@ export class RouteAvailability {
         'resource_domain_id',p.resource_domain_id,'node_name',n.name,'provider_name',u.name,
         'role',p.role,'ordinal',p.ordinal,'share_bps',p.share_bps,'maximum_microtu',p.maximum_microtu::text,
         'paid_microtu',p.paid_microtu::text,'credited_ms',p.credited_ms::text,'withdrawn_at',p.withdrawn_at,
-        'accepted',a.provider_id IS NOT NULL) ORDER BY p.ordinal)
+        'accepted',a.provider_id IS NOT NULL,'provider_mandate_id',a.provider_mandate_id) ORDER BY p.ordinal)
         FROM route_availability_members p JOIN nodes n ON n.id=p.node_id JOIN users u ON u.id=p.provider_id
         LEFT JOIN route_availability_acceptances a ON a.lease_id=p.lease_id AND a.provider_id=p.provider_id
         WHERE p.lease_id=l.id) AS participants,
@@ -239,127 +239,143 @@ export class RouteAvailability {
   async accept(user: User, id: string, body: unknown) {
     uuid.parse(id);
     const data = z.object({ terms_sha256: sha256 }).strict().parse(body);
-    return this.db.transaction(async (tx) => {
-      const row = (
-        await tx.query(
-          `SELECT l.* FROM route_availability_leases l WHERE l.id=$1
-        AND EXISTS(SELECT 1 FROM route_availability_members p WHERE p.lease_id=l.id AND p.provider_id=$2) FOR UPDATE`,
-          [id, user.id],
-        )
-      ).rows[0];
-      need(
-        row,
-        404,
-        "lease_missing",
-        "Contrato não encontrado para este operador.",
-      );
-      need(
-        row.terms_sha256 === data.terms_sha256,
-        409,
-        "lease_terms",
-        "Confira e aceite exatamente os termos desta oferta.",
-      );
-      const prior = (
-        await tx.query(
-          "SELECT 1 FROM route_availability_acceptances WHERE lease_id=$1 AND provider_id=$2",
-          [id, user.id],
-        )
-      ).rowCount;
-      if (prior && row.state !== "OFFERED") return this.publicRow(row);
-      need(
-        row.state === "OFFERED" &&
-          new Date(row.offer_expires_at).getTime() > (await clock(tx)),
-        409,
-        "offer_expired",
-        "A oferta expirou ou foi encerrada.",
-      );
-      if (!prior) {
-        await tx.query(
-          "INSERT INTO route_availability_acceptances(lease_id,provider_id,terms_sha256) VALUES($1,$2,$3)",
-          [id, user.id, data.terms_sha256],
-        );
-        await this.event(tx, id, "provider_accepted", {
-          provider_id: user.id,
-          terms_sha256: data.terms_sha256,
-        });
-      }
-      const missing = (
-        await tx.query(
-          `SELECT 1 FROM route_availability_members p LEFT JOIN route_availability_acceptances a
-        ON a.lease_id=p.lease_id AND a.provider_id=p.provider_id WHERE p.lease_id=$1 AND a.provider_id IS NULL LIMIT 1`,
-          [id],
-        )
-      ).rowCount;
-      if (missing) return this.publicRow(row);
-      const domains = (
-        await tx.query(
-          "SELECT DISTINCT resource_domain_id FROM route_availability_members WHERE lease_id=$1 ORDER BY resource_domain_id",
-          [id],
-        )
-      ).rows.map((r) => r.resource_domain_id);
+    return this.db.transaction((tx) =>
+      this.acceptTransaction(tx, user, id, data),
+    );
+  }
+  async acceptTransaction(
+    tx: PoolClient,
+    user: User,
+    id: string,
+    data: { terms_sha256: string },
+    mandate?: { id: string; terms_sha256: string },
+  ) {
+    const row = (
       await tx.query(
-        "SELECT id FROM resource_domains WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE",
+        `SELECT l.* FROM route_availability_leases l WHERE l.id=$1
+        AND EXISTS(SELECT 1 FROM route_availability_members p WHERE p.lease_id=l.id AND p.provider_id=$2) FOR UPDATE`,
+        [id, user.id],
+      )
+    ).rows[0];
+    need(
+      row,
+      404,
+      "lease_missing",
+      "Contrato não encontrado para este operador.",
+    );
+    need(
+      row.terms_sha256 === data.terms_sha256,
+      409,
+      "lease_terms",
+      "Confira e aceite exatamente os termos desta oferta.",
+    );
+    const prior = (
+      await tx.query(
+        "SELECT 1 FROM route_availability_acceptances WHERE lease_id=$1 AND provider_id=$2",
+        [id, user.id],
+      )
+    ).rowCount;
+    if (prior && row.state !== "OFFERED") return this.publicRow(row);
+    need(
+      row.state === "OFFERED" &&
+        new Date(row.offer_expires_at).getTime() > (await clock(tx)),
+      409,
+      "offer_expired",
+      "A oferta expirou ou foi encerrada.",
+    );
+    if (!prior) {
+      await tx.query(
+        "INSERT INTO route_availability_acceptances(lease_id,provider_id,terms_sha256,provider_mandate_id) VALUES($1,$2,$3,$4)",
+        [id, user.id, data.terms_sha256, mandate?.id ?? null],
+      );
+      await this.event(tx, id, "provider_accepted", {
+        provider_id: user.id,
+        terms_sha256: data.terms_sha256,
+        ...(mandate
+          ? {
+              source: "BOUNDED_PROVIDER_MANDATE",
+              provider_mandate_id: mandate.id,
+              mandate_terms_sha256: mandate.terms_sha256,
+            }
+          : { source: "DIRECT_PROVIDER_ACCEPTANCE" }),
+      });
+    }
+    const missing = (
+      await tx.query(
+        `SELECT 1 FROM route_availability_members p LEFT JOIN route_availability_acceptances a
+        ON a.lease_id=p.lease_id AND a.provider_id=p.provider_id WHERE p.lease_id=$1 AND a.provider_id IS NULL LIMIT 1`,
+        [id],
+      )
+    ).rowCount;
+    if (missing) return this.publicRow(row);
+    const domains = (
+      await tx.query(
+        "SELECT DISTINCT resource_domain_id FROM route_availability_members WHERE lease_id=$1 ORDER BY resource_domain_id",
+        [id],
+      )
+    ).rows.map((r) => r.resource_domain_id);
+    await tx.query(
+      "SELECT id FROM resource_domains WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE",
+      [domains],
+    );
+    const occupied = (
+      await tx.query(
+        "SELECT 1 FROM availability_domain_claims WHERE resource_domain_id=ANY($1::uuid[]) LIMIT 1",
         [domains],
-      );
-      const occupied = (
+      )
+    ).rowCount;
+    need(
+      !occupied,
+      409,
+      "domain_leased",
+      "Uma das capacidades físicas já possui contrato ativo.",
+    );
+    const now = await clock(tx);
+    if (row.terms.cooperative) {
+      const p = (
         await tx.query(
-          "SELECT 1 FROM availability_domain_claims WHERE resource_domain_id=ANY($1::uuid[]) LIMIT 1",
-          [domains],
-        )
-      ).rowCount;
-      need(
-        !occupied,
-        409,
-        "domain_leased",
-        "Uma das capacidades físicas já possui contrato ativo.",
-      );
-      const now = await clock(tx);
-      if (row.terms.cooperative) {
-        const p = (
-          await tx.query(
-            "SELECT paused,support_until FROM cooperative_pools WHERE id=$1",
-            [row.terms.cooperative.pool_id],
-          )
-        ).rows[0];
-        need(
-          p &&
-            !p.paused &&
-            Math.min(
-              new Date(p.support_until).getTime(),
-              new Date(row.terms.cooperative.support_until).getTime(),
-            ) >=
-              now + row.duration_seconds * 1000,
-          409,
-          "support_window",
-          "O apoio operacional não cobre mais a janela completa.",
-        );
-      }
-      const observation = await this.observe(tx, row, now);
-      need(
-        observation.joint,
-        409,
-        "route_not_ready",
-        "Todas as etapas precisam estar prontas, com presença recente e os termos originais.",
-      );
-      for (const p of observation.members)
-        await tx.query(
-          "UPDATE route_availability_members SET sample_ready=true,node_epoch=$3 WHERE lease_id=$1 AND node_id=$2",
-          [id, p.node_id, p.epoch],
-        );
-      const result = (
-        await tx.query(
-          `UPDATE route_availability_leases SET state='ACTIVE',started_ms=$2,ends_ms=$3,
-        sample_ms=$2,sample_ready=true WHERE id=$1 RETURNING *`,
-          [id, now, now + row.duration_seconds * 1000],
+          "SELECT paused,support_until FROM cooperative_pools WHERE id=$1",
+          [row.terms.cooperative.pool_id],
         )
       ).rows[0];
-      await this.event(tx, id, "activated", {
-        started_ms: now,
-        ends_ms: Number(result.ends_ms),
-        physical_domains: domains.length,
-      });
-      return this.publicRow(result);
+      need(
+        p &&
+          !p.paused &&
+          Math.min(
+            new Date(p.support_until).getTime(),
+            new Date(row.terms.cooperative.support_until).getTime(),
+          ) >=
+            now + row.duration_seconds * 1000,
+        409,
+        "support_window",
+        "O apoio operacional não cobre mais a janela completa.",
+      );
+    }
+    const observation = await this.observe(tx, row, now);
+    need(
+      observation.joint,
+      409,
+      "route_not_ready",
+      "Todas as etapas precisam estar prontas, com presença recente e os termos originais.",
+    );
+    for (const p of observation.members)
+      await tx.query(
+        "UPDATE route_availability_members SET sample_ready=true,node_epoch=$3 WHERE lease_id=$1 AND node_id=$2",
+        [id, p.node_id, p.epoch],
+      );
+    const result = (
+      await tx.query(
+        `UPDATE route_availability_leases SET state='ACTIVE',started_ms=$2,ends_ms=$3,
+        sample_ms=$2,sample_ready=true WHERE id=$1 RETURNING *`,
+        [id, now, now + row.duration_seconds * 1000],
+      )
+    ).rows[0];
+    await this.event(tx, id, "activated", {
+      started_ms: now,
+      ends_ms: Number(result.ends_ms),
+      physical_domains: domains.length,
     });
+    return this.publicRow(result);
   }
 
   async cancel(user: User, id: string) {

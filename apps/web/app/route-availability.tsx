@@ -13,6 +13,7 @@ type Participant = {
   paid_microtu: string;
   credited_ms: string;
   accepted: boolean;
+  provider_mandate_id: string | null;
   withdrawn_at: string | null;
 };
 type Lease = {
@@ -368,7 +369,9 @@ export function RouteAvailabilityPanel({ user, request, onChange }: Props) {
                         {p.withdrawn_at
                           ? "Contribuição encerrada"
                           : p.accepted
-                            ? "Aceito"
+                            ? p.provider_mandate_id
+                              ? "Aceito por autorização limitada"
+                              : "Aceito"
                             : "Pendente"}
                       </td>
                     </tr>

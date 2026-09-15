@@ -1971,6 +1971,16 @@ td small,
 .coverage-wide {
   grid-column: 1 / -1;
 }
+.route-availability-form .consent-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.route-availability-form .consent-line input[type="checkbox"] {
+  width: auto;
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
 .coverage-budget {
   padding: 16px;
   border: 1px solid var(--line);

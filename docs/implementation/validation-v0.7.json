@@ -1,0 +1,79 @@
+{
+  "version": "0.7.0-private-renewal-preview",
+  "observed_on_local_date": "2026-09-14",
+  "timezone": "America/Sao_Paulo",
+  "scope": "Private Windows application, one physical host/account, three signed agents, one coordinator and the installed official 32B CPU route.",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "tests": {
+    "integration_and_integer_accounting": 74,
+    "new_bounded_renewal_cases": 14,
+    "artifact_acquisition": 3,
+    "rpc_socket_protocol": 4,
+    "rust_runtime": 4,
+    "rust_private_link": 3,
+    "rust_f0": 2,
+    "python_f0": 21,
+    "browser": 9,
+    "total_automated_without_double_counting_new_cases": 120
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_economic_sources_unchanged": true
+  },
+  "real_campaign": {
+    "report": "evidence/qwen3-32b-bounded-renewal.json",
+    "initial_existing_funding_microtu": "3000",
+    "automatically_started_windows": 2,
+    "seconds_per_window": 30,
+    "total_readiness_paid_microtu": "6000",
+    "actual_consumption_recycled_microtu": "40000",
+    "final_working_microtu": "37000",
+    "new_contributions_for_second_window_microtu": "0",
+    "new_grants": 0,
+    "manager_maximum_windows": 3,
+    "provider_maximum_windows": 3,
+    "provider_revoked_during_second_window": true,
+    "accepted_window_kept_earning": true,
+    "third_window_blocked_with_funds_and_capacity_available": true
+  },
+  "browser_campaign": {
+    "distinct_cases_passed": 9,
+    "execution": "Eight existing journeys passed in the full run; new bounded-renewal journey passed on focused rerun after correcting its select locator.",
+    "lost_authorization_response_reuses_uuid_and_expiry": true,
+    "separate_provider_consent": true,
+    "future_only_revocation": true,
+    "accepted_window_kept_earning": true,
+    "desktop_mobile_visual_review": true,
+    "mobile_width": 390,
+    "no_page_overflow": true,
+    "requires_existing_managed_route": true,
+    "no_fake_readiness_substituted_in_ci": true
+  },
+  "isolated_restore": {
+    "report": "evidence/renewal-backup-restore.json",
+    "same_exported_snapshot": true,
+    "journal_entries": 293,
+    "active_complete_route_windows": 1,
+    "renewal_authorizations": 4,
+    "provider_mandates": 2,
+    "automatic_windows": 3,
+    "projection_and_binding_mismatches": 0,
+    "runtime_permissions_preserved": true
+  },
+  "unqualified_or_unfinished": [
+    "real 24-hour recovery campaign",
+    "fresh successful mature economic study",
+    "demand-backed expansion and observed cost calibration",
+    "cooperative issuance and exposure governance",
+    "independent heterogeneous GPU/WAN routes",
+    "independent work verification and anti-Sybil controls",
+    "distributed consensus and public operating quorum",
+    "cash payments, disputes and payouts",
+    "funded public pilot and production operation"
+  ]
+}

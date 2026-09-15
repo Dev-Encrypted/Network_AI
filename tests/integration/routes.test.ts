@@ -11,6 +11,7 @@ import { Database } from "../../apps/control-api/src/db.js";
 import { Market } from "../../apps/control-api/src/market.js";
 import { Nodes } from "../../apps/control-api/src/nodes.js";
 import { Routes } from "../../apps/control-api/src/routes.js";
+import { Renewals } from "../../apps/control-api/src/renewals.js";
 import { Availability } from "../../apps/control-api/src/availability.js";
 import { RouteAvailability } from "../../apps/control-api/src/route-availability.js";
 import { Sessions } from "../../apps/control-api/src/sessions.js";
@@ -1655,4 +1656,563 @@ test("cooperation: committed plans, settlements and runtime policy permissions a
     await db.pool.query("SELECT sum(balance)::text AS n FROM ledger_accounts")
   ).rows[0].n;
   assert.equal(overall, "0");
+});
+
+const renewals = () => new Renewals(db);
+const authorityTerms = (p: any, extra: Record<string, unknown> = {}) => ({
+  group_key: "essential",
+  policy_sha256: p.policy_sha256,
+  maximum_windows: 3,
+  maximum_working_microtu: "18000",
+  maximum_reserve_microtu: "0",
+  expires_at: new Date(Date.now() + 600000).toISOString(),
+  reason: "Isolated bounded automatic essential renewal",
+  idempotency_key: randomUUID(),
+  consent: "BOUNDED_GROSS_COMMITMENTS_NO_AUTOMATIC_LIMIT_INCREASE",
+  ...extra,
+});
+const mandateTerms = (
+  p: any,
+  route: string,
+  extra: Record<string, unknown> = {},
+) => ({
+  route_id: route,
+  policy_sha256: p.policy_sha256,
+  maximum_windows: 3,
+  expires_at: new Date(Date.now() + 600000).toISOString(),
+  reason: "Isolated provider accepts bounded readiness-only renewal",
+  idempotency_key: randomUUID(),
+  consent: "READINESS_ONLY_BOUNDED_RENEWALS",
+  ...extra,
+});
+async function renewalFixture(
+  t: TestContext,
+  options: {
+    providers?: number;
+    working?: string;
+    reserve?: string;
+    authority?: Record<string, unknown>;
+  } = {},
+) {
+  const { f, p } = await poolFixture(
+    t,
+    options.working ?? "10000000",
+    options.reserve ?? "0",
+  );
+  const a = await renewals().authorize(
+    f.buyer,
+    p.id,
+    authorityTerms(p, options.authority),
+  );
+  const ms: any[] = [];
+  for (const provider of f.providers.slice(0, options.providers ?? 3))
+    ms.push(
+      await renewals().mandate(provider, p.id, mandateTerms(p, f.route.id)),
+    );
+  t.after(async () => {
+    const v = await renewals().view(admin, p.id);
+    for (const m of v.mandates) await renewals().revoke(admin, m.id, true);
+    for (const a of v.authorizations)
+      await renewals().revoke(admin, a.id, false);
+  });
+  return { f, p, a, ms };
+}
+async function authorityRow(id: string) {
+  return (
+    await db.pool.query(
+      "SELECT * FROM cooperative_renewal_authorizations WHERE id=$1",
+      [id],
+    )
+  ).rows[0];
+}
+
+test("renewals: manager and provider authorities bind identity, policy, payload and finite limits", async (t) => {
+  const { f, p } = await poolFixture(t);
+  const d = authorityTerms(p);
+  await assert.rejects(renewals().authorize(f.root, p.id, d), /responsável/);
+  const a = await renewals().authorize(f.buyer, p.id, d);
+  assert.equal((await renewals().authorize(f.buyer, p.id, d)).id, a.id);
+  await assert.rejects(
+    renewals().authorize(f.buyer, p.id, { ...d, maximum_windows: 9 }),
+    /Identificador/,
+  );
+  await assert.rejects(
+    renewals().authorize(f.buyer, p.id, authorityTerms(p)),
+    /Revogue/,
+  );
+  await assert.rejects(
+    renewals().mandate(f.buyer, p.id, mandateTerms(p, f.route.id)),
+    /oferecer/,
+  );
+  await assert.rejects(
+    renewals().mandate(
+      f.root,
+      p.id,
+      mandateTerms(p, f.route.id, { policy_sha256: hash("wrong") }),
+    ),
+    /política/,
+  );
+  await assert.rejects(
+    renewals().mandate(
+      f.root,
+      p.id,
+      mandateTerms(p, f.route.id, {
+        expires_at: new Date(Date.now() + 1000).toISOString(),
+      }),
+    ),
+    /autorização/,
+  );
+  const m = mandateTerms(p, f.route.id),
+    r = await renewals().mandate(f.root, p.id, m);
+  assert.equal((await renewals().mandate(f.root, p.id, m)).id, r.id);
+  await assert.rejects(
+    renewals().mandate(f.root, p.id, { ...m, maximum_windows: 4 }),
+    /Identificador/,
+  );
+  await renewals().revoke(f.buyer, a.id, false);
+  await renewals().revoke(f.root, r.id, true);
+});
+test("renewals: missing one operator creates no window, escrow, incident or consumed limit", async (t) => {
+  const { f, p, a } = await renewalFixture(t, { providers: 2 });
+  const before = (
+    await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+      p.working_account,
+    ])
+  ).rows[0].balance;
+  assert.equal(
+    (await renewals().attempt(a.id)).status,
+    "WAITING_FOR_OPERATORS",
+  );
+  assert.equal((await renewals().view(f.buyer, p.id)).runs.length, 0);
+  assert.equal((await authorityRow(a.id)).windows_used, 0);
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        p.working_account,
+      ])
+    ).rows[0].balance,
+    before,
+  );
+  const events = (await renewals().view(f.buyer, p.id)).events.length;
+  await renewals().attempt(a.id);
+  assert.equal(
+    (await renewals().view(f.buyer, p.id)).events.length,
+    events,
+    "Unchanged waits do not append duplicate events",
+  );
+});
+test("renewals: all mandates activate one fully funded complete window atomically", async (t) => {
+  const { f, p, a, ms } = await renewalFixture(t);
+  const result = await renewals().attempt(a.id);
+  assert.equal(result.status, "RENEWED");
+  const l = await coverageRow(f, result.lease_id as string);
+  assert.equal(l.state, "ACTIVE");
+  assert.equal(l.terms.cooperative.renewal.authorization_id, a.id);
+  assert.ok(l.participants.every((v: any) => v.provider_mandate_id));
+  assert.equal((await authorityRow(a.id)).working_committed_microtu, "6000");
+  for (const m of ms)
+    assert.equal(
+      (
+        await db.pool.query(
+          "SELECT windows_used FROM cooperative_provider_mandates WHERE id=$1",
+          [m.id],
+        )
+      ).rows[0].windows_used,
+      1,
+    );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM cooperative_mandate_usages WHERE lease_id=$1",
+        [l.id],
+      )
+    ).rows[0].n,
+    3,
+  );
+});
+test("renewals: concurrent coordinators and restart retries cannot double fund the same group", async (t) => {
+  const { p, a } = await renewalFixture(t);
+  const results = await Promise.all([
+    renewals().attempt(a.id),
+    new Renewals(db).attempt(a.id),
+  ]);
+  assert.deepEqual(results.map((r) => r.status).sort(), [
+    "RENEWED",
+    "WAITING_FOR_WINDOW",
+  ]);
+  assert.equal(
+    (await new Renewals(db).attempt(a.id)).status,
+    "WAITING_FOR_WINDOW",
+  );
+  assert.equal((await renewals().view(admin, p.id)).runs.length, 1);
+  assert.equal((await authorityRow(a.id)).windows_used, 1);
+});
+test("renewals: returned escrow never replenishes gross lifetime spending or window limits", async (t) => {
+  const { f, p, a } = await renewalFixture(t, {
+    authority: { maximum_windows: 2, maximum_working_microtu: "12000" },
+  });
+  const before = (
+    await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+      p.working_account,
+    ])
+  ).rows[0].balance;
+  for (let i = 0; i < 2; i++) {
+    for (const part of f.parts) await ready(part.nodeId);
+    const r = await renewals().attempt(a.id);
+    assert.equal(r.status, "RENEWED");
+    await finishCoverage(r.lease_id as string);
+  }
+  const after = await authorityRow(a.id);
+  assert.equal(after.state, "EXHAUSTED");
+  assert.equal(after.working_committed_microtu, "12000");
+  assert.equal(after.windows_used, 2);
+  assert.equal((await renewals().attempt(a.id)).status, "EXHAUSTED");
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        p.working_account,
+      ])
+    ).rows[0].balance,
+    before,
+  );
+});
+test("renewals: provider revocation stops future windows while accepted readiness continues earning", async (t) => {
+  const { f, p, a, ms } = await renewalFixture(t);
+  const r = await renewals().attempt(a.id),
+    id = r.lease_id as string;
+  await renewals().revoke(f.providers[1]!, ms[1].id, true);
+  await elapsedCoverage(id, 1000);
+  await coverage().reconcile();
+  const l = await coverageRow(f, id);
+  assert.equal(l.state, "ACTIVE");
+  assert.ok(
+    l.participants.every(
+      (v: any) => v.withdrawn_at === null && BigInt(v.paid_microtu) > 0n,
+    ),
+  );
+  await finishCoverage(id);
+  for (const part of f.parts) await ready(part.nodeId);
+  assert.equal(
+    (await renewals().attempt(a.id)).status,
+    "WAITING_FOR_OPERATORS",
+  );
+  assert.equal((await renewals().view(admin, p.id)).runs.length, 1);
+});
+test("renewals: manager revocation and expiry cannot be reversed or applied retroactively", async (t) => {
+  const { f, a } = await renewalFixture(t);
+  const r = await renewals().attempt(a.id);
+  await assert.rejects(renewals().revoke(f.root, a.id, false), /responsável/);
+  await renewals().revoke(f.buyer, a.id, false);
+  assert.equal((await renewals().attempt(a.id)).status, "REVOKED");
+  assert.equal((await coverageRow(f, r.lease_id as string)).state, "ACTIVE");
+  await assert.rejects(
+    db.pool.query(
+      "UPDATE cooperative_renewal_authorizations SET state='ACTIVE' WHERE id=$1",
+      [a.id],
+    ),
+    /cannot be reactivated/,
+  );
+  const q = await renewalFixture(t);
+  await owner.query(
+    "UPDATE cooperative_renewal_authorizations SET expires_at=now()-interval '1 second' WHERE id=$1",
+    [q.a.id],
+  );
+  assert.equal((await renewals().attempt(q.a.id)).status, "EXPIRED");
+  assert.equal((await authorityRow(q.a.id)).windows_used, 0);
+});
+test("renewals: protected reserve spending needs both explicit authority and an actual working shortfall", async (t) => {
+  const { p, a } = await renewalFixture(t, { working: "0", reserve: "18000" });
+  assert.equal(
+    (await renewals().attempt(a.id)).status,
+    "WAITING_FOR_AUTHORIZED_SOURCE",
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM cooperative_incidents WHERE pool_id=$1",
+        [p.id],
+      )
+    ).rows[0].n,
+    0,
+  );
+  const q = await renewalFixture(t, {
+    working: "0",
+    reserve: "18000",
+    authority: {
+      maximum_working_microtu: "0",
+      maximum_reserve_microtu: "6000",
+    },
+  });
+  const r = await renewals().attempt(q.a.id);
+  assert.equal(r.status, "RENEWED");
+  assert.equal(r.source, "RESERVE");
+  assert.equal((await authorityRow(q.a.id)).state, "EXHAUSTED");
+  assert.equal((await authorityRow(q.a.id)).reserve_committed_microtu, "6000");
+  const blocked = await renewalFixture(t, {
+    working: "10000",
+    reserve: "18000",
+    authority: {
+      maximum_working_microtu: "0",
+      maximum_reserve_microtu: "6000",
+    },
+  });
+  assert.equal(
+    (await renewals().attempt(blocked.a.id)).status,
+    "WAITING_FOR_AUTHORIZED_SOURCE",
+  );
+});
+test("renewals: pool pauses, support gaps, disabled authorizers and unavailable stages stop new commitments", async (t) => {
+  const { f, p, a } = await renewalFixture(t);
+  await coop().manage(f.buyer, p.id, {
+    paused: true,
+    reason: "Responsible operator temporarily pauses future commitments",
+  });
+  assert.equal((await renewals().attempt(a.id)).status, "PAUSED");
+  await coop().manage(f.buyer, p.id, {
+    paused: false,
+    reason: "Responsible operator resumes bounded future commitments",
+  });
+  await owner.query(
+    "UPDATE cooperative_pools SET support_until=now()+interval '5 seconds' WHERE id=$1",
+    [p.id],
+  );
+  assert.equal((await renewals().attempt(a.id)).status, "WAITING_FOR_SUPPORT");
+  await owner.query(
+    "UPDATE cooperative_pools SET support_until=now()+interval '1 hour' WHERE id=$1",
+    [p.id],
+  );
+  await owner.query("UPDATE users SET disabled=true WHERE id=$1", [f.buyer.id]);
+  assert.equal((await renewals().attempt(a.id)).status, "AUTHORIZER_DISABLED");
+  await owner.query("UPDATE users SET disabled=false WHERE id=$1", [
+    f.buyer.id,
+  ]);
+  await owner.query("UPDATE nodes SET desired_state='PAUSED' WHERE id=$1", [
+    f.parts[1].nodeId,
+  ]);
+  assert.equal((await renewals().attempt(a.id)).status, "WAITING_FOR_CAPACITY");
+  assert.equal((await authorityRow(a.id)).windows_used, 0);
+});
+test("renewals: no free funding and no override of a separately exhausted provider limit", async (t) => {
+  const empty = await renewalFixture(t, { working: "0" });
+  assert.equal(
+    (await renewals().attempt(empty.a.id)).status,
+    "WAITING_FOR_FUNDS",
+  );
+  const { f, p, a, ms } = await renewalFixture(t, { providers: 2 });
+  const limited = await renewals().mandate(
+    f.providers[2]!,
+    p.id,
+    mandateTerms(p, f.route.id, { maximum_windows: 1 }),
+  );
+  const r = await renewals().attempt(a.id);
+  assert.equal(r.status, "RENEWED");
+  await finishCoverage(r.lease_id as string);
+  for (const part of f.parts) await ready(part.nodeId);
+  assert.equal(
+    (await renewals().attempt(a.id)).status,
+    "WAITING_FOR_OPERATORS",
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT state FROM cooperative_provider_mandates WHERE id=$1",
+        [limited.id],
+      )
+    ).rows[0].state,
+    "EXHAUSTED",
+  );
+  assert.equal((await authorityRow(a.id)).windows_used, 1);
+  assert.equal(ms.length, 2);
+});
+test("renewals: an authorized alternative is selected when the first ready route lacks consent", async (t) => {
+  const f = await fixture(t);
+  const root = await market.invite(admin, {
+    name: "Alternative test root",
+    owner_id: f.root.id,
+    resource_domain_id: f.parts[0].domainId,
+    model_id: f.modelId,
+    base_url: "http://127.0.0.1:43249",
+    node_kind: "ROUTE_ROOT",
+  });
+  await ready(root.id);
+  const alternative = await routes.publish(f.root, {
+    ...f.proposal,
+    name: "Alternate fixed terms",
+    participants: f.proposal.participants.map((p, i) =>
+      i === 0 ? { ...p, node_id: root.id } : p,
+    ),
+    idempotency_key: randomUUID(),
+  });
+  for (const provider of f.providers)
+    await routes.accept(provider, alternative.id, {
+      route_sha256: alternative.route_sha256,
+    });
+  await routes.qualify(admin, alternative.id, {
+    state: "LOCAL_PREVIEW",
+    note: "Isolated database alternative, no hardware execution",
+  });
+  const routeIds = [f.route.id, alternative.id].sort();
+  const p = await coop().create(f.buyer, {
+    name: "Essential alternatives with independent mandates",
+    support_until: new Date(Date.now() + 3600000).toISOString(),
+    idempotency_key: randomUUID(),
+    groups: [
+      {
+        key: "essential",
+        route_ids: routeIds,
+        rate_microtu_per_second: "100",
+        duration_seconds: 60,
+      },
+    ],
+  });
+  await coop().fund(f.buyer, p.id, {
+    destination: "WORKING",
+    amount_microtu: "6000",
+    policy_sha256: p.policy_sha256,
+    consent: "COMMITTED_LAB_CREDITS_NO_REDEMPTION",
+    idempotency_key: randomUUID(),
+  });
+  const a = await renewals().authorize(
+    f.buyer,
+    p.id,
+    authorityTerms(p, { maximum_windows: 1 }),
+  );
+  for (const provider of f.providers)
+    await renewals().mandate(provider, p.id, mandateTerms(p, routeIds[1]!));
+  const r = await renewals().attempt(a.id);
+  assert.equal(r.status, "RENEWED");
+  assert.equal(
+    (await coverageRow(f, r.lease_id as string)).route_id,
+    routeIds[1],
+  );
+  await finishCoverage(r.lease_id as string);
+});
+
+test("renewals: a late database failure rolls back funding, activation and every consumed limit", async (t) => {
+  const { f, p, a, ms } = await renewalFixture(t);
+  const before = (
+    await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+      p.working_account,
+    ])
+  ).rows[0].balance;
+  // Deliberate fault in this isolated test database, after the authority and earlier mandate writes.
+  await owner.query(`CREATE FUNCTION reject_test_renewal_usage() RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN
+      IF (SELECT count(*) FROM cooperative_mandate_usages WHERE lease_id=NEW.lease_id)>=2 THEN
+        RAISE EXCEPTION 'injected final usage failure';
+      END IF;
+      RETURN NEW;
+    END $$;
+    CREATE TRIGGER reject_test_renewal_usage BEFORE INSERT ON cooperative_mandate_usages FOR EACH ROW EXECUTE FUNCTION reject_test_renewal_usage()`);
+  try {
+    await assert.rejects(
+      renewals().attempt(a.id),
+      /injected final usage failure/,
+    );
+    assert.equal((await authorityRow(a.id)).windows_used, 0);
+    assert.equal(
+      (
+        await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+          p.working_account,
+        ])
+      ).rows[0].balance,
+      before,
+    );
+    assert.equal(
+      (
+        await db.pool.query(
+          "SELECT 1 FROM cooperative_windows WHERE pool_id=$1",
+          [p.id],
+        )
+      ).rowCount,
+      0,
+    );
+    assert.equal(
+      (
+        await db.pool.query(
+          "SELECT 1 FROM cooperative_provider_mandates WHERE id=ANY($1::uuid[]) AND windows_used<>0",
+          [ms.map((m) => m.id)],
+        )
+      ).rowCount,
+      0,
+    );
+    assert.equal(
+      (
+        await db.pool.query(
+          "SELECT 1 FROM availability_domain_claims WHERE resource_domain_id=ANY($1::uuid[])",
+          [f.parts.map((v) => v.domainId)],
+        )
+      ).rowCount,
+      0,
+    );
+  } finally {
+    await owner.query(
+      "DROP TRIGGER reject_test_renewal_usage ON cooperative_mandate_usages; DROP FUNCTION reject_test_renewal_usage()",
+    );
+  }
+  for (const part of f.parts) await ready(part.nodeId);
+  assert.equal((await renewals().attempt(a.id)).status, "RENEWED");
+  assert.equal((await authorityRow(a.id)).windows_used, 1);
+});
+
+test("renewals: a provider deadline too short for a whole window cannot consume any funds", async (t) => {
+  const { f, a, ms } = await renewalFixture(t);
+  await owner.query(
+    "UPDATE cooperative_provider_mandates SET expires_at=now()+interval '10 seconds' WHERE id=$1",
+    [ms[2].id],
+  );
+  assert.equal(
+    (await renewals().attempt(a.id)).status,
+    "WAITING_FOR_OPERATORS",
+  );
+  assert.equal((await authorityRow(a.id)).windows_used, 0);
+  await owner.query(
+    "UPDATE cooperative_provider_mandates SET expires_at=now()+interval '1 hour' WHERE id=$1",
+    [ms[2].id],
+  );
+  await owner.query("UPDATE users SET disabled=true WHERE id=$1", [
+    f.providers[2]!.id,
+  ]);
+  assert.equal((await renewals().attempt(a.id)).status, "WAITING_FOR_CAPACITY");
+  assert.equal((await authorityRow(a.id)).windows_used, 0);
+});
+
+test("renewals: immutable usage projects limits and runtime cannot edit terms, counters or history", async (t) => {
+  const { a, ms } = await renewalFixture(t);
+  await renewals().attempt(a.id);
+  await assert.rejects(
+    db.pool.query(
+      "UPDATE cooperative_renewal_authorizations SET working_committed_microtu=0 WHERE id=$1",
+      [a.id],
+    ),
+    { code: "42501" },
+  );
+  await assert.rejects(
+    db.pool.query(
+      "UPDATE cooperative_provider_mandates SET windows_used=0 WHERE id=$1",
+      [ms[0].id],
+    ),
+    { code: "42501" },
+  );
+  await assert.rejects(
+    db.pool.query(
+      "UPDATE cooperative_renewal_authorizations SET maximum_windows=100 WHERE id=$1",
+      [a.id],
+    ),
+    { code: "42501" },
+  );
+  await assert.rejects(
+    db.pool.query("DELETE FROM cooperative_mandate_usages"),
+    { code: "42501" },
+  );
+  const mismatch = await db.pool
+    .query(`SELECT a.id FROM cooperative_renewal_authorizations a LEFT JOIN cooperative_renewal_runs rr ON rr.authorization_id=a.id
+ GROUP BY a.id HAVING count(rr.lease_id)<>a.windows_used OR coalesce(sum(rr.committed_microtu) FILTER(WHERE rr.source='WORKING'),0)<>a.working_committed_microtu
+ OR coalesce(sum(rr.committed_microtu) FILTER(WHERE rr.source='RESERVE'),0)<>a.reserve_committed_microtu`);
+  assert.equal(mismatch.rowCount, 0);
+  assert.equal(
+    (await db.pool.query("SELECT sum(balance)::text AS n FROM ledger_accounts"))
+      .rows[0].n,
+    "0",
+  );
 });

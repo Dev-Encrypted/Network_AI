@@ -1,6 +1,16 @@
 # Private-preview implementation and validation status
 
-## Version 0.6 additions
+## Version 0.7 additions
+
+The private coordinator now renews whole-route readiness automatically within two independent permissions: finite manager authority over gross working/reserve commitments, and finite provider mandates over their exact route participation. Activation, escrow, participant consent, physical claims and used limits commit atomically. Returned escrow never replenishes a permission. Pauses, absent consent, unavailable capacity, insufficient funds, source restrictions or expiry prevent new commitments. Revocation preserves accepted windows. The interface shows limits, consumed authority, waiting reasons and revocation controls. [Complete contract and operations guide](BOUNDED_RENEWALS.md).
+
+The installed 32B CPU campaign used one host, one account and three signed agents. A 3,000-microcredit contribution funded the first automatic 30-second window. A real request used 19 input and seven output tokens, settled 40,000 microcredits and recycled them into the fund. The second window started automatically without another contribution or grant. Both windows paid 3,000; revocation during the second preserved subsequent readiness payments but prevented a third despite available funds, ready capacity and one unused authorized window. Final free working capital was 37,000, with no held balance. [Allowlisted result](evidence/qwen3-32b-bounded-renewal.json).
+
+Validation includes 74 integration/accounting cases (14 specific to renewal), seven unit/socket cases, nine Rust cases, 21 unchanged Python F0 cases and nine browser journeys: 120 distinct automated cases. The prior eight browser journeys passed in the full run; the new journey passed after correcting its select locator. Its controls were inspected at desktop and 390-pixel mobile widths. An isolated restore of a snapshot containing 293 journal entries and one active complete-route window preserved renewal projections, bindings and runtime-role restrictions. [Version 0.7 validation](validation-v0.7.json), [restore result](evidence/renewal-backup-restore.json).
+
+This closes the private bounded-renewal mechanism. Independent operators, heterogeneous GPUs across hosts, WAN campaigns, public work verification/consensus, economic qualification, issuance, demand-backed expansion and cash settlement remain unfinished. An active mandate does not guarantee gap-free service: the next window is funded after the prior one ends. The original F0 source hashes and unsuccessful economic studies remain unchanged.
+
+## Preserved version 0.6 campaign
 
 The private application now implements immutable essential coverage plans, existing-credit contributions, separate working/reserve/burn accounts, protected essential contingency incidents, readiness-only provider consent and cooperative quote/session binding. Verified consumption replenishes the working floor, reserve and working target in order. An exactly backed full refund reverses the original destinations once; it cannot spend another contract's escrow or mint a replacement. The interface exposes these operations and the consumer's explicit choice. [Contracts and arithmetic](COOPERATIVE_FUNDS.md).
 

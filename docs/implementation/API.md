@@ -28,6 +28,10 @@ Login verifies a scrypt password hash and creates a 12-hour HttpOnly, SameSite=S
 | POST | `/cooperative/pools/:id/fund` | Commit existing credits with exact policy consent and idempotency |
 | POST | `/cooperative/pools/:id/windows` | Manager/admin funds the complete next essential window |
 | POST | `/cooperative/pools/:id/manage` | Manager/admin records pause/resume and operational support |
+| GET / POST | `/cooperative/pools/:id/renewals` | Inspect recent renewal state / manager creates finite gross spending authority |
+| POST | `/cooperative/pools/:id/provider-mandates` | A provider authorizes only its own exact route participation |
+| POST | `/cooperative/renewals/:id/revoke` | Manager/admin revokes future fund authority; accepted windows preserved |
+| POST | `/cooperative/provider-mandates/:id/revoke` | Owning provider/admin revokes future participation; accepted windows preserved |
 | POST | `/cooperative/refunds/:session_id` | Administrator-only full refund from exact original destinations |
 | GET | `/sessions`, `/sessions/:id` | Up to 100 own sessions / details and events |
 | POST | `/sessions/:id/cancel` | Cancel an owned session |
@@ -157,5 +161,7 @@ Stages additionally send signed `POST /nodes/:id/stage-claim` and `/nodes/:id/st
 
 
 ## Opt-in cooperative sessions
+
+Optional automatic coverage requires the [bounded renewal contracts](BOUNDED_RENEWALS.md). Fund and provider permissions use separate limits, hashes and expiries. Creating or funding a pool does not implicitly enable renewal. The authenticated renewal read endpoint includes recent permissions, own eligible routes, consumed windows and reasons for waiting.
 
 `POST /quotes` accepts optional `cooperative_pool_id`. The quote and session freeze that pool and policy hash. Supply the resulting quote in `X-Quote-Id`; the normal chat body is unchanged. Coverage-aware admission binds `coverage_lease_id` and `coverage_terms_sha256` into the session/capability and caps its execution deadline at the accepted window end. A session cannot switch pools or bypass missing coverage. Ordinary quotes remain 80/20; cooperative consumption is recycled while providers earn under the separately accepted readiness-only window. See the [complete request/consent guide](COOPERATIVE_FUNDS.md).
