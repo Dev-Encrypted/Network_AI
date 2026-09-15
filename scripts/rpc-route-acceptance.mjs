@@ -14,10 +14,19 @@ import {
   stopRouteRpcStage,
   stopCpu,
   startCpuRoute,
+  faultContributorComponent,
 } from "./lab.mjs";
+import {
+  loadProfile,
+  componentConfigs,
+} from "../packages/contributor/src/profile.mjs";
+import { workerStatus } from "../packages/contributor/src/supervisor.mjs";
 
 const { values: a } = parseArgs({
-  options: { fault: { type: "boolean", default: false } },
+  options: {
+    fault: { type: "boolean", default: false },
+    contributors: { type: "boolean", default: false },
+  },
 });
 const c = await config(),
   profile = JSON.parse(await readFile(join(runtime, "cpu-route.json"), "utf8"));
@@ -26,6 +35,12 @@ assert.equal(
   "iroh-direct-quic-guarded-rpc",
   "Enable the installed route's QUIC transport first",
 );
+const portable = profile.worker_supervision === "portable_contributors";
+assert.equal(
+  portable,
+  a.contributors,
+  "Use --contributors for an installed portable route; do not mix evidence profiles",
+);
 const { Pool } = createRequire(
   new URL("../apps/control-api/package.json", import.meta.url),
 )("pg");
@@ -33,12 +48,18 @@ const db = new Pool({
   connectionString: c.database_url,
   options: "-c search_path=nai,public",
 });
-const directory = join(runtime, "rpc-route-campaigns", randomUUID());
+const directory = join(
+  runtime,
+  portable ? "contributor-campaigns" : "rpc-route-campaigns",
+  randomUUID(),
+);
 await mkdir(directory, { recursive: true, mode: 0o700 });
 await protectDirectory(directory);
 const report = {
   schema_version: 1,
-  evidence_type: "REAL_INSTALLED_32B_GUARDED_RPC_OVER_QUIC",
+  evidence_type: portable
+    ? "REAL_INSTALLED_32B_PORTABLE_CONTRIBUTORS"
+    : "REAL_INSTALLED_32B_GUARDED_RPC_OVER_QUIC",
   observed_at: new Date().toISOString(),
   physical_hosts: 1,
   physical_resource_domains: 1,
@@ -48,6 +69,7 @@ const report = {
   compute: "CPU",
   unit: "LAB_TU",
   transport: profile.rpc_transport,
+  worker_supervision: portable ? "portable_contributors" : "root_cluster",
   relay_enabled: false,
   cash_payments: false,
   database_observations_fabricated: false,
@@ -55,6 +77,7 @@ const report = {
   sustainable_economics_established: false,
   sessions: [],
   checks: [],
+  ...(portable ? { faults: [], contributor_profiles: [] } : {}),
 };
 let cookie = "",
   key,
@@ -102,17 +125,16 @@ async function snapshots() {
   for (const i of [1, 2]) {
     const pair = {};
     for (const role of ["root", "stage"]) {
-      const s = JSON.parse(
-        await readFile(
-          join(
+      const folder = portable
+        ? join(
             runtime,
             "cpu-route",
-            "rpc-link",
-            `${role}-${i}`,
-            "rpc-status.json",
-          ),
-          "utf8",
-        ),
+            "portable",
+            role === "root" ? `root-rpc-${i}` : `operator-${i}/state`,
+          )
+        : join(runtime, "cpu-route", "rpc-link", `${role}-${i}`);
+      const s = JSON.parse(
+        await readFile(join(folder, "rpc-status.json"), "utf8"),
       );
       assert.ok(Math.abs(Date.now() - s.observed_at_unix_ms) < 5000);
       assert.equal(s.binding.route_id, profile.route_id);
@@ -267,6 +289,48 @@ try {
   delete engine.pids;
   report.engine = engine;
   report.loaded_transport = await snapshots();
+  if (portable) {
+    assert.equal(engine.worker_supervision, "contributor");
+    for (let i = 1; i <= 2; i++) {
+      const path = join(
+        runtime,
+        "cpu-route",
+        "portable",
+        `operator-${i}`,
+        "worker.json",
+      );
+      const { profile: worker, state, pin } = await loadProfile(path);
+      const s = await workerStatus(path);
+      assert.ok(s.live && s.ready);
+      const generated = componentConfigs(worker, state);
+      assert.equal(generated.stage.readiness_mode, "coordinator_route_lease");
+      for (const forbidden of [
+        "backend_api_key",
+        "backend_url",
+        "database_url",
+        "admin_password",
+        "capability_private_key",
+      ])
+        assert.ok(
+          !JSON.stringify(worker).includes(forbidden) &&
+            !JSON.stringify(generated).includes(forbidden),
+        );
+      report.contributor_profiles.push({
+        ordinal: i,
+        engine_id: pin.id,
+        engine_files_verified: pin.files.length,
+        http_binary_sha256: worker.binaries.http.sha256,
+        rpc_binary_sha256: worker.binaries.rpc.sha256,
+        backend_credentials_present: false,
+        coordinator_secrets_present: false,
+        source: "strict_profile_and_derived_component_configuration",
+        os_access_isolation: false,
+      });
+    }
+    pass(
+      "two_contributors_run_own_worker_guard_control_and_rpc_without_root_credentials",
+    );
+  }
   for (const p of [43125, 43126]) {
     const h = await fetch(`http://127.0.0.1:${p}/health`).then((r) => r.json());
     assert.equal(h.rpc_route_bound, true);
@@ -286,7 +350,11 @@ try {
   pair.sort((x, y) => new Date(x.started_at) - new Date(y.started_at));
   assert.ok(new Date(pair[1].started_at) >= new Date(pair[0].finished_at));
   pass("concurrent_consumers_serialize_on_the_single_physical_domain");
-  if (a.fault) {
+  for (const component of a.fault
+    ? portable
+      ? ["control_link", "worker"]
+      : ["rpc_link"]
+    : []) {
     const response = await fetch(
       `http://127.0.0.1:${c.gateway_port}/v1/chat/completions`,
       {
@@ -321,7 +389,8 @@ try {
     await until(async () => (await api(`/sessions/${id}`)).state === "RUNNING");
     needsRecovery = true;
     const faultAt = Date.now();
-    await stopRouteRpcStage(2);
+    if (portable) await faultContributorComponent(2, component);
+    else await stopRouteRpcStage(2);
     const terminal = await until(async () => {
       const s = await api(`/sessions/${id}`);
       return ["FAILED", "CANCELLED", "INTERRUPTED"].includes(s.state) && s;
@@ -336,8 +405,10 @@ try {
     ).rows[0].n;
     assert.equal(claimCount, 0);
     await drained;
-    report.fault = {
-      injected: "terminate_only_tracked_second_stage_quic_link",
+    const fault = {
+      injected: portable
+        ? `terminate_owned_second_contributor_${component}`
+        : "terminate_only_tracked_second_stage_quic_link",
       state: terminal.state,
       billing_state: terminal.billing_state,
       charged_microtu: terminal.charged_microtu,
@@ -345,6 +416,17 @@ try {
       detection_ms: Date.now() - faultAt,
       client_cancel_injected: false,
     };
+    if (portable) {
+      const stopped = await until(async () => {
+        const s = await workerStatus(
+          join(runtime, "cpu-route", "portable", "operator-2", "worker.json"),
+        );
+        return s.phase === "FAILED" && !s.live && s;
+      });
+      fault.contributor_failure = stopped.failure;
+      fault.contributor_phase = stopped.phase;
+      report.faults.push(fault);
+    } else report.fault = fault;
     pass(
       "mid_execution_quic_loss_ends_session_without_charge_or_retained_physical_claim",
     );
@@ -352,7 +434,11 @@ try {
     await startCpuRoute(profile);
     await ready();
     needsRecovery = false;
-    await infer("after_whole_route_restart");
+    await infer(
+      portable
+        ? `after_${component}_failure_restart`
+        : "after_whole_route_restart",
+    );
     pass(
       "same_profile_reload_restores_real_32b_execution_without_new_identities",
     );

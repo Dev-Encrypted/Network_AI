@@ -165,6 +165,8 @@ Control signs Ed25519 prepare/execute capabilities bound to network, audience, n
 
 Stages additionally send signed `POST /nodes/:id/stage-claim` and `/nodes/:id/stage-receipts`. Stage HTTP listeners accept `/prepare`, `/release`, `/stage/start` and `/stage/finish`, each under its specific coordinator capability. A stage receipt reports session/attempt/epoch/route hash, terminal state, completed graph commands, observed request/response bytes, transcript SHA-256, elapsed time and `metering_source: rpc_observed`. Those observations are distinct from the root's engine token usage. The normal browser proxy cannot invoke these signed internal node operations.
 
+Portable stages use signed `POST /nodes/:id/stage-readiness` with exactly `epoch`, `route_id`, `route_sha256`, `manifest_sha256`, `rpc_generation` and a 43-character base64url `request_nonce`. The reply is `{ready: false, lease: null}` when the route/root is ineligible or stale, or `{ready: true, lease: "..."}` with a signed `NAI-READY` declaration. Scope/manifest mismatch is HTTP 403 (`stage_readiness_scope`); a changed stage epoch is HTTP 409 (`epoch_fenced`). The declaration binds the stage, its epoch, route/model hashes, connection generation, challenge, root node/epoch/boot and timestamps. Its lifetime is at most four seconds and expires no later than six seconds after the root heartbeat. It carries no execution or payment authority. The node signature, nonce replay protection and restricted HTTP-link allowlist apply before issuance. [Protocol, lifecycle and operator setup](PORTABLE_CONTRIBUTORS.md).
+
 
 ## Opt-in cooperative sessions
 

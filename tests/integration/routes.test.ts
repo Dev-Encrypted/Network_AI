@@ -4,7 +4,12 @@ import { after, before, test, type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { randomUUID } from "node:crypto";
+import {
+  randomUUID,
+  generateKeyPairSync,
+  randomBytes,
+  createPublicKey,
+} from "node:crypto";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 import { Auth, type User } from "../../apps/control-api/src/auth.js";
@@ -17,6 +22,8 @@ import { Economics } from "../../apps/control-api/src/economics.js";
 import { Availability } from "../../apps/control-api/src/availability.js";
 import { RouteAvailability } from "../../apps/control-api/src/route-availability.js";
 import { Sessions } from "../../apps/control-api/src/sessions.js";
+import { Readiness } from "../../apps/control-api/src/readiness.js";
+import { verifyReadiness } from "../../packages/contributor/src/readiness.mjs";
 import {
   Cooperative,
   recycle,
@@ -2966,4 +2973,141 @@ test("expansion: a PostgreSQL backup restores positive demand claims, support an
     report.expansion_demand_support_and_coverage_binding_mismatches,
     0,
   );
+});
+
+async function readinessFixture(t: TestContext) {
+  const f = await fixture(t);
+  const key = generateKeyPairSync("ed25519")
+    .publicKey.export({ format: "der", type: "spki" })
+    .subarray(-32)
+    .toString("base64url");
+  await owner.query(
+    "UPDATE nodes SET public_key=$2,last_seen=now() WHERE id=$1",
+    [f.parts[0].nodeId, key],
+  );
+  const request = {
+    epoch: 1,
+    route_id: f.route.id,
+    route_sha256: f.route.route_sha256,
+    manifest_sha256: hash(canonical(f.manifest)),
+    rpc_generation: randomUUID(),
+    request_nonce: randomBytes(32).toString("base64url"),
+  };
+  return { f, request, service: new Readiness(db, auth.config) };
+}
+test("portable readiness bootstraps validating stages without creating an execution or credit", async (t) => {
+  const { f, request, service } = await readinessFixture(t);
+  await owner.query(
+    "UPDATE nodes SET state='VALIDATING' WHERE id=ANY($1::uuid[])",
+    [f.parts.slice(1).map((p) => p.nodeId)],
+  );
+  const before = (
+    await db.pool.query(
+      "SELECT (SELECT count(*) FROM journal) AS journals,(SELECT count(*) FROM sessions) AS sessions",
+    )
+  ).rows[0];
+  const response = await service.stage(f.parts[1].nodeId, request);
+  assert.equal(response.ready, true);
+  const lease = verifyReadiness(response.lease, {
+    authority: createPublicKey(auth.config.capability_private_key_pem),
+    binding: {
+      stage_node_id: f.parts[1].nodeId,
+      ...Object.fromEntries(
+        Object.entries(request).filter(([k]) =>
+          ["route_id", "route_sha256", "manifest_sha256"].includes(k),
+        ),
+      ),
+    },
+    epoch: 1,
+    generation: request.rpc_generation,
+    nonce: request.request_nonce,
+  });
+  assert.equal(lease.root_node_id, f.parts[0].nodeId);
+  assert.ok(lease.expires_ms <= lease.root_seen_ms + 6000);
+  assert.deepEqual(
+    (
+      await db.pool.query(
+        "SELECT (SELECT count(*) FROM journal) AS journals,(SELECT count(*) FROM sessions) AS sessions",
+      )
+    ).rows[0],
+    before,
+  );
+});
+test("portable readiness rejects scope confusion and stale stage epochs", async (t) => {
+  const { f, request, service } = await readinessFixture(t);
+  for (const id of [f.parts[0].nodeId, randomUUID()])
+    await assert.rejects(service.stage(id, request), {
+      code: "stage_readiness_scope",
+    });
+  for (const change of [
+    { route_id: randomUUID() },
+    { route_sha256: "0".repeat(64) },
+    { manifest_sha256: "0".repeat(64) },
+  ])
+    await assert.rejects(
+      service.stage(f.parts[1].nodeId, { ...request, ...change }),
+      { code: "stage_readiness_scope" },
+    );
+  await assert.rejects(
+    service.stage(f.parts[1].nodeId, { ...request, epoch: 2 }),
+    { code: "epoch_fenced" },
+  );
+  await assert.rejects(
+    service.stage(f.parts[1].nodeId, { ...request, request_nonce: "short" }),
+  );
+  await assert.rejects(
+    service.stage(f.parts[1].nodeId, {
+      ...request,
+      backend_api_key: "not-accepted",
+    }),
+  );
+});
+test("portable readiness requires fresh, loaded, eligible root and consent from the complete route", async (t) => {
+  const { f, request, service } = await readinessFixture(t);
+  const root = f.parts[0].nodeId;
+  const check = async () =>
+    assert.deepEqual(await service.stage(f.parts[1].nodeId, request), {
+      ready: false,
+      lease: null,
+    });
+  for (const assignment of [
+    "last_seen=now()-interval '7 seconds'",
+    "last_seen=now()+interval '1 second'",
+    "state='VALIDATING'",
+    "desired_state='PAUSED'",
+    "loaded_backend_models='[]'",
+  ]) {
+    await owner.query(`UPDATE nodes SET ${assignment} WHERE id=$1`, [root]);
+    await check();
+    await owner.query(
+      "UPDATE nodes SET last_seen=now(),state='READY',desired_state='READY',loaded_backend_models='[\"route-test-engine\"]' WHERE id=$1",
+      [root],
+    );
+  }
+  await owner.query("UPDATE users SET disabled=true WHERE id=$1", [
+    f.providers[2]!.id,
+  ]);
+  await check();
+  await owner.query("UPDATE users SET disabled=false WHERE id=$1", [
+    f.providers[2]!.id,
+  ]);
+  await owner.query("UPDATE nodes SET desired_state='PAUSED' WHERE id=$1", [
+    f.parts[2].nodeId,
+  ]);
+  await check();
+  await owner.query("UPDATE nodes SET desired_state='READY' WHERE id=$1", [
+    f.parts[2].nodeId,
+  ]);
+  await owner.query("UPDATE models SET state='CANDIDATE' WHERE id=$1", [
+    f.modelId,
+  ]);
+  await check();
+  await owner.query("UPDATE models SET state='LOCAL_PREVIEW' WHERE id=$1", [
+    f.modelId,
+  ]);
+  await owner.query(
+    "UPDATE route_acceptances SET withdrawn_at=now() WHERE route_id=$1 AND provider_id=$2",
+    [f.route.id, f.providers[2]!.id],
+  );
+  await check();
 });

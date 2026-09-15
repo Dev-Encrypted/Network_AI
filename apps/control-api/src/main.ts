@@ -27,6 +27,7 @@ import { Renewals } from "./renewals.js";
 import { Economics } from "./economics.js";
 import { Cooperative } from "./cooperative.js";
 import { Routes } from "./routes.js";
+import { Readiness } from "./readiness.js";
 import { ApiController } from "./controller.js";
 import { AppError } from "./errors.js";
 
@@ -51,6 +52,7 @@ const renewals = new Renewals(db);
     { provide: Economics, useValue: new Economics(db) },
     { provide: Cooperative, useValue: cooperative },
     { provide: Routes, useValue: new Routes(db, auth) },
+    { provide: Readiness, useValue: new Readiness(db, config) },
   ],
 })
 class AppModule {}

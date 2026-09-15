@@ -18,6 +18,8 @@ NETWORK AI does not claim authorship of the engines, libraries or models below. 
 | IBM Plex Sans / Mono | Locally served interface fonts | IBM; SIL Open Font License; Fontsource packages in pnpm-lock.yaml |
 | Lucide | Interface icons | ISC license; pinned package |
 | Playwright and axe-core | Browser and accessibility verification | Development tools with their own licenses and notices |
+| Zod 4.6.5 | Contributor profile and protocol validation; bundled in the standalone source archive | MIT license retained in the bundled package's LICENSE; exact version in pnpm-lock.yaml |
+| llama.cpp b10964 | Pinned CPU RPC worker; source package distributes only file hashes | Upstream engine and model remain separate prerequisites with their original terms |
 
 [Historical planning evidence](docs/planning/evidence/README.md) includes metadata, indexes and configurations from public upstream APIs. Safetensors headers under `docs/execution/evidence/kimi-k3/` are upstream reference material. These are not presented as original Dev-Encrypted works or assigned replacement licenses.
 

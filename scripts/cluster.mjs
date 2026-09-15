@@ -19,6 +19,7 @@ const { values: a } = parseArgs({
       "manifest",
       "directory",
       "workers",
+      "worker-supervision",
       "port",
       "rpc-port",
       "rpc-forward-port",
@@ -36,6 +37,12 @@ const workers = Number(a.workers ?? "2"),
   rpc = Number(a["rpc-port"] ?? "43820"),
   rpcForward = Number(a["rpc-forward-port"] ?? a["rpc-port"] ?? "43820"),
   threads = Number(a.threads ?? "8");
+const externalWorkers = a["worker-supervision"] === "external";
+if (
+  a["worker-supervision"] &&
+  (!externalWorkers || workers !== 2 || !a["rpc-forward-port"])
+)
+  throw new Error("External workers require two guarded route endpoints");
 if (
   ![0, 2].includes(workers) ||
   ![port, rpc, rpc + 1, rpcForward, rpcForward + 1].every(
@@ -151,7 +158,7 @@ async function waitFor(probe, ms) {
   throw new Error("Cluster did not become ready; inspect private logs");
 }
 try {
-  for (let i = 0; i < workers; i++)
+  for (let i = 0; i < (externalWorkers ? 0 : workers); i++)
     launch(`worker-${i}`, "ggml-rpc-server", [
       "--host",
       "127.0.0.1",
@@ -243,6 +250,7 @@ try {
         schema_version: 1,
         physical_hosts: 1,
         workers,
+        worker_supervision: externalWorkers ? "contributor" : "root_cluster",
         transport: workers
           ? (a["rpc-transport"] ?? "loopback-ggml-rpc")
           : "local-cpu",

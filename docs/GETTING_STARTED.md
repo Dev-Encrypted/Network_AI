@@ -79,6 +79,8 @@ For cooperative funds, **Cooperação → Renovação automática com limites** 
 
 An installed 32B route can also use the [v0.9 authenticated model-stage transport](implementation/GUARDED_RPC_TRANSPORT.md). This is a private operator setting; the chat/API contract and credit unit stay the same. The guide explains activation, status, interruption and recovery.
 
+The [v0.10 contributor package](../packages/contributor/README.md) lets an invited CPU stage run its own worker and private transports. It needs the participant's own identity, accepted route details and pinned binaries; it does not need the root model API key or database credentials. Start with the package's prerequisite and peer-exchange instructions. Two profiles on one machine still count as one physical host.
+
 New v0.8 plans also expose **Expansão conforme a demanda** (Demand-backed expansion). This shows why extra capacity can or cannot start. An administrator records actual private account classifications and operational support; the manager and each provider separately choose the expansion purpose. Working funds must remain above the essential floor, the reserve must be complete, and funded demand must exceed covered free slots. One computer with one account does not establish independent demand by running more agents. Follow the [full expansion walkthrough](implementation/DEMAND_BACKED_EXPANSION.md); the original essential-only plans keep their accepted terms.
 
 | Outcome | Meaning | Next step |

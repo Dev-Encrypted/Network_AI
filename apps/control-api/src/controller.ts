@@ -21,6 +21,7 @@ import { Renewals } from "./renewals.js";
 import { Economics } from "./economics.js";
 import { Cooperative } from "./cooperative.js";
 import { Routes } from "./routes.js";
+import { Readiness } from "./readiness.js";
 import { capacity } from "./capacity.js";
 import { need } from "./errors.js";
 import { same } from "./security.js";
@@ -38,6 +39,7 @@ export class ApiController {
     @Inject(Economics) readonly economics: Economics,
     @Inject(Cooperative) readonly cooperative: Cooperative,
     @Inject(Routes) readonly routes: Routes,
+    @Inject(Readiness) readonly readiness: Readiness,
   ) {}
   internal(req: FastifyRequest) {
     need(
@@ -427,6 +429,14 @@ export class ApiController {
   ) {
     await this.nodes.signed(req, id);
     return this.nodes.heartbeat(id, body);
+  }
+  @Post("nodes/:id/stage-readiness") async stageReadiness(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    await this.nodes.signed(req, id);
+    return this.readiness.stage(id, body);
   }
   @Post("nodes/:id/claim") async claim(
     @Req() req: FastifyRequest,

@@ -1,6 +1,16 @@
 # Private-preview implementation and validation status
 
-## Version 0.9 additions
+## Version 0.10 additions
+
+The [portable contributor package](PORTABLE_CONTRIBUTORS.md) supervises a participant's pinned Windows CPU worker, stage guard and both authenticated transport peers. It has strict private profiles, participant-generated keys, local binary verification, a filtered child environment, persistent node identity, current-boot shutdown and whole-contributor cleanup after an owned child fails. Short-lived coordinator-signed readiness declarations replace root-backend credential polling in this mode. They bind the exact stage epoch, route/model, RPC generation and request challenge; they do not authorize execution or mint credits. The root model server uses externally supervised workers.
+
+The real one-computer campaign completed **five 32B requests**, each with 18 input/six output tokens, three accepted receipts and a conserved 36,000-micro-LAB_TU charge. Concurrent consumers did not overlap the one physical slot. An owned contributor control-link failure during execution produced `FAILED / REFUNDED` with zero charge and no retained physical claim in 17,482 ms; a worker failure did the same in 1,655 ms. The contributor reached `FAILED` and group reload restored actual inference after each fault. No additional grant, model copy, node/provider identity or GPU takeover was used. [Measured campaign and limits](evidence/qwen3-32b-portable-contributors.json).
+
+The source archive includes its exact Zod dependency and applicable licenses. Its extraction and standalone CLI/identity startup are verified separately from model execution. Engine and transport binaries, Node, weights and private state are separate prerequisites. The packaged code does not import the coordinator source/configuration. Same-user processes can still access the host's files: this is process/configuration separation, not an OS sandbox. Forced supervisor termination can leave children; service/job ownership and hostile-peer resource limits remain open.
+
+Validation passed **94 integration cases, 16 Node unit/socket cases, 14 Rust cases, 21 unchanged Python F0 cases and ten browser journeys: 155 distinct automated cases**. The browser suite ran against the installed contributor route. An isolated working-database restore preserved 455 journals, balanced projections and runtime permissions. [Versioned validation](validation-v0.10.json), [restore evidence](evidence/contributor-backup-restore.json), [source package and SHA-256](evidence/contributor-package.json). Applied migrations 001–009 and all preserved F0 artifacts retain their exact bytes. Physical-host/GPU/WAN qualification, independent verification, a successful economic study, public issuance, distributed continuity and cash settlement remain unfinished.
+
+## Preserved version 0.9 campaign
 
 The [guarded RPC transport](GUARDED_RPC_TRANSPORT.md) carries actual model-stage bytes over paired Iroh/QUIC endpoints. It uses a dedicated ALPN, pinned identities, exact stage/route/manifest bindings, bounded handshakes, one active tunnel, streaming backpressure and finite link failure detection. The worker-side guard remains responsible for claimed compute, deadlines and durable receipts, and now also rejects signed capabilities that differ from the configured transport binding. The installed CPU route has managed enable/disable, start/stop, private status and recovery commands.
 

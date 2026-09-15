@@ -542,7 +542,7 @@ export default function Home() {
           </div>
           <footer>
             Um projeto de <strong>Dev-Encrypted</strong>
-            <span>v0.9 · Ambiente privado</span>
+            <span>v0.10 · Ambiente privado</span>
           </footer>
         </section>
         <section className="login-side">
@@ -1632,7 +1632,7 @@ export default function Home() {
           <span>
             NETWORK AI <i>by Dev-Encrypted</i>
           </span>
-          <span>Ambiente privado · v0.9 · Sem oferta comercial</span>
+          <span>Ambiente privado · v0.10 · Sem oferta comercial</span>
         </footer>
       </div>
     </div>

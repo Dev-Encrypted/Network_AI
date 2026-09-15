@@ -104,6 +104,12 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
 
+  packages/contributor:
+    dependencies:
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
+
 packages:
 
   '@axe-core/playwright@4.13.0':

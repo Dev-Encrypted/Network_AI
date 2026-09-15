@@ -18,6 +18,10 @@ const enable = positionals[0] === "enable";
 const path = join(runtime, "cpu-route.json");
 const profile = JSON.parse(await readFile(path, "utf8"));
 assert.ok(
+  enable || profile.worker_supervision !== "portable_contributors",
+  "Disable portable contributors before disabling their required QUIC transport",
+);
+assert.ok(
   profile.route_id && profile.node_ids?.length === 3,
   "Install and qualify the managed CPU route first",
 );

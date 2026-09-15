@@ -1,0 +1,29 @@
+{
+  "name": "@network-ai/contributor",
+  "version": "0.10.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "bin": {
+    "network-ai-worker": "bin/worker.mjs"
+  },
+  "files": [
+    "src",
+    "bin",
+    "examples",
+    "README.md",
+    "LICENSE",
+    "LICENSE-DOCS.txt",
+    "NOTICE"
+  ],
+  "dependencies": {
+    "zod": "4.6.5"
+  },
+  "bundledDependencies": [
+    "zod"
+  ],
+  "author": "Dev-Encrypted",
+  "license": "Apache-2.0"
+}

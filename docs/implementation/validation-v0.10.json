@@ -1,0 +1,112 @@
+{
+  "version": "0.10.0-private-contributor-preview",
+  "validation_local_dates": [
+    "2026-09-15"
+  ],
+  "timezone": "America/Sao_Paulo",
+  "scope": "Private Windows installation, one physical computer/account/CPU domain. Five real Qwen3-32B requests through two contributor supervisors with authenticated control and model-data peers. No independent-host, GPU or OS isolation qualification.",
+  "tests": {
+    "integration_and_integer_accounting": 94,
+    "node_unit_and_socket": 16,
+    "rust_runtime": 4,
+    "rust_http_private_link": 3,
+    "rust_rpc_transport": 5,
+    "rust_f0": 2,
+    "python_f0": 21,
+    "browser": 10,
+    "total_automated_distinct": 155
+  },
+  "new_coverage": {
+    "readiness_database_cases": 3,
+    "readiness_signature_binding_expiry_cases": 3,
+    "portable_stage_real_socket_fixture": 1,
+    "configuration_environment_engine_pin_cases": 3,
+    "existing_http_allowlist_extended": true
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_economic_sources_unchanged": true,
+    "applied_migrations_001_through_009_bytes_preserved": true
+  },
+  "live_campaign": {
+    "report": "evidence/qwen3-32b-portable-contributors.json",
+    "completed_requests": 5,
+    "receipts_per_completed_request": 3,
+    "concurrent_consumers_serialized": true,
+    "faults": [
+      {
+        "injected": "terminate_owned_second_contributor_control_link",
+        "state": "FAILED",
+        "billing_state": "REFUNDED",
+        "charged_microtu": "0",
+        "physical_claims_remaining": 0,
+        "detection_ms": 17482,
+        "client_cancel_injected": false,
+        "contributor_failure": "control_link_exited",
+        "contributor_phase": "FAILED"
+      },
+      {
+        "injected": "terminate_owned_second_contributor_worker",
+        "state": "FAILED",
+        "billing_state": "REFUNDED",
+        "charged_microtu": "0",
+        "physical_claims_remaining": 0,
+        "detection_ms": 1655,
+        "client_cancel_injected": false,
+        "contributor_failure": "worker_exited",
+        "contributor_phase": "FAILED"
+      }
+    ],
+    "new_node_or_operator_identities": false,
+    "new_transport_keys_for_contributor_profiles": true,
+    "new_lab_grants": 0,
+    "ledger_projection_mismatches": 0,
+    "root_backend_key_present_in_contributor_profiles": false,
+    "whole_route_reload_and_real_inference_after_each_failure": true
+  },
+  "standalone_package": {
+    "report": "evidence/contributor-package.json",
+    "schema_version": 1,
+    "version": "0.10.0",
+    "filename": "network-ai-contributor-0.10.0.tgz",
+    "sha256": "064532406ab1cbb1c218c5ad28e8fd651a2645e1848e8ad6053c9637854863ec",
+    "bytes": 1173113,
+    "dependency": {
+      "name": "zod",
+      "version": "4.6.5",
+      "bundled": true,
+      "license_included": true
+    },
+    "extraction_and_cli_without_coordinator_source": true,
+    "model_or_engine_included": false,
+    "executable_signing_or_multi_host_qualification": false
+  },
+  "browser": {
+    "distinct_passed": 10,
+    "installed_32b_worker_supervision": "portable_contributors",
+    "cooperative_renewal_and_expansion_regressions_passed": true,
+    "ci_scope": "CI runs three model-independent browser journeys; seven other journeys require the original local models/private state."
+  },
+  "restore": {
+    "report": "evidence/contributor-backup-restore.json",
+    "journal_entries": 455,
+    "active_complete_route_windows": 0,
+    "all_checked_projection_mismatches": 0,
+    "runtime_permissions_preserved": true
+  },
+  "boundaries": [
+    "same-host configuration/process separation, not operating-system isolation",
+    "forced supervisor crash can leave children; OS job/service and hostile-engine resource controls remain",
+    "independent hosts, Linux/GPU profiles, WAN/NAT/relay, broader quality/context and sustained performance",
+    "real 24-hour recovery, independent observed costs, mature economic study and approved issuance/exposure",
+    "public work verification, quorum/continuity, cash payouts/disputes and funded public pilots"
+  ],
+  "validation_notes": [
+    "The readiness fixture first referenced a non-existent plural journal table; the fixture was corrected to the actual journal table and all 94 integration cases passed.",
+    "pnpm isolated linking cannot directly bundle dependencies through pnpm pack. The pack script uses a private staging copy with the installed exact Zod dependency, npm offline packing and extracted CLI/identity checks, without changing workspace linking.",
+    "All previous F0 results and migrations retain their bytes. No second computer or other application GPU was used."
+  ]
+}

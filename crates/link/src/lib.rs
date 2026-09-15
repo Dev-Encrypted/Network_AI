@@ -66,6 +66,7 @@ impl Role {
                             "receipts",
                             "stage-claim",
                             "stage-receipts",
+                            "stage-readiness",
                         ]
                         .iter()
                         .any(|action| path == format!("/api/v1/nodes/{node}/{action}")))
@@ -431,9 +432,14 @@ mod tests {
     fn routes_cannot_escape_the_assigned_protocol() {
         let id = uuid::Uuid::new_v4().to_string();
         assert!(Role::Control.permits("POST", &format!("/api/v1/nodes/{id}/heartbeat"), &id));
+        let readiness = format!("/api/v1/nodes/{id}/stage-readiness");
+        assert!(Role::Control.permits("POST", &readiness, &id));
+        assert!(!Role::Control.permits("GET", &readiness, &id));
+        assert!(!Role::Node.permits("POST", &readiness, &id));
         for path in [
             "/api/v1/admin/users",
             "/api/v1/nodes/other/heartbeat",
+            "/api/v1/nodes/other/stage-readiness",
             "/api/v1/nodes/register?x=1",
             "/api/v1/nodes/register/../admin",
             "http://example.org/",

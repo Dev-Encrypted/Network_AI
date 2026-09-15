@@ -1,11 +1,19 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 import { spawn, execFileSync } from "node:child_process";
+import { protectDirectory } from "../packages/contributor/src/permissions.mjs";
+import {
+  workerEnvironment,
+  loadProfile,
+} from "../packages/contributor/src/profile.mjs";
+import {
+  requestStop as requestWorkerStop,
+  workerStatus,
+} from "../packages/contributor/src/supervisor.mjs";
 import {
   mkdir,
   readFile,
   writeFile,
   open,
-  chmod,
   stat,
   readdir,
   unlink,
@@ -102,19 +110,7 @@ async function exists(path) {
 export async function config() {
   return JSON.parse(await readFile(configPath, "utf8"));
 }
-export async function protectDirectory(path) {
-  if (process.platform === "win32") {
-    const identity = execFileSync("whoami.exe", [], {
-      encoding: "utf8",
-      windowsHide: true,
-    }).trim();
-    execFileSync(
-      "icacls.exe",
-      [path, "/inheritance:r", "/grant:r", `${identity}:(OI)(CI)F`],
-      { stdio: "ignore", windowsHide: true },
-    );
-  } else await chmod(path, 0o700);
-}
+export { protectDirectory } from "../packages/contributor/src/permissions.mjs";
 async function privateJson(path, value) {
   await writeFile(path, `${JSON.stringify(value, null, 2)}\n`, { mode: 0o600 });
 }
@@ -417,6 +413,28 @@ async function rpcStatusReady(entry) {
   }
 }
 async function waitLaunched(entry, health) {
+  if (entry.options?.workerConfigPath) {
+    for (let i = 0; i < 60; i++) {
+      const s = await workerStatus(entry.options.workerConfigPath).catch(
+        () => null,
+      );
+      if (
+        s?.live &&
+        s.pid === entry.pid &&
+        ["WAITING_ROOT", "READY"].includes(s.phase)
+      )
+        return;
+      await delay(500);
+    }
+    throw new Error("Contributor did not report its own live components");
+  }
+  if (entry.options?.listenerOnly) {
+    for (let i = 0; i < 30; i++) {
+      if ((await owned(entry)) && (await listening(entry.port))) return;
+      await delay(500);
+    }
+    throw new Error("Private control transport did not start");
+  }
   if (entry.options?.rpcStatusFile) {
     for (let i = 0; i < 30; i++) {
       if (await rpcStatusReady(entry)) return;
@@ -458,13 +476,18 @@ export async function launch(name, program, args, port, health, options = {}) {
     detached: true,
     windowsHide: true,
     stdio: ["ignore", out.fd, err.fd],
-    env: {
-      ...process.env,
-      NETWORK_AI_CONFIG: options.configPath ?? configPath,
-      NEXT_TELEMETRY_DISABLED: "1",
-      NETWORK_AI_CONTROL_URL: `http://127.0.0.1:${c.control_port}`,
-      NETWORK_AI_GATEWAY_URL: `http://127.0.0.1:${c.gateway_port}`,
-    },
+    env: options.workerConfigPath
+      ? workerEnvironment()
+      : {
+          ...process.env,
+          NETWORK_AI_CONFIG: options.configPath ?? configPath,
+          NEXT_TELEMETRY_DISABLED: "1",
+          NETWORK_AI_CONTROL_URL: `http://127.0.0.1:${c.control_port}`,
+          NETWORK_AI_GATEWAY_URL: `http://127.0.0.1:${c.gateway_port}`,
+          ...(options.linkConfigPath
+            ? { NETWORK_AI_LINK_CONFIG: options.linkConfigPath }
+            : {}),
+        },
   });
   await new Promise((resolve, reject) => {
     child.once("spawn", resolve);
@@ -608,6 +631,10 @@ export async function stopCpu() {
     "route_cluster",
     "route_rpc_root_1",
     "route_rpc_root_2",
+    "route_contributor_1",
+    "route_contributor_2",
+    "route_control_1",
+    "route_control_2",
     "route_rpc_stage_1",
     "route_rpc_stage_2",
     "route_stage_1",
@@ -625,6 +652,10 @@ export async function stop() {
     "route_cluster",
     "route_rpc_root_1",
     "route_rpc_root_2",
+    "route_contributor_1",
+    "route_contributor_2",
+    "route_control_1",
+    "route_control_2",
     "route_rpc_stage_1",
     "route_rpc_stage_2",
     "route_stage_1",
@@ -638,12 +669,60 @@ export async function stopRouteRpcStage(index) {
   if (![1, 2].includes(index)) throw new Error("Choose installed stage 1 or 2");
   await stopNames([`route_rpc_stage_${index}`]);
 }
+export async function faultContributorComponent(index, component) {
+  if (
+    ![1, 2].includes(index) ||
+    !["worker", "control_link", "rpc_link"].includes(component)
+  )
+    throw new Error(
+      "Choose an installed contributor and one of its owned components",
+    );
+  const entry = (await readProcesses())[`route_contributor_${index}`];
+  const expected = join(
+    runtime,
+    "cpu-route",
+    "portable",
+    `operator-${index}`,
+    "worker.json",
+  );
+  if (!(await owned(entry)) || entry.options?.workerConfigPath !== expected)
+    throw new Error("Contributor supervisor is not the tracked process");
+  const s = await workerStatus(expected),
+    { profile, pin } = await loadProfile(expected, false);
+  const program =
+    component === "worker"
+      ? join(profile.engine.directory, pin.entry)
+      : profile.binaries[component === "control_link" ? "http" : "rpc"].path;
+  const pid = s.component_pids[component];
+  if (!s.live || s.pid !== entry.pid || !(await owned({ pid, program })))
+    throw new Error("Contributor component ownership could not be verified");
+  process.kill(pid);
+}
 async function stopNames(names) {
   const processes = await readProcesses();
   for (const name of names) {
     const entry = processes[name];
     if (await owned(entry)) {
-      if (name === "cpu_cluster" || name === "route_cluster") {
+      if (entry.options?.workerConfigPath) {
+        const expected = join(
+          runtime,
+          "cpu-route",
+          "portable",
+          `operator-${name.endsWith("_1") ? 1 : 2}`,
+          "worker.json",
+        );
+        if (
+          !["route_contributor_1", "route_contributor_2"].includes(name) ||
+          resolve(entry.options.workerConfigPath) !== expected
+        )
+          throw new Error("Unexpected managed contributor identity");
+        await requestWorkerStop(expected);
+        for (let i = 0; i < 30 && (await owned(entry)); i++) await delay(500);
+        if (await owned(entry))
+          throw new Error(
+            "Contributor shutdown did not finish; owned processes retained for inspection",
+          );
+      } else if (name === "cpu_cluster" || name === "route_cluster") {
         const expected = managedShutdownPath(name);
         if (entry.options?.shutdownFile !== expected)
           throw new Error("Missing managed cluster shutdown identity");
@@ -697,40 +776,92 @@ export async function startCpuCluster(cpu) {
 export async function startCpuRoute(profile) {
   const directory = join(runtime, "cpu-route");
   const useQuic = profile.rpc_transport === "iroh-direct-quic-guarded-rpc";
+  const portable = profile.worker_supervision === "portable_contributors";
+  if ((profile.worker_supervision && !portable) || (portable && !useQuic))
+    throw new Error("Invalid installed contributor transport");
   if (profile.rpc_transport && !useQuic)
     throw new Error("Unknown route RPC transport");
-  for (let i = 1; i <= 2; i++)
-    await launch(
-      `route_stage_${i}`,
-      process.execPath,
-      [
-        join(root, "scripts/stage-agent.mjs"),
-        "--config",
-        join(directory, `operator-${i}`, "config.json"),
-        "--rpc-listen-port",
-        String(43841 + i),
-        "--rpc-target-port",
-        String(43839 + i),
-        "--startup-compute-commands",
-        "4",
-        ...(useQuic
-          ? [
-              "--route-binding",
-              join(directory, "rpc-link", `stage-${i}`, "binding.json"),
-            ]
-          : []),
-      ],
-      43124 + i,
-      `http://127.0.0.1:${43124 + i}/health`,
-    );
-  if (useQuic) {
-    const binary = join(
-      root,
-      `target/debug/network-ai-rpc-link${process.platform === "win32" ? ".exe" : ""}`,
-    );
+  if (portable) {
     for (let i = 1; i <= 2; i++) {
-      for (const role of ["stage", "root"]) {
-        const folder = join(directory, "rpc-link", `${role}-${i}`);
+      const file = join(directory, "portable", `operator-${i}`, "worker.json");
+      const worker = (await loadProfile(file, false)).profile;
+      if (
+        worker.node.id !== profile.node_ids[i] ||
+        worker.binding.route_id !== profile.route_id
+      )
+        throw new Error("Contributor profile does not match installed route");
+      await launch(
+        `route_control_${i}`,
+        worker.binaries.http.path,
+        [],
+        43124 + i,
+        null,
+        {
+          listenerOnly: true,
+          linkConfigPath: join(
+            directory,
+            "portable",
+            `root-control-${i}`,
+            "link.json",
+          ),
+        },
+      );
+      await launch(
+        `route_contributor_${i}`,
+        process.execPath,
+        [
+          join(root, "packages/contributor/bin/worker.mjs"),
+          "start",
+          "--config",
+          file,
+        ],
+        worker.node.http_port,
+        null,
+        { workerConfigPath: file },
+      );
+    }
+  } else
+    for (let i = 1; i <= 2; i++)
+      await launch(
+        `route_stage_${i}`,
+        process.execPath,
+        [
+          join(root, "scripts/stage-agent.mjs"),
+          "--config",
+          join(directory, `operator-${i}`, "config.json"),
+          "--rpc-listen-port",
+          String(43841 + i),
+          "--rpc-target-port",
+          String(43839 + i),
+          "--startup-compute-commands",
+          "4",
+          ...(useQuic
+            ? [
+                "--route-binding",
+                join(directory, "rpc-link", `stage-${i}`, "binding.json"),
+              ]
+            : []),
+        ],
+        43124 + i,
+        `http://127.0.0.1:${43124 + i}/health`,
+      );
+  if (useQuic) {
+    const binary = portable
+      ? (
+          await loadProfile(
+            join(directory, "portable", "operator-1", "worker.json"),
+            false,
+          )
+        ).profile.binaries.rpc.path
+      : join(
+          root,
+          `target/debug/network-ai-rpc-link${process.platform === "win32" ? ".exe" : ""}`,
+        );
+    for (let i = 1; i <= 2; i++) {
+      for (const role of portable ? ["root"] : ["stage", "root"]) {
+        const folder = portable
+          ? join(directory, "portable", `root-rpc-${i}`)
+          : join(directory, "rpc-link", `${role}-${i}`);
         const file = join(folder, "rpc.json");
         const rpc = JSON.parse(await readFile(file, "utf8"));
         if (
@@ -774,6 +905,7 @@ export async function startCpuRoute(profile) {
       engine,
       "--workers",
       "2",
+      ...(portable ? ["--worker-supervision", "external"] : []),
       "--port",
       "43224",
       "--rpc-port",
@@ -823,6 +955,11 @@ export async function restart(name, downtimeMs = 0) {
       ? c.web_origin
       : `http://127.0.0.1:${entry.port}/${name === "control" ? "api/v1/health" : "health"}`;
   await launch(name, entry.program, entry.args, entry.port, health);
+}
+export async function stopApplicationComponent(name) {
+  if (!["web", "gateway", "node", "control"].includes(name))
+    throw new Error("Choose web, gateway, node or control");
+  await stopNames([name]);
 }
 export async function status() {
   const processes = await readProcesses();
