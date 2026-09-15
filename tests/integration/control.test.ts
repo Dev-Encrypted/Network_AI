@@ -255,6 +255,80 @@ test("funded availability reserves once, requires provider acceptance and refund
   );
 });
 
+test("execution placement is persisted in the immutable model manifest and changes its consent hash", async () => {
+  const f = await fixture();
+  const original = (
+    await db.pool.query("SELECT manifest FROM models WHERE id=$1", [f.modelId])
+  ).rows[0].manifest;
+  const execution = {
+    schema_version: 1,
+    adapter: "llama-b10964-rpc",
+    engine_commit: "b29c606e28a01b1bc8c1351026a0fa6e616bf6c4",
+    transport: "iroh-direct-quic-guarded-rpc",
+    split_mode: "layer",
+    context_tokens: original.max_context_tokens,
+    batch_tokens: 128,
+    slots: 1,
+    stages: [
+      {
+        device: "CUDA",
+        tensor_weight: 1,
+        buffer_budget_mib: 3072,
+        reserve_mib: 1024,
+        threads: 8,
+      },
+      {
+        device: "CPU",
+        tensor_weight: 9,
+        buffer_budget_mib: 20480,
+        reserve_mib: 8192,
+        threads: 8,
+      },
+    ],
+  };
+  const model = {
+    ...original,
+    model_id: `device-${randomUUID()}`,
+    execution_profile: execution,
+  };
+  const published = await market.publish(f.user, model);
+  const stored = (
+    await db.pool.query(
+      "SELECT manifest,manifest_sha256 FROM models WHERE id=$1",
+      [model.model_id],
+    )
+  ).rows[0];
+  assert.deepEqual(stored.manifest.execution_profile, execution);
+  assert.equal(stored.manifest_sha256, published.manifest_sha256);
+  await assert.rejects(
+    market.publish(f.user, {
+      ...model,
+      model_id: `device-${randomUUID()}`,
+      execution_profile: { ...execution, context_tokens: 2048 },
+    }),
+  );
+  await assert.rejects(
+    () =>
+      db.pool.query("UPDATE models SET manifest=$2 WHERE id=$1", [
+        model.model_id,
+        { ...model, execution_profile: { ...execution, slots: 2 } },
+      ]),
+    { code: "42501" },
+  );
+  const changed = {
+    ...model,
+    execution_profile: {
+      ...execution,
+      stages: execution.stages.map((stage, i) => ({
+        ...stage,
+        tensor_weight: i + 1,
+      })),
+    },
+  };
+  const { canonical } = await import("../../apps/control-api/src/security.js");
+  assert.notEqual(hash(canonical(changed)), published.manifest_sha256);
+});
+
 test("availability cannot fund insufficient balances or double-pay a physical domain", async () => {
   const f = await fixture();
   const poor = await member();

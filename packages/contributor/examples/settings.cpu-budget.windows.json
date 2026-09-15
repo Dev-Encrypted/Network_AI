@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "mode": "private_contributor_device",
+  "node": {
+    "name": "My invited CPU stage with a memory budget",
+    "http_port": 43225,
+    "backend_model": "REPLACE_WITH_EXACT_BACKEND_MODEL"
+  },
+  "binding": {
+    "stage_node_id": "REPLACE_WITH_INVITED_NODE_UUID",
+    "route_id": "REPLACE_WITH_ACCEPTED_ROUTE_UUID",
+    "route_sha256": "REPLACE_WITH_ROUTE_SHA256",
+    "manifest_sha256": "REPLACE_WITH_MODEL_MANIFEST_SHA256"
+  },
+  "ports": {
+    "worker_rpc": 43840,
+    "guard_rpc": 43842,
+    "control_forward": 43141
+  },
+  "control": {
+    "peer_id": "REPLACE_WITH_COORDINATOR_CONTROL_PUBLIC_KEY_HEX",
+    "peer_addresses": ["127.0.0.1:43951"],
+    "bind_addr": "127.0.0.1:43952"
+  },
+  "rpc": {
+    "peer_id": "REPLACE_WITH_MODEL_ROOT_RPC_PUBLIC_KEY_HEX",
+    "peer_addresses": ["127.0.0.1:43932"],
+    "bind_addr": "127.0.0.1:43930"
+  },
+  "engine": {
+    "id": "llama-b10964-win-x64-cpu",
+    "directory": "C:/NetworkAI/llama-b10964/bin"
+  },
+  "binaries": {
+    "http": {
+      "path": "C:/NetworkAI/bin/network-ai-link.exe",
+      "sha256": "REPLACE_WITH_VERIFIED_HTTP_BINARY_SHA256"
+    },
+    "rpc": {
+      "path": "C:/NetworkAI/bin/network-ai-rpc-link.exe",
+      "sha256": "REPLACE_WITH_VERIFIED_RPC_BINARY_SHA256"
+    },
+    "guardian": {
+      "path": "C:/NetworkAI/bin/network-ai-contributor-guardian.exe",
+      "sha256": "REPLACE_WITH_VERIFIED_GUARDIAN_BINARY_SHA256"
+    }
+  },
+  "threads": 8,
+  "startup_compute_commands": 4,
+  "device": {
+    "kind": "CPU",
+    "buffer_budget_mib": 20480,
+    "reserve_mib": 8192
+  }
+}

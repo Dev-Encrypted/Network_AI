@@ -7,6 +7,7 @@ import { ensureIdentity, configureWorker } from "../src/configure.mjs";
 import { loadProfile, requireValue } from "../src/profile.mjs";
 import { startWorker, requestStop, workerStatus } from "../src/supervisor.mjs";
 import { upgradeGuardianProfile } from "../src/upgrade.mjs";
+import { availableDevices, prepareDevice } from "../src/devices.mjs";
 
 try {
   const { values: args, positionals } = parseArgs({
@@ -24,7 +25,8 @@ try {
   });
   const command = positionals[0];
   if (command === "help" || !command) {
-    console.log(`NETWORK AI contributor (private CPU preview)
+    console.log(`NETWORK AI contributor (private device preview)
+  devices
   identity --directory PATH
   configure --directory PATH --invite FILE --settings FILE
   check --config FILE
@@ -32,7 +34,13 @@ try {
   status --config FILE
   stop --config FILE
   upgrade --config FILE --guardian EXE --guardian-sha256 SHA256
-Only identity.json is public. Read README.md for peer exchange and the pinned Windows CPU engine.`);
+Only identity.json is public. Read README.md for peer exchange and pinned Windows CPU/CUDA engines.`);
+  } else if (command === "devices") {
+    requireValue(
+      positionals.length === 1 && Object.keys(args).length === 0,
+      "worker_arguments",
+    );
+    console.log(JSON.stringify(await availableDevices(), null, 2));
   } else if (command === "identity") {
     requireValue(
       args.directory && positionals.length === 1,
@@ -92,12 +100,23 @@ Only identity.json is public. Read README.md for peer exchange and the pinned Wi
     );
     if (command === "check") {
       const { profile } = await loadProfile(args.config);
+      // An already running worker occupies some of its own offer. Report new
+      // startup headroom separately; don't call its valid live profile invalid.
+      const device = await prepareDevice(profile, undefined, {
+        requireHeadroom: false,
+      });
+      const observation = device?.snapshot() ?? null;
       console.log(
         JSON.stringify({
           valid: true,
           node_id: profile.node.id,
           route_id: profile.binding.route_id,
           engine_id: profile.engine.id,
+          device: observation,
+          startup_headroom_sufficient: observation
+            ? observation.memory_free_mib >=
+              observation.buffer_budget_mib + observation.reserve_mib
+            : null,
           backend_credentials_required: false,
         }),
       );

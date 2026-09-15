@@ -121,6 +121,7 @@ test("contributor children do not inherit coordinator keys, Node injection, or p
       NODE_OPTIONS: "--import malicious",
       HTTPS_PROXY: "proxy",
       AWS_SECRET_ACCESS_KEY: "private",
+      CUDA_VISIBLE_DEVICES: "accidental-other-device",
     }),
     {
       Path: "test-path",
@@ -128,6 +129,31 @@ test("contributor children do not inherit coordinator keys, Node injection, or p
       TEMP: "test-temp",
       GGML_RPC_NO_RDMA: "1",
     },
+  );
+});
+
+test("an explicit device profile survives configuration while incomplete settings create no identity", async (t) => {
+  const dir = await directory(t);
+  const deviceSettings = {
+    ...settings,
+    mode: "private_contributor_device",
+    device: { kind: "CPU", buffer_budget_mib: 4096, reserve_mib: 1024 },
+  };
+  await assert.rejects(
+    configureWorker(dir, invitation, { ...deviceSettings, device: undefined }),
+    { code: "worker_device_required" },
+  );
+  await assert.rejects(readFile(join(dir, "identity.private.json")), {
+    code: "ENOENT",
+  });
+  const { path } = await configureWorker(dir, invitation, deviceSettings);
+  const profile = validateProfile(JSON.parse(await readFile(path, "utf8")));
+  assert.deepEqual(profile.device, deviceSettings.device);
+  await assert.rejects(
+    configureWorker(dir, invitation, {
+      ...deviceSettings,
+      device: { ...deviceSettings.device, reserve_mib: 2048 },
+    }),
   );
 });
 test("graceful stop is bound to the current lock and works without fresh readable telemetry", async (t) => {

@@ -17,6 +17,7 @@ import {
 import { protectDirectory } from "./permissions.mjs";
 import { atomicJson, StatusPublisher } from "./state.mjs";
 import { startGuardian } from "./guardian.mjs";
+import { prepareDevice } from "./devices.mjs";
 
 async function json(file, value) {
   await atomicJson(file, value);
@@ -54,6 +55,7 @@ export async function startWorker(file) {
   const loaded = await loadProfile(file),
     c = loaded.profile,
     state = loaded.state;
+  const device = await prepareDevice(c);
   await mkdir(state, { recursive: true, mode: 0o700 });
   await protectDirectory(loaded.directory);
   await protectDirectory(state);
@@ -100,6 +102,8 @@ export async function startWorker(file) {
       route_id: c.binding.route_id,
       profile_sha256: fingerprint,
       engine_id: c.engine.id,
+      device: device?.snapshot() ?? null,
+      rpc_memory: agent?.health().rpc_memory ?? null,
       phase,
       ready: Boolean(ready && !stopping),
       failure,
@@ -186,16 +190,21 @@ export async function startWorker(file) {
       rpcFile = join(state, "rpc.json");
     await json(controlFile, configs.control);
     await json(rpcFile, configs.rpc);
-    launch("worker", join(c.engine.directory, loaded.pin.entry), [
-      "--host",
-      "127.0.0.1",
-      "--port",
-      String(c.ports.worker_rpc),
-      "--device",
-      "CPU",
-      "--threads",
-      String(c.threads),
-    ]);
+    launch(
+      "worker",
+      join(c.engine.directory, loaded.pin.entry),
+      [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        String(c.ports.worker_rpc),
+        "--device",
+        device?.engineDevice ?? "CPU",
+        "--threads",
+        String(c.threads),
+      ],
+      device?.environment ?? {},
+    );
     await waitFor(() => tcpReady(c.ports.worker_rpc));
     launch("control_link", c.binaries.http.path, [], {
       NETWORK_AI_LINK_CONFIG: controlFile,
@@ -206,6 +215,9 @@ export async function startWorker(file) {
       rpcTargetPort: c.ports.worker_rpc,
       startupComputeCommands: c.startup_compute_commands,
       routeBinding: c.binding,
+      memoryBudget: device?.memoryBudget,
+      memoryFreeBytes: device?.freeBytes,
+      deviceSnapshot: device?.snapshot,
     });
     if (stopping) await agent.stop();
     requireValue(!stopping, "worker_stopping");

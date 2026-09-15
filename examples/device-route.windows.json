@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "id": "qwen32-mixed",
+  "name": "Qwen3-32B / private CUDA and CPU route",
+  "model": {
+    "schema_version": 1,
+    "model_id": "qwen3-32b-mixed-private",
+    "display_name": "Qwen3-32B / CUDA + CPU",
+    "backend_model": "network-ai-qualified-model",
+    "revision": "938a7432affaec9157f883a87164e2646ae17555",
+    "artifact_sha256": "efd971561896866f0e910cce52761ca77b1b138090c7f15fe284676d57d1f689",
+    "license_id": "Apache-2.0",
+    "source_url": "https://huggingface.co/Qwen/Qwen3-32B-GGUF/resolve/938a7432affaec9157f883a87164e2646ae17555/Qwen3-32B-Q4_K_M.gguf",
+    "modality": "text",
+    "max_context_tokens": 2048,
+    "max_output_tokens": 128,
+    "max_input_bytes": 1400,
+    "input_rate_microtu": "1000",
+    "output_rate_microtu": "3000",
+    "rate_denominator": 1,
+    "description": "Official 32.8B Q4_K_M on one host. Explicit 1:9 CUDA/CPU layer weights, observed RPC-buffer budgets and reused physical resource domains. Private LAB rates are accounting fixtures; this is not a market price or public hardware qualification.",
+    "trust_policy": "private_lab",
+    "execution_profile": {
+      "schema_version": 1,
+      "adapter": "llama-b10964-rpc",
+      "engine_commit": "b29c606e28a01b1bc8c1351026a0fa6e616bf6c4",
+      "transport": "iroh-direct-quic-guarded-rpc",
+      "split_mode": "layer",
+      "context_tokens": 2048,
+      "batch_tokens": 128,
+      "slots": 1,
+      "stages": [
+        {
+          "device": "CUDA",
+          "tensor_weight": 1,
+          "buffer_budget_mib": 3072,
+          "reserve_mib": 1024,
+          "threads": 8
+        },
+        {
+          "device": "CPU",
+          "tensor_weight": 9,
+          "buffer_budget_mib": 20480,
+          "reserve_mib": 8192,
+          "threads": 8
+        }
+      ]
+    }
+  },
+  "artifact_manifest": "C:/NetworkAI/Network_AI/adapters/manifests/qwen3-32b-q4-k-m.json",
+  "model_directory": "C:/NetworkAI/models/qwen3-32b",
+  "root_engine_directory": "C:/NetworkAI/llama-b10964-cpu/bin",
+  "root_resource_domain_id": "REPLACE_WITH_EXISTING_CPU_DOMAIN_UUID",
+  "root_share_bps": 1000,
+  "root_http_port": 43134,
+  "engine_port": 43234,
+  "batch": 128,
+  "root_threads": 8,
+  "binaries": {
+    "node": {
+      "path": "C:/NetworkAI/bin/network-ai-node.exe",
+      "sha256": "REPLACE_WITH_VERIFIED_NODE_BINARY_SHA256"
+    },
+    "http": {
+      "path": "C:/NetworkAI/bin/network-ai-link.exe",
+      "sha256": "REPLACE_WITH_VERIFIED_HTTP_BINARY_SHA256"
+    },
+    "rpc": {
+      "path": "C:/NetworkAI/bin/network-ai-rpc-link.exe",
+      "sha256": "REPLACE_WITH_VERIFIED_RPC_BINARY_SHA256"
+    },
+    "guardian": {
+      "path": "C:/NetworkAI/bin/network-ai-contributor-guardian.exe",
+      "sha256": "REPLACE_WITH_VERIFIED_GUARDIAN_BINARY_SHA256"
+    }
+  },
+  "stages": [
+    {
+      "name": "CUDA contributor / bounded 3 GiB",
+      "resource_domain_id": "REPLACE_WITH_EXISTING_GPU_DOMAIN_UUID",
+      "share_bps": 4500,
+      "tensor_weight": 1,
+      "engine": {
+        "id": "llama-b10964-win-x64-cuda12",
+        "directory": "C:/NetworkAI/llama-b10964-cuda12/bin"
+      },
+      "device": {
+        "kind": "CUDA",
+        "uuid": "REPLACE_WITH_PHYSICAL_GPU_UUID_FROM_DEVICES_COMMAND",
+        "buffer_budget_mib": 3072,
+        "reserve_mib": 1024
+      },
+      "threads": 8,
+      "ports": {
+        "http": 43235,
+        "control_from_root": 43135,
+        "control_to_coordinator": 43151,
+        "worker_rpc": 43850,
+        "guard_rpc": 43852,
+        "root_rpc": 43854,
+        "control_udp_root": 44000,
+        "control_udp_stage": 44001,
+        "rpc_udp_root": 44002,
+        "rpc_udp_stage": 44003
+      }
+    },
+    {
+      "name": "CPU contributor / bounded 20 GiB",
+      "resource_domain_id": "REPLACE_WITH_EXISTING_CPU_DOMAIN_UUID",
+      "share_bps": 4500,
+      "tensor_weight": 9,
+      "engine": {
+        "id": "llama-b10964-win-x64-cpu",
+        "directory": "C:/NetworkAI/llama-b10964-cpu/bin"
+      },
+      "device": {
+        "kind": "CPU",
+        "buffer_budget_mib": 20480,
+        "reserve_mib": 8192
+      },
+      "threads": 8,
+      "ports": {
+        "http": 43236,
+        "control_from_root": 43136,
+        "control_to_coordinator": 43152,
+        "worker_rpc": 43851,
+        "guard_rpc": 43853,
+        "root_rpc": 43855,
+        "control_udp_root": 44004,
+        "control_udp_stage": 44005,
+        "rpc_udp_root": 44006,
+        "rpc_udp_stage": 44007
+      }
+    }
+  ]
+}

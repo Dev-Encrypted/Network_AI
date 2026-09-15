@@ -1053,6 +1053,24 @@ pre {
   padding: 9px;
   margin: 15px 0 20px;
 }
+.execution-profile {
+  margin-top: 14px;
+  padding: 12px;
+  background: #f4f6fa;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.execution-profile p {
+  margin: 8px 0;
+  color: var(--muted);
+}
+.execution-profile ul {
+  padding-left: 18px;
+}
+.execution-profile li + li {
+  margin-top: 8px;
+}
 .model-card > .secondary {
   margin-top: auto;
   font-size: 12px;

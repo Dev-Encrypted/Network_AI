@@ -615,6 +615,15 @@ export async function start(options = {}) {
       { configPath: cpu.node_config },
     );
   }
+  if (
+    !options.skipDevices &&
+    !process.argv.includes("--skip-devices") &&
+    (await exists(join(runtime, "device-routes")))
+  ) {
+    const { installedDeviceRoutes, startDeviceRoute } =
+      await import("./device-route.mjs");
+    for (const id of await installedDeviceRoutes()) await startDeviceRoute(id);
+  }
   console.log(
     `NETWORK AI disponível em ${c.web_origin}. Login no arquivo privado de credenciais.`,
   );
@@ -624,7 +633,28 @@ function managedShutdownPath(name) {
     return join(runtime, "cpu-cluster", "engine", "stop.request");
   if (name === "route_cluster")
     return join(runtime, "cpu-route", "engine", "stop.request");
+  const device = /^device_([a-z][a-z0-9-]{0,31})_cluster$/.exec(name);
+  if (device)
+    return join(runtime, "device-routes", device[1], "engine", "stop.request");
   throw new Error("Unknown managed supervisor identity");
+}
+export async function stopManagedDeviceRoute(id, workers) {
+  if (
+    !/^[a-z][a-z0-9-]{0,31}$/.test(id ?? "") ||
+    !Number.isInteger(workers) ||
+    workers < 1 ||
+    workers > 15
+  )
+    throw new Error("Invalid managed device route identity");
+  const prefix = `device_${id}`,
+    indices = Array.from({ length: workers }, (_, i) => i + 1);
+  await stopNames([
+    `${prefix}_root`,
+    `${prefix}_cluster`,
+    ...indices.map((i) => `${prefix}_rpc_${i}`),
+    ...indices.map((i) => `${prefix}_contributor_${i}`),
+    ...indices.map((i) => `${prefix}_control_${i}`),
+  ]);
 }
 export async function stopCpu() {
   return stopNames([
@@ -645,6 +675,22 @@ export async function stopCpu() {
   ]);
 }
 export async function stop() {
+  // Shutdown must work even before building contracts, or after an incomplete
+  // installation. Enumerate only this lab's tracked and path-bound identities.
+  const deviceRoutes = new Map();
+  for (const name of Object.keys(await readProcesses())) {
+    const match =
+      /^device_([a-z][a-z0-9-]{0,31})_(?:root|cluster|(?:contributor|rpc|control)_([1-9]|1[0-5]))$/.exec(
+        name,
+      );
+    if (match)
+      deviceRoutes.set(
+        match[1],
+        Math.max(deviceRoutes.get(match[1]) ?? 1, Number(match[2] ?? 1)),
+      );
+  }
+  for (const [id, workers] of deviceRoutes)
+    await stopManagedDeviceRoute(id, workers);
   return stopNames([
     "web",
     "gateway",
@@ -671,9 +717,19 @@ export async function stopRouteRpcStage(index) {
   if (![1, 2].includes(index)) throw new Error("Choose installed stage 1 or 2");
   await stopNames([`route_rpc_stage_${index}`]);
 }
-export async function faultContributorComponent(index, component) {
+export async function faultContributorComponent(
+  index,
+  component,
+  deviceRouteId = null,
+) {
+  const device = deviceRouteId !== null;
   if (
-    ![1, 2].includes(index) ||
+    (device
+      ? !/^[a-z][a-z0-9-]{0,31}$/.test(deviceRouteId) ||
+        !Number.isInteger(index) ||
+        index < 1 ||
+        index > 15
+      : ![1, 2].includes(index)) ||
     !["worker", "control_link", "rpc_link", "supervisor", "guardian"].includes(
       component,
     )
@@ -681,14 +737,26 @@ export async function faultContributorComponent(index, component) {
     throw new Error(
       "Choose an installed contributor and one of its owned components",
     );
-  const entry = (await readProcesses())[`route_contributor_${index}`];
-  const expected = join(
-    runtime,
-    "cpu-route",
-    "portable",
-    `operator-${index}`,
-    "worker.json",
-  );
+  const entry = (await readProcesses())[
+    device
+      ? `device_${deviceRouteId}_contributor_${index}`
+      : `route_contributor_${index}`
+  ];
+  const expected = device
+    ? join(
+        runtime,
+        "device-routes",
+        deviceRouteId,
+        `operator-${index}`,
+        "worker.json",
+      )
+    : join(
+        runtime,
+        "cpu-route",
+        "portable",
+        `operator-${index}`,
+        "worker.json",
+      );
   if (!(await owned(entry)) || entry.options?.workerConfigPath !== expected)
     throw new Error("Contributor supervisor is not the tracked process");
   const s = await workerStatus(expected),
@@ -743,15 +811,28 @@ async function stopNames(names) {
     const entry = processes[name];
     if (await owned(entry)) {
       if (entry.options?.workerConfigPath) {
-        const expected = join(
-          runtime,
-          "cpu-route",
-          "portable",
-          `operator-${name.endsWith("_1") ? 1 : 2}`,
-          "worker.json",
-        );
+        const device =
+          /^device_([a-z][a-z0-9-]{0,31})_contributor_([1-9]|1[0-5])$/.exec(
+            name,
+          );
+        const expected = device
+          ? join(
+              runtime,
+              "device-routes",
+              device[1],
+              `operator-${device[2]}`,
+              "worker.json",
+            )
+          : join(
+              runtime,
+              "cpu-route",
+              "portable",
+              `operator-${name.endsWith("_1") ? 1 : 2}`,
+              "worker.json",
+            );
         if (
-          !["route_contributor_1", "route_contributor_2"].includes(name) ||
+          (!device &&
+            !["route_contributor_1", "route_contributor_2"].includes(name)) ||
           resolve(entry.options.workerConfigPath) !== expected
         )
           throw new Error("Unexpected managed contributor identity");
@@ -761,7 +842,11 @@ async function stopNames(names) {
           throw new Error(
             "Contributor shutdown did not finish; owned processes retained for inspection",
           );
-      } else if (name === "cpu_cluster" || name === "route_cluster") {
+      } else if (
+        name === "cpu_cluster" ||
+        name === "route_cluster" ||
+        /^device_([a-z][a-z0-9-]{0,31})_cluster$/.test(name)
+      ) {
         const expected = managedShutdownPath(name);
         if (entry.options?.shutdownFile !== expected)
           throw new Error("Missing managed cluster shutdown identity");

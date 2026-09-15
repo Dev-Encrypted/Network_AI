@@ -542,7 +542,7 @@ export default function Home() {
           </div>
           <footer>
             Um projeto de <strong>Dev-Encrypted</strong>
-            <span>v0.11 · Ambiente privado</span>
+            <span>v0.12 · Ambiente privado</span>
           </footer>
         </section>
         <section className="login-side">
@@ -1099,6 +1099,49 @@ export default function Home() {
                         <dd>{item.manifest.license_id}</dd>
                       </div>
                     </dl>
+                    {item.manifest.execution_profile && (
+                      <div className="execution-profile">
+                        <strong>Distribuição do modelo</strong>
+                        <p>
+                          As etapas trabalham juntas em uma resposta. O tamanho
+                          de cada parte depende da memória oferecida; a
+                          remuneração segue os termos aceitos da rota.
+                        </p>
+                        <ul>
+                          {item.manifest.execution_profile.stages.map(
+                            (stage, index, stages) => (
+                              <li key={index}>
+                                Etapa {index + 1}:{" "}
+                                {stage.device === "CUDA"
+                                  ? "GPU NVIDIA (CUDA)"
+                                  : "CPU e RAM"}{" "}
+                                · peso de divisão {stage.tensor_weight}/
+                                {stages.reduce(
+                                  (sum, s) => sum + s.tensor_weight,
+                                  0,
+                                )}{" "}
+                                ·{" "}
+                                {(
+                                  stage.buffer_budget_mib / 1024
+                                ).toLocaleString("pt-BR")}{" "}
+                                GiB para buffers ·{" "}
+                                {(stage.reserve_mib / 1024).toLocaleString(
+                                  "pt-BR",
+                                )}{" "}
+                                GiB de reserva.
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                        <p>
+                          O orçamento cobre buffers observados pelo agente.
+                          Contexto, operações internas do motor e outros
+                          aplicativos também consomem memória. Mais parâmetros
+                          exigem mais memória total; o número de colaboradores
+                          depende da capacidade de cada um.
+                        </p>
+                      </div>
+                    )}
                     <p className="qualification">
                       {item.qualification_note ||
                         "Aguardando evidência de compatibilidade, origem e licença."}
@@ -1632,7 +1675,7 @@ export default function Home() {
           <span>
             NETWORK AI <i>by Dev-Encrypted</i>
           </span>
-          <span>Ambiente privado · v0.11 · Sem oferta comercial</span>
+          <span>Ambiente privado · v0.12 · Sem oferta comercial</span>
         </footer>
       </div>
     </div>

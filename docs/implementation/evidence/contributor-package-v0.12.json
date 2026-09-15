@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "version": "0.12.0",
+  "filename": "network-ai-contributor-0.12.0.tgz",
+  "sha256": "18fe068e8cff0fb99c7adbf4ca048ef21994f4c268a4d26f05976ce06633fd32",
+  "bytes": 1182394,
+  "dependency": {
+    "name": "zod",
+    "version": "4.6.5",
+    "bundled": true,
+    "license_included": true
+  },
+  "extraction_and_cli_without_coordinator_source": true,
+  "device_profiles_and_both_engine_pins_included": true,
+  "model_or_engine_included": false,
+  "executable_signing_or_multi_host_qualification": false,
+  "extracted_profile_checks": {
+    "extracted_package": true,
+    "coordinator_credentials_required": false,
+    "checks": [
+      {
+        "kind": "legacy_cpu",
+        "valid": true,
+        "engine_id": "llama-b10964-win-x64-cpu",
+        "device_kind": "CPU",
+        "startup_headroom_sufficient": null
+      },
+      {
+        "kind": "cuda",
+        "valid": true,
+        "engine_id": "llama-b10964-win-x64-cuda12",
+        "device_kind": "CUDA",
+        "startup_headroom_sufficient": false
+      },
+      {
+        "kind": "budgeted_cpu",
+        "valid": true,
+        "engine_id": "llama-b10964-win-x64-cpu",
+        "device_kind": "CPU",
+        "startup_headroom_sufficient": true
+      }
+    ]
+  },
+  "measurement_note": "Profile validity and startup headroom are separate. An already loaded CUDA worker uses its own budget; a false fresh-start headroom result while it is loaded does not mean the running profile is invalid or promise capacity for an additional worker."
+}

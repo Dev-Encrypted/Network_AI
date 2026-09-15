@@ -1,0 +1,647 @@
+{
+  "schema_version": 1,
+  "evidence_type": "REAL_SINGLE_HOST_CPU_CUDA_MODEL_ROUTE",
+  "observed_at": "2026-09-15T13:55:10.491Z",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "relay_enabled": false,
+  "unit": "LAB_TU",
+  "cash_payments": false,
+  "new_domains": 0,
+  "database_observations_fabricated": false,
+  "public_operation_approved": false,
+  "sustainable_economics_established": false,
+  "execution_profile": {
+    "schema_version": 1,
+    "adapter": "llama-b10964-rpc",
+    "engine_commit": "b29c606e28a01b1bc8c1351026a0fa6e616bf6c4",
+    "transport": "iroh-direct-quic-guarded-rpc",
+    "split_mode": "layer",
+    "context_tokens": 2048,
+    "batch_tokens": 128,
+    "slots": 1,
+    "stages": [
+      {
+        "device": "CUDA",
+        "tensor_weight": 1,
+        "buffer_budget_mib": 3072,
+        "reserve_mib": 1024,
+        "threads": 8
+      },
+      {
+        "device": "CPU",
+        "tensor_weight": 9,
+        "buffer_budget_mib": 20480,
+        "reserve_mib": 8192,
+        "threads": 8
+      }
+    ]
+  },
+  "physical_resource_domains": 2,
+  "checks": [
+    "real_mixed_model_output_and_all_signed_receipts_conserve_payment",
+    "mixed_consumers_serialize_on_shared_physical_resources",
+    "existing_gpu_model_waits_for_the_same_physical_resource",
+    "existing_cpu_model_waits_for_the_same_physical_resource",
+    "both_real_backends_stay_within_observed_buffer_budgets",
+    "cuda_worker_loss_refunds_and_releases_both_resource_claims",
+    "same_profile_and_identities_reload_after_cuda_failure",
+    "no_new_grants_and_zero_ledger_projection_mismatches"
+  ],
+  "result": "PASS",
+  "new_lab_grants": 0,
+  "ledger_projection_mismatches": 0,
+  "model": {
+    "artifact_sha256": "efd971561896866f0e910cce52761ca77b1b138090c7f15fe284676d57d1f689",
+    "revision": "938a7432affaec9157f883a87164e2646ae17555",
+    "manifest_sha256": "8502f1e960bd518d41a0eb4cc1095b824148595b38cbde9fcd23afa1db147429"
+  },
+  "contributor_pins": [
+    {
+      "ordinal": 1,
+      "engine_id": "llama-b10964-win-x64-cuda12",
+      "verified_engine_files": 55,
+      "guardian_sha256": "0ca31d942f8b64dd5fa8090bc0b2e49871789e5c489b2b63b260a3ed766789fc",
+      "http_sha256": "da980ba18cce3d00aaebecfb68dbff27cda8d943446ed75dc4074b98ddd598da",
+      "rpc_sha256": "3c65125ec92b5e610e19d1f38f581736e62a1513103397ab8e64139d7436f67d",
+      "backend_credentials_present": false
+    },
+    {
+      "ordinal": 2,
+      "engine_id": "llama-b10964-win-x64-cpu",
+      "verified_engine_files": 51,
+      "guardian_sha256": "0ca31d942f8b64dd5fa8090bc0b2e49871789e5c489b2b63b260a3ed766789fc",
+      "http_sha256": "da980ba18cce3d00aaebecfb68dbff27cda8d943446ed75dc4074b98ddd598da",
+      "rpc_sha256": "3c65125ec92b5e610e19d1f38f581736e62a1513103397ab8e64139d7436f67d",
+      "backend_credentials_present": false
+    }
+  ],
+  "sessions": [
+    {
+      "label": "mixed_cuda_cpu",
+      "model": "qwen3-32b-mixed-private",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "started_at": "2026-09-15T13:55:11.759Z",
+      "finished_at": "2026-09-15T13:55:14.726Z",
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000",
+      "provider_paid_microtu": "28800",
+      "platform_fee_microtu": "7200",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        }
+      ]
+    },
+    {
+      "label": "mixed_concurrent_a",
+      "model": "qwen3-32b-mixed-private",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "started_at": "2026-09-15T13:55:14.868Z",
+      "finished_at": "2026-09-15T13:55:17.288Z",
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000",
+      "provider_paid_microtu": "28800",
+      "platform_fee_microtu": "7200",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        }
+      ]
+    },
+    {
+      "label": "mixed_concurrent_b",
+      "model": "qwen3-32b-mixed-private",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "started_at": "2026-09-15T13:55:17.428Z",
+      "finished_at": "2026-09-15T13:55:20.081Z",
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000",
+      "provider_paid_microtu": "28800",
+      "platform_fee_microtu": "7200",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 6,
+          "request_bytes": "156",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        }
+      ]
+    },
+    {
+      "label": "mixed_owns_gpu_domain",
+      "model": "qwen3-32b-mixed-private",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "started_at": "2026-09-15T13:55:20.223Z",
+      "finished_at": "2026-09-15T13:55:46.849Z",
+      "prompt_tokens": 23,
+      "completion_tokens": 64,
+      "charged_microtu": "215000",
+      "provider_paid_microtu": "172000",
+      "platform_fee_microtu": "43000",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 64,
+          "request_bytes": "1664",
+          "response_bytes": "1536",
+          "paid_microtu": "77400"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 64,
+          "request_bytes": "1664",
+          "response_bytes": "1536",
+          "paid_microtu": "77400"
+        }
+      ]
+    },
+    {
+      "label": "existing_gpu_model_after_shared_claim",
+      "model": "qwen-local",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "started_at": "2026-09-15T13:55:47.003Z",
+      "finished_at": "2026-09-15T13:55:49.892Z",
+      "prompt_tokens": 62,
+      "completion_tokens": 134,
+      "charged_microtu": "464000"
+    },
+    {
+      "label": "mixed_owns_cpu_domain",
+      "model": "qwen3-32b-mixed-private",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "started_at": "2026-09-15T13:55:50.007Z",
+      "finished_at": "2026-09-15T13:56:16.098Z",
+      "prompt_tokens": 23,
+      "completion_tokens": 64,
+      "charged_microtu": "215000",
+      "provider_paid_microtu": "172000",
+      "platform_fee_microtu": "43000",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 64,
+          "request_bytes": "1664",
+          "response_bytes": "1536",
+          "paid_microtu": "77400"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 64,
+          "request_bytes": "1664",
+          "response_bytes": "1536",
+          "paid_microtu": "77400"
+        }
+      ]
+    },
+    {
+      "label": "existing_cpu_model_after_shared_claim",
+      "model": "qwen3-32b-route-private",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "started_at": "2026-09-15T13:56:16.437Z",
+      "finished_at": "2026-09-15T13:56:20.818Z",
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000"
+    },
+    {
+      "label": "after_cuda_worker_reload",
+      "model": "qwen3-32b-mixed-private",
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "started_at": "2026-09-15T14:01:06.476Z",
+      "finished_at": "2026-09-15T14:01:10.555Z",
+      "prompt_tokens": 18,
+      "completion_tokens": 6,
+      "charged_microtu": "36000",
+      "provider_paid_microtu": "28800",
+      "platform_fee_microtu": "7200",
+      "worker_receipts": [
+        {
+          "ordinal": 1,
+          "completed_commands": 6,
+          "request_bytes": "205964",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        },
+        {
+          "ordinal": 2,
+          "completed_commands": 6,
+          "request_bytes": "1659580",
+          "response_bytes": "144",
+          "paid_microtu": "12960"
+        }
+      ]
+    }
+  ],
+  "response_observations": [
+    {
+      "label": "mixed_cuda_cpu",
+      "model": "qwen3-32b-mixed-private",
+      "requested_max_tokens": 16,
+      "status": 200,
+      "finish_reason": "stop",
+      "visible_characters": 11,
+      "reasoning_characters": 0,
+      "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 6,
+        "total_tokens": 24
+      }
+    },
+    {
+      "label": "mixed_concurrent_a",
+      "model": "qwen3-32b-mixed-private",
+      "requested_max_tokens": 16,
+      "status": 200,
+      "finish_reason": "stop",
+      "visible_characters": 11,
+      "reasoning_characters": 0,
+      "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 6,
+        "total_tokens": 24
+      }
+    },
+    {
+      "label": "mixed_concurrent_b",
+      "model": "qwen3-32b-mixed-private",
+      "requested_max_tokens": 16,
+      "status": 200,
+      "finish_reason": "stop",
+      "visible_characters": 11,
+      "reasoning_characters": 0,
+      "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 6,
+        "total_tokens": 24
+      }
+    },
+    {
+      "label": "existing_gpu_model_after_shared_claim",
+      "model": "qwen-local",
+      "requested_max_tokens": 256,
+      "status": 200,
+      "finish_reason": "stop",
+      "visible_characters": 11,
+      "reasoning_characters": 564,
+      "usage": {
+        "prompt_tokens": 62,
+        "completion_tokens": 134,
+        "total_tokens": 196
+      }
+    },
+    {
+      "label": "existing_cpu_model_after_shared_claim",
+      "model": "qwen3-32b-route-private",
+      "requested_max_tokens": 128,
+      "status": 200,
+      "finish_reason": "stop",
+      "visible_characters": 11,
+      "reasoning_characters": 0,
+      "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 6,
+        "total_tokens": 24
+      }
+    },
+    {
+      "label": "after_cuda_worker_reload",
+      "model": "qwen3-32b-mixed-private",
+      "requested_max_tokens": 16,
+      "status": 200,
+      "finish_reason": "stop",
+      "visible_characters": 11,
+      "reasoning_characters": 0,
+      "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 6,
+        "total_tokens": 24
+      }
+    }
+  ],
+  "faults": [
+    {
+      "injected": "terminate_owned_cuda_worker",
+      "state": "FAILED",
+      "billing_state": "REFUNDED",
+      "charged_microtu": "0",
+      "retained_claims": 0,
+      "terminal_and_cleanup_ms": 18539,
+      "contributor_phase": "FAILED",
+      "original_worker_pid_observed": true,
+      "client_cancel_injected": false
+    }
+  ],
+  "before": [
+    {
+      "ordinal": 1,
+      "device": {
+        "kind": "CUDA",
+        "name": "NVIDIA GeForce RTX 4090",
+        "buffer_budget_mib": 3072,
+        "reserve_mib": 1024,
+        "memory_total_mib": 24564,
+        "memory_free_mib": 2796,
+        "observation_source": "nvidia-smi",
+        "observed_at_unix_ms": 1789480158964,
+        "os_memory_isolation": false
+      },
+      "rpc_memory": {
+        "scope": "observed_rpc_buffers_only",
+        "limit_bytes": "3221225472",
+        "reserve_bytes": "1073741824",
+        "allocated_bytes": "2286248960",
+        "peak_allocated_bytes": "2286248960",
+        "live_buffers": 3,
+        "rejected_allocations": 0,
+        "os_memory_isolation": false
+      },
+      "transport": "iroh-direct-quic-guarded-rpc",
+      "counters": {
+        "accepted_tunnels": 9,
+        "active_tunnels": 1,
+        "closed_tunnels": 8,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 2169492445,
+        "stage_to_root_bytes": 3119143
+      }
+    },
+    {
+      "ordinal": 2,
+      "device": {
+        "kind": "CPU",
+        "name": "System RAM",
+        "buffer_budget_mib": 20480,
+        "reserve_mib": 8192,
+        "memory_total_mib": 130755,
+        "memory_free_mib": 24846,
+        "observation_source": "node:os",
+        "observed_at_unix_ms": 1789480158966,
+        "os_memory_isolation": false
+      },
+      "rpc_memory": {
+        "scope": "observed_rpc_buffers_only",
+        "limit_bytes": "21474836480",
+        "reserve_bytes": "8589934592",
+        "allocated_bytes": "17691924608",
+        "peak_allocated_bytes": "17691924608",
+        "live_buffers": 3,
+        "rejected_allocations": 0,
+        "os_memory_isolation": false
+      },
+      "transport": "iroh-direct-quic-guarded-rpc",
+      "counters": {
+        "accepted_tunnels": 9,
+        "active_tunnels": 1,
+        "closed_tunnels": 8,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 17159686632,
+        "stage_to_root_bytes": 55817770
+      }
+    }
+  ],
+  "after_inference": [
+    {
+      "ordinal": 1,
+      "device": {
+        "kind": "CUDA",
+        "name": "NVIDIA GeForce RTX 4090",
+        "buffer_budget_mib": 3072,
+        "reserve_mib": 1024,
+        "memory_total_mib": 24564,
+        "memory_free_mib": 2796,
+        "observation_source": "nvidia-smi",
+        "observed_at_unix_ms": 1789480158964,
+        "os_memory_isolation": false
+      },
+      "rpc_memory": {
+        "scope": "observed_rpc_buffers_only",
+        "limit_bytes": "3221225472",
+        "reserve_bytes": "1073741824",
+        "allocated_bytes": "2286248960",
+        "peak_allocated_bytes": "2286248960",
+        "live_buffers": 3,
+        "rejected_allocations": 0,
+        "os_memory_isolation": false
+      },
+      "transport": "iroh-direct-quic-guarded-rpc",
+      "counters": {
+        "accepted_tunnels": 9,
+        "active_tunnels": 1,
+        "closed_tunnels": 8,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 2175984945,
+        "stage_to_root_bytes": 11701767
+      }
+    },
+    {
+      "ordinal": 2,
+      "device": {
+        "kind": "CPU",
+        "name": "System RAM",
+        "buffer_budget_mib": 20480,
+        "reserve_mib": 8192,
+        "memory_total_mib": 130755,
+        "memory_free_mib": 24846,
+        "observation_source": "node:os",
+        "observed_at_unix_ms": 1789480158966,
+        "os_memory_isolation": false
+      },
+      "rpc_memory": {
+        "scope": "observed_rpc_buffers_only",
+        "limit_bytes": "21474836480",
+        "reserve_bytes": "8589934592",
+        "allocated_bytes": "17691924608",
+        "peak_allocated_bytes": "17691924608",
+        "live_buffers": 3,
+        "rejected_allocations": 0,
+        "os_memory_isolation": false
+      },
+      "transport": "iroh-direct-quic-guarded-rpc",
+      "counters": {
+        "accepted_tunnels": 9,
+        "active_tunnels": 1,
+        "closed_tunnels": 8,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 17188707514,
+        "stage_to_root_bytes": 190079338
+      }
+    }
+  ],
+  "after_recovery": [
+    {
+      "ordinal": 1,
+      "device": {
+        "kind": "CUDA",
+        "name": "NVIDIA GeForce RTX 4090",
+        "buffer_budget_mib": 3072,
+        "reserve_mib": 1024,
+        "memory_total_mib": 24564,
+        "memory_free_mib": 2912,
+        "observation_source": "nvidia-smi",
+        "observed_at_unix_ms": 1789480863068,
+        "os_memory_isolation": false
+      },
+      "rpc_memory": {
+        "scope": "observed_rpc_buffers_only",
+        "limit_bytes": "3221225472",
+        "reserve_bytes": "1073741824",
+        "allocated_bytes": "2286248960",
+        "peak_allocated_bytes": "2286248960",
+        "live_buffers": 3,
+        "rejected_allocations": 0,
+        "os_memory_isolation": false
+      },
+      "transport": "iroh-direct-quic-guarded-rpc",
+      "counters": {
+        "accepted_tunnels": 9,
+        "active_tunnels": 1,
+        "closed_tunnels": 8,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 2167125334,
+        "stage_to_root_bytes": 513287
+      }
+    },
+    {
+      "ordinal": 2,
+      "device": {
+        "kind": "CPU",
+        "name": "System RAM",
+        "buffer_budget_mib": 20480,
+        "reserve_mib": 8192,
+        "memory_total_mib": 130755,
+        "memory_free_mib": 25107,
+        "observation_source": "node:os",
+        "observed_at_unix_ms": 1789480863068,
+        "os_memory_isolation": false
+      },
+      "rpc_memory": {
+        "scope": "observed_rpc_buffers_only",
+        "limit_bytes": "21474836480",
+        "reserve_bytes": "8589934592",
+        "allocated_bytes": "17691924608",
+        "peak_allocated_bytes": "17691924608",
+        "live_buffers": 3,
+        "rejected_allocations": 0,
+        "os_memory_isolation": false
+      },
+      "transport": "iroh-direct-quic-guarded-rpc",
+      "counters": {
+        "accepted_tunnels": 9,
+        "active_tunnels": 1,
+        "closed_tunnels": 8,
+        "rejected_tunnels": 0,
+        "root_to_stage_bytes": 17155809713,
+        "stage_to_root_bytes": 3650018
+      }
+    }
+  ],
+  "engine": {
+    "physical_hosts": null,
+    "physical_host_evidence": "not inferred from loopback tunnel endpoints",
+    "workers": 2,
+    "worker_supervision": "contributor",
+    "transport": "iroh-direct-quic-guarded-rpc",
+    "transport_evidence": "operator_configuration; verify independent link counters and session receipts",
+    "model": "Qwen/Qwen3-32B-GGUF",
+    "revision": "938a7432affaec9157f883a87164e2646ae17555",
+    "artifact_sha256": "efd971561896866f0e910cce52761ca77b1b138090c7f15fe284676d57d1f689",
+    "engine_sha256": "aa2e1f5c67be55f11be26ae58d643a545ca07c6de498f6f870330ac2f4dfec73",
+    "context": 2048,
+    "batch": 128,
+    "tensor_split": [
+      1,
+      9
+    ],
+    "worker_devices": "explicit contributor profiles; inspect their hardware observations",
+    "slots": 1,
+    "threads_per_worker": 8,
+    "cpu_repack": false,
+    "rpc_guarded": true,
+    "ready_ms": 228893
+  },
+  "hardware": {
+    "physical_hosts": 1,
+    "os": "Windows x64",
+    "cpu": "Intel Core i9-14900K",
+    "logical_processors": 32,
+    "system_memory_mib": 130755,
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_memory_mib": 24564,
+    "nvidia_driver": "596.49",
+    "other_loaded_model": "Existing private 27B Q4 LM Studio profile, context 8192, one parallel slot; left loaded throughout this increment."
+  },
+  "weight_buffers_mib": {
+    "cuda_rpc": 2065.83,
+    "cpu_rpc": 16357.82,
+    "root_cpu_mapped": 417.3,
+    "scope": "Engine-reported weight buffers from the final reload; separate from the guard-observed totals including KV and scratch buffers."
+  },
+  "provider_terms": {
+    "provider_pool_bps": 8000,
+    "working_account_bps": 2000,
+    "within_provider_pool": {
+      "root_bps": 1000,
+      "cuda_stage_bps": 4500,
+      "cpu_stage_bps": 4500
+    },
+    "tariff_is_private_fixture": true,
+    "layer_weights_determine_payment": false,
+    "market_fairness_calibrated": false
+  },
+  "measurement_notes": [
+    "One physical computer, one account, two existing resource domains, and three signed agents per mixed request. Separate CPU and GPU domains represent subresources of this host, not independent machines or operators.",
+    "The mixed model is a new immutable execution definition with distinct route and agent identities. It reuses the existing CPU/GPU domains and LAB_TU; fault recovery reuses these same new identities. No additional model weights were downloaded.",
+    "The full campaign completed six mixed-route requests, one request through the existing GPU model and one through the original CPU route. Every mixed success required a root receipt and both stage receipts. These private signatures do not establish correct work by an adversarial provider.",
+    "Both sharing-model tests first established RUNNING mixed work, submitted another funded request and checked non-overlap. The repeat report adds explicit database assertions of the actual common resource-domain binding. It does not test independent machines.",
+    "The fault duration of 18539 ms includes observation of terminal/refunded state and contributor failure cleanup. It is not OS kill latency, full model reload time or a service-level guarantee. The client stream was not deliberately cancelled.",
+    "Observed buffer peaks are 2286248960 bytes on CUDA and 17691924608 bytes on the CPU worker. They include RPC-visible weight, KV and scratch buffers, but exclude other process/driver allocations and the root mapped file. They are not OS memory quotas or whole-process peaks.",
+    "Allocation-time free-memory snapshots are timestamped and are not live heartbeat inventory. Current driver memory may differ. The independent driver reading is used conservatively because WDDM CUDA queries overstated available memory beside the already loaded model.",
+    "The engine ready_ms measurement covers its own startup, acquisition check, model loading and ready observation; managed group pin checks and link startup add time. Requests and the complete reload are acceptance observations, not throughput or WAN benchmarks.",
+    "The 1:9 weights guide layer placement rather than guaranteeing exact byte, latency, energy or payment ratios. The private 10/45/45 provider shares are a contract fixture, not a fair-market conclusion.",
+    "The full fault campaign preceded the final read-only check reporting and filtered root-engine environment changes. A complete clean reload then loaded the final contributor/root source, and a separate three-request actual campaign passed. Historical source/binary fingerprints are retained.",
+    "No broad CPU/CUDA numerical parity, sustained stress, other GPU architecture, OS isolation, public work verification, independent-provider economics or paid service qualification is established. Private prompt/output text, UUIDs, account/node/session IDs, keys and absolute operator paths are excluded."
+  ]
+}

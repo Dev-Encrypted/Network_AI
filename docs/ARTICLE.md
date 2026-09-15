@@ -1,6 +1,6 @@
 # NETWORK AI: cooperative inference for models beyond one computer
 
-> Implementation update: [portable contributors](implementation/PORTABLE_CONTRIBUTORS.md) run their own CPU workers, guards and authenticated control/data peers without root model API credentials. [Version 0.11](implementation/CONTRIBUTOR_PROCESS_CONTAINMENT.md) adds Windows contributor crash containment, following the [v0.10.1 status-file correction](implementation/CONTRIBUTOR_STATUS_RECOVERY.md). The [v0.9 model-data path](implementation/GUARDED_RPC_TRANSPORT.md) carries actual 32B model weights and RPC computation through route-bound QUIC. One-host execution, concurrency, failure/refund and reload recovery are measured; independent hardware, public trust and economic qualification remain separate requirements.
+> Implementation update: [version 0.12](implementation/HETEROGENEOUS_CONTRIBUTORS.md) executes the official 32B model across a selected NVIDIA CUDA contributor and a CPU contributor with unequal layer weights and observed allocation budgets. Both retain participant-owned workers, authenticated control/data peers, signed receipts and Windows crash containment. Actual requests serialize against the same resources used by the existing GPU model and CPU route; CUDA worker failure, refund and reloaded recovery are measured. The evidence uses one computer and one operator. Independent hardware, public trust, measured exchange prices and economic qualification remain separate requirements. [Results and limitations](implementation/STATUS.md).
 
 > Implementation update: the [cooperative guide](implementation/COOPERATIVE_FUNDS.md) documents the private credit cycle, and [bounded renewal](implementation/BOUNDED_RENEWALS.md) adds continuation within finite manager and provider permissions. The [v0.8 expansion guide](implementation/DEMAND_BACKED_EXPANSION.md) implements additional complete-route windows gated by funded demand, essential protection and recorded private evidence. Positive activation is tested in isolated fixtures; the real one-host 32B campaign continued useful inference while correctly refusing expansion. The research and candidate policies below retain their evidence classifications and remaining economic/public-network gates.
 
@@ -65,7 +65,7 @@ The same distinction applies to physical inventory. Ten node identities are not 
 
 ## 4. Three execution modes behind one consumer interface
 
-**Mode A** assigns a request to a node serving a complete model. This is the current private application's execution path. It is also useful in a future network for models that fit one host and for independent replicas.
+**Mode A** assigns a request to a node serving a complete model. This is one of the private application's current execution paths. It is also useful in a future network for models that fit one host and for independent replicas.
 
 **Mode B** treats a nearby group of GPUs as one participating service. The operator's engine handles the internal model distribution. This is a candidate path for large models on suitable local interconnects.
 

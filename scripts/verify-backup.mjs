@@ -291,6 +291,9 @@ try {
     "UPDATE economic_affiliations SET created_at=now()",
     "DELETE FROM economic_parties",
     "DELETE FROM cooperative_expansion_demand",
+    "UPDATE models SET manifest=manifest",
+    "UPDATE models SET manifest_sha256=manifest_sha256",
+    "DELETE FROM models",
   ])
     await assert.rejects(() => restored.query(statement), { code: "42501" });
   const report = {
@@ -313,6 +316,7 @@ try {
     runtime_renewal_limits_terms_and_usage_writes_denied: true,
     runtime_cooperative_policy_and_history_writes_denied: true,
     runtime_balance_write_denied: true,
+    runtime_model_definition_writes_denied: true,
     availability_contracts: leases.rows[0].n,
     availability_escrow_mismatches: 0,
     runtime_contract_term_write_denied: true,

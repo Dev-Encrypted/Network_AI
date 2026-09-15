@@ -1,0 +1,207 @@
+{
+  "version": "0.12.0-private-device-preview",
+  "validation_local_dates": [
+    "2026-09-15"
+  ],
+  "timezone": "America/Sao_Paulo",
+  "scope": "One Windows computer, one operator, an RTX 4090 and CPU/RAM. Actual 32B mixed inference and fault recovery; no independent-host, broader-device, public-economic or OS-resource-isolation qualification.",
+  "tests": {
+    "integration_and_integer_accounting": 95,
+    "node_unit_and_socket": 36,
+    "rust_runtime": 4,
+    "rust_http_private_link": 3,
+    "rust_rpc_transport": 5,
+    "rust_f0": 2,
+    "rust_guardian_parser": 2,
+    "python_f0": 21,
+    "browser": 11,
+    "windows_process_tree_fixtures": 4,
+    "total_automated_distinct": 183
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_sources_unchanged": true,
+    "applied_migrations_001_through_010_checked_read_only": true,
+    "served_browser_version": "0.12.0"
+  },
+  "campaigns": {
+    "full_fault": {
+      "report": "evidence/qwen3-32b-mixed-devices-v0.12.json",
+      "completed_requests": 8,
+      "mixed_requests": 6,
+      "existing_gpu_model_requests": 1,
+      "original_cpu_route_requests": 1,
+      "faulted_refunded_requests": 1
+    },
+    "explicit_cross_model_domain_regression": {
+      "report": "evidence/qwen3-32b-device-domain-regression-v0.12.json",
+      "completed_requests": 7
+    },
+    "final_source_reload": {
+      "report": "evidence/qwen3-32b-device-final-source-v0.12.json",
+      "completed_requests": 3
+    }
+  },
+  "observed_buffer_peaks_bytes": {
+    "cuda": "2286248960",
+    "cpu": "17691924608"
+  },
+  "initial_failures_and_corrections": "evidence/device-initial-observations-v0.12.json",
+  "standalone_package": {
+    "report": "evidence/contributor-package-v0.12.json",
+    "filename": "network-ai-contributor-0.12.0.tgz",
+    "bytes": 1182394,
+    "sha256": "18fe068e8cff0fb99c7adbf4ca048ef21994f4c268a4d26f05976ce06633fd32",
+    "source_only": true,
+    "extracted_legacy_cpu_cuda_and_budgeted_cpu_profiles_valid": true
+  },
+  "restore": {
+    "report": "evidence/device-backup-restore-v0.12.json",
+    "journal_entries": 692,
+    "all_checked_projection_mismatches": 0,
+    "runtime_model_definition_writes_denied": true
+  },
+  "migration_010": {
+    "version": 10,
+    "sha256": "647e69bf0e63d46a1c2704cd1b08d13a2ccea80a5c5fc25335cff957d6964d81",
+    "models_preserved": 9,
+    "previous_migrations_preserved": 9,
+    "new_grants": 0,
+    "permissions": {
+      "manifest_update": false,
+      "qualification_update": true,
+      "model_delete": false
+    }
+  },
+  "final_runtime_observation": {
+    "observed_at": "2026-09-15T14:18:40.971Z",
+    "schema_version": 1,
+    "physical_hosts": 1,
+    "applied_migrations_checked_read_only": 10,
+    "active_work": {
+      "sessions": 0,
+      "route_windows": 0
+    },
+    "installed_execution_definition_preserved": true,
+    "extracted_package_checks_all_four_real_profiles": [
+      {
+        "group": "original_cpu",
+        "stage": 1,
+        "phase": "READY",
+        "live": true,
+        "ready": true,
+        "status_fresh": true,
+        "profile_valid": true,
+        "guardian_bound_to_current_parent": true,
+        "private_profile_bindings_preserved": true,
+        "process_containment": "windows_job"
+      },
+      {
+        "group": "original_cpu",
+        "stage": 2,
+        "phase": "READY",
+        "live": true,
+        "ready": true,
+        "status_fresh": true,
+        "profile_valid": true,
+        "guardian_bound_to_current_parent": true,
+        "private_profile_bindings_preserved": true,
+        "process_containment": "windows_job"
+      },
+      {
+        "group": "mixed",
+        "stage": 1,
+        "phase": "READY",
+        "live": true,
+        "ready": true,
+        "status_fresh": true,
+        "profile_valid": true,
+        "guardian_bound_to_current_parent": true,
+        "private_profile_bindings_preserved": true,
+        "process_containment": "windows_job",
+        "device": {
+          "kind": "CUDA",
+          "name": "NVIDIA GeForce RTX 4090",
+          "buffer_budget_mib": 3072,
+          "reserve_mib": 1024,
+          "memory_total_mib": 24564,
+          "memory_free_mib": 2905,
+          "observation_source": "nvidia-smi",
+          "observed_at_unix_ms": 1789481350132,
+          "os_memory_isolation": false
+        },
+        "rpc_memory": {
+          "scope": "observed_rpc_buffers_only",
+          "limit_bytes": "3221225472",
+          "reserve_bytes": "1073741824",
+          "allocated_bytes": "2286248960",
+          "peak_allocated_bytes": "2286248960",
+          "live_buffers": 3,
+          "rejected_allocations": 0,
+          "os_memory_isolation": false
+        }
+      },
+      {
+        "group": "mixed",
+        "stage": 2,
+        "phase": "READY",
+        "live": true,
+        "ready": true,
+        "status_fresh": true,
+        "profile_valid": true,
+        "guardian_bound_to_current_parent": true,
+        "private_profile_bindings_preserved": true,
+        "process_containment": "windows_job",
+        "device": {
+          "kind": "CPU",
+          "name": "System RAM",
+          "buffer_budget_mib": 20480,
+          "reserve_mib": 8192,
+          "memory_total_mib": 130755,
+          "memory_free_mib": 24590,
+          "observation_source": "node:os",
+          "observed_at_unix_ms": 1789481350134,
+          "os_memory_isolation": false
+        },
+        "rpc_memory": {
+          "scope": "observed_rpc_buffers_only",
+          "limit_bytes": "21474836480",
+          "reserve_bytes": "8589934592",
+          "allocated_bytes": "17691924608",
+          "peak_allocated_bytes": "17691924608",
+          "live_buffers": 3,
+          "rejected_allocations": 0,
+          "os_memory_isolation": false
+        }
+      }
+    ],
+    "served_ui_version": "0.12.0",
+    "original_cpu_root_ready": true,
+    "mixed_root_ready": true,
+    "original_local_model_node_ready": true,
+    "original_lm_studio_model_still_served": true,
+    "result": "PASS"
+  },
+  "validation_notes": [
+    "All 183 distinct automated cases passed locally. Repeated tests are not counted as additional cases. The real-model campaigns and working-database restore are additional evidence.",
+    "The new unit/socket cases use fabricated allocator/device responses to test rejection and conservation; they are not GPU benchmarks. Actual CUDA/CPU allocations and model output are recorded separately.",
+    "All eleven browser journeys passed in one full run, including the actual mixed-model card on desktop/mobile, real streamed chat, contract consent, funding retry, windows, renewal and cooperative consumption. The UI is PT-BR; maintained documentation is English.",
+    "CI does not receive private model weights or real GPU credentials. The Linux application job runs three model-independent browser journeys; Windows CI runs four disposable contributor process-tree fixtures. Actual mixed-device inference remains local evidence.",
+    "The full fault campaign, the seven-request domain regression and the final-source three-request reload are separately identified. Do not treat them as numerical parity, sustained stress, independent-provider or price evidence.",
+    "The first driver startup, model-definition privilege test and competing-model visible-text assertion failed. Their observations, corrections and limits are retained in the linked failure report.",
+    "The nine previous migration hashes and F0 evidence are unchanged. Migration 010 was applied once after a backup and is now immutable. It preserved nine existing model definitions and created no grant.",
+    "The final extracted source package checked all four currently ready real contributor profiles. Actual guardian parent/boot bindings, original CPU profile fields, mixed route/model binding, all three roots/nodes, LM Studio availability, rendered version and ten applied migration hashes were inspected without writes.",
+    "The source package includes the exact bundled Zod dependency and licenses. Windows native guardian/transport binaries, both inference engines, CUDA runtime, Node and model weights remain separately verified prerequisites."
+  ],
+  "boundaries": [
+    "one physical Windows host and account; two resource domains do not mean two independent hosts",
+    "observed RPC buffer limits are not OS RAM/VRAM isolation, whole-process caps or hostile-work validation",
+    "layer weights and private payout shares are separate; no calibrated economic fairness or lower API price claim",
+    "root/coordinator lifecycle ownership, service installation and reboot recovery remain unfinished",
+    "other GPUs, AMD/Intel backends, Linux/macOS contributors, LAN/WAN/NAT/relay and broad model quality/context/performance need qualification",
+    "independent cost observations, successful economics, approved issuance, public work verification, distributed continuity, funded pilot and cash settlement remain unfinished"
+  ]
+}

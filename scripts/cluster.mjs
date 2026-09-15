@@ -1,5 +1,5 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
-// One trusted participant's CPU process cluster. All RPC sockets stay on loopback.
+// Trusted root with explicitly weighted RPC workers. RPC sockets stay on loopback.
 import { spawn } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
@@ -10,6 +10,8 @@ import { setTimeout as delay } from "node:timers/promises";
 import { connect } from "node:net";
 import { protectDirectory } from "./lab.mjs";
 import { acquire } from "./artifacts.mjs";
+import { clusterOptions } from "./cluster-options.mjs";
+import { workerEnvironment } from "../packages/contributor/src/profile.mjs";
 
 const { values: a } = parseArgs({
   options: Object.fromEntries(
@@ -25,49 +27,28 @@ const { values: a } = parseArgs({
       "rpc-forward-port",
       "rpc-transport",
       "threads",
+      "context",
+      "batch",
+      "tensor-split",
     ].map((k) => [k, { type: "string" }]),
   ),
 });
 if (!a["engine-dir"] || !a["model-dir"] || !a.manifest || !a.directory)
   throw new Error(
-    "Use --engine-dir PATH --model-dir PATH --manifest FILE --directory PATH [--workers 0|2 --port 43220 --rpc-port 43820 --threads 8]",
+    "Use --engine-dir PATH --model-dir PATH --manifest FILE --directory PATH [--workers 0..15 --tensor-split 1,1 --context 2048 --port 43220 --rpc-port 43820 --threads 8]",
   );
-const workers = Number(a.workers ?? "2"),
-  port = Number(a.port ?? "43220"),
-  rpc = Number(a["rpc-port"] ?? "43820"),
-  rpcForward = Number(a["rpc-forward-port"] ?? a["rpc-port"] ?? "43820"),
-  threads = Number(a.threads ?? "8");
-const externalWorkers = a["worker-supervision"] === "external";
-if (
-  a["worker-supervision"] &&
-  (!externalWorkers || workers !== 2 || !a["rpc-forward-port"])
-)
-  throw new Error("External workers require two guarded route endpoints");
-if (
-  ![0, 2].includes(workers) ||
-  ![port, rpc, rpc + 1, rpcForward, rpcForward + 1].every(
-    (p) => Number.isInteger(p) && p >= 1024 && p <= 65535,
-  ) ||
-  port === rpc ||
-  port === rpc + 1 ||
-  port === rpcForward ||
-  port === rpcForward + 1 ||
-  (a["rpc-forward-port"] &&
-    (workers !== 2 ||
-      [rpc, rpc + 1].some((p) => p === rpcForward || p === rpcForward + 1))) ||
-  !Number.isInteger(threads) ||
-  threads < 1 ||
-  threads > 32
-)
-  throw new Error("Invalid cluster bounds");
-if (
-  a["rpc-transport"] &&
-  (a["rpc-transport"] !== "iroh-direct-quic-guarded-rpc" ||
-    !a["rpc-forward-port"])
-)
-  throw new Error(
-    "Invalid declared RPC transport; a guarded forward port is required",
-  );
+const {
+  workers,
+  port,
+  rpc,
+  threads,
+  context,
+  batch,
+  split,
+  externalWorkers,
+  rawPorts,
+  forwardPorts,
+} = clusterOptions(a);
 const manifest = JSON.parse(await readFile(resolve(a.manifest), "utf8"));
 if (manifest.files.length !== 1 || !manifest.files[0].path.endsWith(".gguf"))
   throw new Error("This adapter requires one complete GGUF");
@@ -117,7 +98,7 @@ function launch(name, file, args) {
     cwd: directory,
     windowsHide: true,
     stdio: ["ignore", "pipe", "pipe"],
-    env: { ...process.env, GGML_RPC_NO_RDMA: "1" },
+    env: workerEnvironment(),
   });
   children.push(p);
   p.stdout.pipe(log, { end: false });
@@ -169,8 +150,8 @@ try {
       "--threads",
       String(threads),
     ]);
-  for (let i = 0; i < workers; i++)
-    await waitFor(() => listening(rpc + i), 15000);
+  for (const workerPort of externalWorkers ? forwardPorts : rawPorts)
+    await waitFor(() => listening(workerPort), 15000);
   const args = [
     "--model",
     join(resolve(a["model-dir"]), manifest.files[0].path),
@@ -181,7 +162,7 @@ try {
     "--port",
     String(port),
     "--ctx-size",
-    "2048",
+    String(context),
     "--parallel",
     "1",
     "--threads",
@@ -189,9 +170,9 @@ try {
     "--threads-batch",
     String(threads),
     "--batch-size",
-    "128",
+    String(batch),
     "--ubatch-size",
-    "128",
+    String(batch),
     "--fit",
     "off",
     "--no-webui",
@@ -211,11 +192,11 @@ try {
     ...(workers
       ? [
           "--rpc",
-          `127.0.0.1:${rpcForward},127.0.0.1:${rpcForward + 1}`,
+          forwardPorts.map((p) => `127.0.0.1:${p}`).join(","),
           "--split-mode",
           "layer",
           "--tensor-split",
-          "1,1",
+          split.join(","),
           "--gpu-layers",
           "99",
         ]
@@ -248,7 +229,10 @@ try {
     JSON.stringify(
       {
         schema_version: 1,
-        physical_hosts: 1,
+        physical_hosts: externalWorkers ? null : 1,
+        physical_host_evidence: externalWorkers
+          ? "not inferred from loopback tunnel endpoints"
+          : "workers launched by this root on this host",
         workers,
         worker_supervision: externalWorkers ? "contributor" : "root_cluster",
         transport: workers
@@ -262,7 +246,12 @@ try {
         revision: manifest.revision,
         artifact_sha256: manifest.files[0].sha256,
         engine_sha256: binaryHash.digest("hex"),
-        context: 2048,
+        context,
+        batch,
+        tensor_split: split,
+        worker_devices: externalWorkers
+          ? "explicit contributor profiles; inspect their hardware observations"
+          : "CPU",
         slots: 1,
         threads_per_worker: threads,
         cpu_repack: false,
@@ -276,7 +265,7 @@ try {
     { mode: 0o600 },
   );
   console.log(
-    `Trusted local CPU cluster ready on 127.0.0.1:${port}; ${workers} RPC workers; one physical host.`,
+    `Trusted local model root ready on 127.0.0.1:${port}; ${workers} RPC workers; inspect contributor placement for physical host count.`,
   );
 } catch (error) {
   stop(1);

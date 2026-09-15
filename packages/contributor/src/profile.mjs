@@ -5,6 +5,7 @@ import { createReadStream } from "node:fs";
 import { lstat, readFile, readdir, realpath } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { isIP } from "node:net";
+import { deviceSchema, validateDeviceBinding } from "./devices.mjs";
 
 export function requireValue(value, code) {
   if (!value) throw Object.assign(new Error(code), { code });
@@ -29,7 +30,8 @@ const binary = z.object({ path: z.string().min(1), sha256: hex }).strict();
 export const profileSchema = z
   .object({
     schema_version: z.literal(1),
-    mode: z.literal("private_contributor_cpu"),
+    mode: z.enum(["private_contributor_cpu", "private_contributor_device"]),
+    device: deviceSchema.optional(),
     node: z
       .object({
         id: z.uuid(),
@@ -55,7 +57,7 @@ export const profileSchema = z
     rpc: peer,
     engine: z
       .object({
-        id: z.literal("llama-b10964-win-x64-cpu"),
+        id: z.enum(["llama-b10964-win-x64-cpu", "llama-b10964-win-x64-cuda12"]),
         directory: z.string().min(1),
       })
       .strict(),
@@ -85,6 +87,7 @@ export function publicId(secret) {
 }
 export function validateProfile(raw) {
   const c = profileSchema.parse(raw);
+  validateDeviceBinding(c);
   requireValue(c.node.id === c.binding.stage_node_id, "worker_node_binding");
   requireValue(
     new Set([c.node.http_port, ...Object.values(c.ports)]).size === 4,
@@ -147,13 +150,22 @@ export async function loadProfile(file, verify = true) {
   c.engine.directory = resolve(directory, c.engine.directory);
   for (const b of Object.values(c.binaries))
     b.path = resolve(directory, b.path);
-  const pin = JSON.parse(
-    await readFile(new URL("./engine-pin.json", import.meta.url), "utf8"),
-  );
+  const pin = await enginePin(c.engine.id);
   if (verify) await verifyProfileRuntime(c, pin);
   return { profile: c, path, directory, state: join(directory, "state"), pin };
 }
+export async function enginePin(id) {
+  const files = {
+    "llama-b10964-win-x64-cpu": "./engine-pin.json",
+    "llama-b10964-win-x64-cuda12": "./engine-pin.cuda12.json",
+  };
+  requireValue(Object.hasOwn(files, id), "worker_engine_unknown");
+  return JSON.parse(
+    await readFile(new URL(files[id], import.meta.url), "utf8"),
+  );
+}
 export async function verifyProfileRuntime(c, pin) {
+  requireValue(c.engine.id === pin.id, "worker_engine_pin_identity");
   requireValue(
     process.platform === pin.platform && process.arch === pin.arch,
     "worker_platform_not_qualified",
@@ -192,6 +204,9 @@ export function workerEnvironment(source = process.env) {
     "localappdata",
     "number_of_processors",
     "processor_architecture",
+    // NVML needs a Windows installation directory to locate its driver library.
+    "programfiles",
+    "programw6432",
   ]);
   return {
     ...Object.fromEntries(

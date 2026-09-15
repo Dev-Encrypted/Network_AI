@@ -11,6 +11,7 @@ import {
   validateProfile,
 } from "./profile.mjs";
 import { protectDirectory } from "./permissions.mjs";
+import { validateDeviceBinding } from "./devices.mjs";
 
 async function matchingJson(path, value) {
   try {
@@ -93,6 +94,7 @@ export async function configureWorker(directory, rawInvite, rawSettings) {
     })
     .parse(rawInvite);
   const settings = settingsSchema.parse(rawSettings);
+  validateDeviceBinding(settings);
   await ensureIdentity(directory);
   const local = JSON.parse(
     await readFile(join(directory, "identity.private.json"), "utf8"),

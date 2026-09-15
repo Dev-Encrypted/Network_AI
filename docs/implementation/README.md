@@ -1,4 +1,4 @@
-# Private contributor preview v0.11
+# Private device preview v0.12
 
 **Created and directed by Dev-Encrypted.** This release connects the interface, control service, PostgreSQL, Rust gateway, and Rust node to a real local inference engine. It is an executable private environment. Public decentralized operation and the proposed cooperative economy still require qualification.
 
@@ -15,6 +15,7 @@
 - [Portable contributor workers, signed readiness and standalone packaging](PORTABLE_CONTRIBUTORS.md)
 - [Windows status-file recovery, measured fault and v0.10.1 upgrade](CONTRIBUTOR_STATUS_RECOVERY.md)
 - [Windows contributor crash containment and v0.11 upgrade](CONTRIBUTOR_PROCESS_CONTAINMENT.md)
+- [CPU/CUDA selection, memory budgets, unequal placement and managed recipes](HETEROGENEOUS_CONTRIBUTORS.md)
 - [Funded availability and temporary quotas](AVAILABILITY.md)
 - [Verified model artifacts and the trusted CPU cluster adapter](MODEL_ARTIFACTS.md)
 - [Complete routes, stage agents, consent and participant settlement](COMPLETE_ROUTES.md)

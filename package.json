@@ -1,6 +1,6 @@
 {
   "name": "network-ai",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -15,7 +15,7 @@
     "lab:stop": "node scripts/lab.mjs stop",
     "lab:status": "node scripts/lab.mjs status",
     "test:integration": "tsx --test tests/integration/*.test.ts",
-    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:unit": "pnpm --filter @network-ai/contracts build && node --test tests/unit/*.test.mjs",
     "test:e2e": "playwright test",
     "verify": "pnpm typecheck && pnpm test:unit && pnpm test:integration",
     "lab:backup": "node scripts/lab.mjs backup",
@@ -45,7 +45,9 @@
     "test:contributors": "node scripts/rpc-route-acceptance.mjs --contributors --fault",
     "test:contributor-state": "node scripts/contributor-state-acceptance.mjs",
     "test:guardian": "node --test tests/guardian/*.test.mjs",
-    "test:containment": "node scripts/rpc-route-acceptance.mjs --contributors --containment --fault"
+    "test:containment": "node scripts/rpc-route-acceptance.mjs --contributors --containment --fault",
+    "lab:device-route": "node scripts/device-route.mjs",
+    "test:devices": "node scripts/device-route-acceptance.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

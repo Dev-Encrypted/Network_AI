@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "version": "0.12.0-private-device-preview",
+  "observed_date": "2026-09-15",
+  "initial_driver_startup": {
+    "result": "FAIL",
+    "code": "worker_gpu_inventory_unavailable",
+    "native_worker_started": false,
+    "diagnosis": "With the filtered child environment, NVML returned exit 255 (Unknown Error). Isolated probes succeeded after adding either ProgramFiles or ProgramW6432. Both standard Windows directory variables are now retained; unrelated credentials remain excluded.",
+    "retry": "Same saved recipe, invitations and identities resumed successfully."
+  },
+  "initial_model_definition_test": {
+    "result": "FAIL",
+    "tests_passed": 94,
+    "tests_total": 95,
+    "cause": "The runtime database role could update a model manifest directly. The API did not expose that update, but the database privilege broke definition immutability.",
+    "correction": "New migration 010 restricts runtime updates to qualification fields and blocks ordinary definition changes/deletion with a trigger. Migrations 001-009 were not edited.",
+    "retest": "95 integration cases passed; isolated restore also denied definition/hash/deletion writes."
+  },
+  "first_real_campaign": {
+    "result": "FAIL",
+    "observed_at": "2026-09-15T13:52:11.893Z",
+    "visible_text_assertion_failed": true,
+    "completed_before_assertion": [
+      {
+        "label": "mixed_cuda_cpu",
+        "model": "qwen3-32b-mixed-private",
+        "state": "COMPLETED",
+        "billing_state": "SETTLED",
+        "started_at": "2026-09-15T13:52:13.096Z",
+        "finished_at": "2026-09-15T13:52:16.908Z",
+        "prompt_tokens": 18,
+        "completion_tokens": 6,
+        "charged_microtu": "36000",
+        "provider_paid_microtu": "28800",
+        "platform_fee_microtu": "7200",
+        "worker_receipts": [
+          {
+            "ordinal": 1,
+            "completed_commands": 6,
+            "request_bytes": "205964",
+            "response_bytes": "144",
+            "paid_microtu": "12960"
+          },
+          {
+            "ordinal": 2,
+            "completed_commands": 6,
+            "request_bytes": "1659580",
+            "response_bytes": "144",
+            "paid_microtu": "12960"
+          }
+        ]
+      },
+      {
+        "label": "mixed_concurrent_a",
+        "model": "qwen3-32b-mixed-private",
+        "state": "COMPLETED",
+        "billing_state": "SETTLED",
+        "started_at": "2026-09-15T13:52:17.080Z",
+        "finished_at": "2026-09-15T13:52:19.617Z",
+        "prompt_tokens": 18,
+        "completion_tokens": 6,
+        "charged_microtu": "36000",
+        "provider_paid_microtu": "28800",
+        "platform_fee_microtu": "7200",
+        "worker_receipts": [
+          {
+            "ordinal": 1,
+            "completed_commands": 6,
+            "request_bytes": "156",
+            "response_bytes": "144",
+            "paid_microtu": "12960"
+          },
+          {
+            "ordinal": 2,
+            "completed_commands": 6,
+            "request_bytes": "156",
+            "response_bytes": "144",
+            "paid_microtu": "12960"
+          }
+        ]
+      },
+      {
+        "label": "mixed_concurrent_b",
+        "model": "qwen3-32b-mixed-private",
+        "state": "COMPLETED",
+        "billing_state": "SETTLED",
+        "started_at": "2026-09-15T13:52:19.941Z",
+        "finished_at": "2026-09-15T13:52:22.612Z",
+        "prompt_tokens": 18,
+        "completion_tokens": 6,
+        "charged_microtu": "36000",
+        "provider_paid_microtu": "28800",
+        "platform_fee_microtu": "7200",
+        "worker_receipts": [
+          {
+            "ordinal": 1,
+            "completed_commands": 6,
+            "request_bytes": "156",
+            "response_bytes": "144",
+            "paid_microtu": "12960"
+          },
+          {
+            "ordinal": 2,
+            "completed_commands": 6,
+            "request_bytes": "156",
+            "response_bytes": "144",
+            "paid_microtu": "12960"
+          }
+        ]
+      },
+      {
+        "label": "mixed_owns_gpu_domain",
+        "model": "qwen3-32b-mixed-private",
+        "state": "COMPLETED",
+        "billing_state": "SETTLED",
+        "started_at": "2026-09-15T13:52:22.747Z",
+        "finished_at": "2026-09-15T13:52:50.579Z",
+        "prompt_tokens": 23,
+        "completion_tokens": 64,
+        "charged_microtu": "215000",
+        "provider_paid_microtu": "172000",
+        "platform_fee_microtu": "43000",
+        "worker_receipts": [
+          {
+            "ordinal": 1,
+            "completed_commands": 64,
+            "request_bytes": "207472",
+            "response_bytes": "1536",
+            "paid_microtu": "77400"
+          },
+          {
+            "ordinal": 2,
+            "completed_commands": 64,
+            "request_bytes": "1661088",
+            "response_bytes": "1536",
+            "paid_microtu": "77400"
+          }
+        ]
+      }
+    ],
+    "failed_assertion_model": "Existing 27B private model",
+    "request_max_tokens": 16,
+    "observed_finish_reason": "length",
+    "observed_visible_characters": 0,
+    "observed_prompt_tokens": 62,
+    "observed_completion_tokens": 16,
+    "session_state": "COMPLETED",
+    "billing_state": "SETTLED",
+    "correction": "Only the competing-model acceptance input was changed: maximum output increased to the lesser of 256 and its manifest limit. The prompt, existing LM Studio model and its configuration were not changed.",
+    "causal_limit": "The observed finish reason establishes an output cutoff, not the internal reason for empty visible content. No claim of a diagnosed model/runtime defect is made."
+  },
+  "repeat_existing_27b_response": {
+    "label": "existing_gpu_model_after_shared_claim",
+    "model": "qwen-local",
+    "requested_max_tokens": 256,
+    "status": 200,
+    "finish_reason": "stop",
+    "visible_characters": 11,
+    "reasoning_characters": 564,
+    "usage": {
+      "prompt_tokens": 62,
+      "completion_tokens": 134,
+      "total_tokens": 196
+    }
+  },
+  "note": "Failed evidence is retained separately from passing campaigns. Fixture failures, driver diagnosis and real model observations have different evidence scopes."
+}

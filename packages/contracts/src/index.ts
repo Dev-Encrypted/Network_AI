@@ -28,6 +28,33 @@ export const sessionState = z.enum([
   ...terminalStates,
 ]);
 
+export const executionProfileSchema = z
+  .object({
+    schema_version: z.literal(1),
+    adapter: z.literal("llama-b10964-rpc"),
+    engine_commit: z.literal("b29c606e28a01b1bc8c1351026a0fa6e616bf6c4"),
+    transport: z.literal("iroh-direct-quic-guarded-rpc"),
+    split_mode: z.literal("layer"),
+    context_tokens: z.number().int().min(512).max(131072),
+    batch_tokens: z.number().int().min(1).max(2048),
+    slots: z.literal(1),
+    stages: z
+      .array(
+        z
+          .object({
+            device: z.enum(["CPU", "CUDA"]),
+            tensor_weight: z.number().int().min(1).max(10000),
+            buffer_budget_mib: z.number().int().min(256).max(1048576),
+            reserve_mib: z.number().int().min(256).max(1048576),
+            threads: z.number().int().min(1).max(32),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(15),
+  })
+  .strict();
+
 export const modelManifestSchema = z
   .object({
     schema_version: z.literal(1),
@@ -50,11 +77,18 @@ export const modelManifestSchema = z
     rate_denominator: z.number().int().min(1).max(1_000_000),
     description: z.string().max(1000),
     trust_policy: z.literal("private_lab"),
+    execution_profile: executionProfileSchema.optional(),
   })
   .strict()
   .refine(
     (value) => value.max_output_tokens < value.max_context_tokens,
     "Output must leave input capacity",
+  )
+  .refine(
+    (value) =>
+      !value.execution_profile ||
+      value.execution_profile.context_tokens === value.max_context_tokens,
+    "Execution profile context must match the quoted context",
   );
 export type ModelManifest = z.infer<typeof modelManifestSchema>;
 

@@ -98,6 +98,16 @@ const help = await run(
   packageDir,
 );
 assert.match(help, /NETWORK AI contributor/);
+assert.match(help, /devices/);
+for (const file of [
+  "src/engine-pin.json",
+  "src/engine-pin.cuda12.json",
+  "src/devices.mjs",
+  "src/rpc-memory.mjs",
+  "examples/settings.cpu-budget.windows.json",
+  "examples/settings.cuda.windows.json",
+])
+  await access(join(packageDir, file));
 const extractedZod = JSON.parse(
   await readFile(join(packageDir, "node_modules/zod/package.json"), "utf8"),
 );
@@ -127,6 +137,7 @@ const report = {
     license_included: true,
   },
   extraction_and_cli_without_coordinator_source: true,
+  device_profiles_and_both_engine_pins_included: true,
   model_or_engine_included: false,
   executable_signing_or_multi_host_qualification: false,
 };

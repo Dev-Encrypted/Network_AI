@@ -2,7 +2,7 @@
 
 NETWORK AI recommends models **above 27 billion total parameters** as its principal area of focus. The purpose is to make demanding inference profiles accessible through contributed resources. This is a product direction, not a universal technical cutoff. Smaller models remain useful wherever a compatible profile is qualified.
 
-This guide explains how to estimate the contribution needed for a model. Its numerical examples are arithmetic with explicit assumptions, not measurements of NETWORK AI's distributed runtime. That runtime is not yet integrated into the private product.
+This guide explains how to estimate the contribution needed for a model. Its numerical examples are arithmetic with explicit assumptions. The private product already integrates a guarded 32B route with signed contributor receipts on one computer. The [device contribution guide](implementation/HETEROGENEOUS_CONTRIBUTORS.md) explains explicit CPU/CUDA profiles, unequal layer weights, and observed buffer budgets. Those implementations do not turn the estimates below into hardware or WAN benchmarks.
 
 ## 1. Count resources before counting people
 

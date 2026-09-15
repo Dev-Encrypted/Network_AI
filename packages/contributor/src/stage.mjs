@@ -27,6 +27,11 @@ import { protectDirectory } from "./permissions.mjs";
 import { validateRpcBinding, matchesRpcBinding } from "./rpc-binding.mjs";
 import { verifyReadiness } from "./readiness.mjs";
 import { z } from "zod";
+import {
+  RpcMemoryBudget,
+  isMemoryCommand,
+  observeMemoryCommand,
+} from "./rpc-memory.mjs";
 const hash = (b) => createHash("sha256").update(b).digest("hex");
 const nonce = () => randomBytes(32).toString("base64url");
 const now = () => Math.floor(Date.now() / 1000);
@@ -169,6 +174,19 @@ export async function observeRpc(
             !lease.cancelled,
           "rpc_compute_expired",
         );
+      } else if (hooks.memoryBudget && isMemoryCommand(command)) {
+        await observeMemoryCommand({
+          command,
+          bytes,
+          header,
+          input,
+          output,
+          worker,
+          client,
+          write,
+          budget: hooks.memoryBudget,
+          freeBytes: hooks.memoryFreeBytes,
+        });
       } else {
         await write(worker, header);
         await copy(input, worker, bytes);
@@ -187,6 +205,10 @@ export async function observeRpc(
 }
 
 export async function createStageAgent(raw, options) {
+  const memoryPolicy = options.memoryBudget
+    ? { ...options.memoryBudget }
+    : null;
+  if (memoryPolicy) new RpcMemoryBudget(memoryPolicy); // Validate before listeners/identity changes.
   const c = z
     .object({
       mode: z.literal("private_lab"),
@@ -519,11 +541,14 @@ export async function createStageAgent(raw, options) {
       running_sessions: active ? [active.cap.session_id] : [],
       inventory: {
         os: process.platform,
-        gpu_name: null,
-        memory_total_mib: null,
-        memory_free_mib: null,
+        gpu_name:
+          options.deviceSnapshot?.().kind === "CUDA"
+            ? options.deviceSnapshot().name
+            : null,
+        memory_total_mib: options.deviceSnapshot?.().memory_total_mib ?? null,
+        memory_free_mib: null, // Allocation-time observations are not live heartbeat inventory.
         physical_domain_hint:
-          "operator-assigned CPU RPC stage; same-host is not independent hardware",
+          "operator-assigned RPC stage; same-host is not independent hardware",
       },
     });
     ready =
@@ -540,7 +565,11 @@ export async function createStageAgent(raw, options) {
       return;
     }
     connections++;
-    const connection = { id: randomUUID(), handshake: false };
+    const connection = {
+      id: randomUUID(),
+      handshake: false,
+      memoryBudget: memoryPolicy ? new RpcMemoryBudget(memoryPolicy) : null,
+    };
     liveRpc = connection;
     readinessLease = null;
     sockets.add(client);
@@ -558,6 +587,8 @@ export async function createStageAgent(raw, options) {
       () => active ?? (!startupClosed ? startup : null),
       serialize,
       {
+        memoryBudget: connection.memoryBudget,
+        memoryFreeBytes: options.memoryFreeBytes,
         handshake: () => {
           connection.handshake = true;
         },
@@ -607,6 +638,8 @@ export async function createStageAgent(raw, options) {
     startup_compute_commands: startup.completed_commands,
     startup_budget_closed: startupClosed,
     rpc_route_bound: routeBinding !== null,
+    rpc_memory: liveRpc?.memoryBudget?.snapshot() ?? null,
+    device: options.deviceSnapshot?.() ?? null,
     readiness_source: c.readiness_mode,
     readiness_expires_ms: portable
       ? (readinessLease?.value.expires_ms ?? null)
