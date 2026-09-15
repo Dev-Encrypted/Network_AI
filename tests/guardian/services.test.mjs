@@ -293,6 +293,35 @@ test(
 );
 
 test(
+  "process identity uses Windows system modules with a filtered environment",
+  options,
+  async (t) => {
+    const f = await fixture(t);
+    const modules = join(f.runtime, "shadow-modules");
+    const shadow = join(modules, "CimCmdlets");
+    await mkdir(shadow, { recursive: true });
+    await writeFile(
+      join(shadow, "CimCmdlets.psm1"),
+      "function Get-CimInstance { throw 'Untrusted module was loaded' }; Export-ModuleMember -Function Get-CimInstance\n",
+    );
+    const previous = process.env.PSModulePath;
+    try {
+      process.env.PSModulePath = modules;
+      const actual = await processIdentity(process.pid);
+      assert.equal(actual.pid, process.pid);
+      assert.equal(
+        actual.program.toLowerCase(),
+        process.execPath.toLowerCase(),
+      );
+      assert.ok(actual.created);
+    } finally {
+      if (previous === undefined) delete process.env.PSModulePath;
+      else process.env.PSModulePath = previous;
+    }
+  },
+);
+
+test(
   "a read-only status viewer cannot stop a healthy service",
   options,
   async (t) => {

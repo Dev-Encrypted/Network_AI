@@ -16,6 +16,42 @@ const { z } = createRequire(
   new URL("../packages/contributor/package.json", import.meta.url),
 )("zod");
 const exec = promisify(execFile);
+async function windowsQuery(script, variables, maxBuffer = 131072) {
+  const environment = workerEnvironment();
+  const windows = Object.entries(environment).find(
+    ([key]) => key.toLowerCase() === "systemroot",
+  )?.[1];
+  if (!windows) throw new Error("Windows system directory is unavailable");
+  const shellDirectory = join(windows, "System32/WindowsPowerShell/v1.0");
+  const pending = exec(
+    join(shellDirectory, "powershell.exe"),
+    [
+      "-NoLogo",
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';" +
+        "Import-Module ($PSHOME+'\\Modules\\CimCmdlets\\CimCmdlets.psd1');" +
+        "Import-Module ($PSHOME+'\\Modules\\Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1');" +
+        script,
+    ],
+    {
+      windowsHide: true,
+      encoding: "utf8",
+      timeout: 5000,
+      maxBuffer,
+      env: {
+        ...environment,
+        PSModulePath: join(shellDirectory, "Modules"),
+        ...variables,
+      },
+    },
+  );
+  // This read-only command has no input protocol. Do not leave an open stdin
+  // pipe or inherit user/module discovery settings in a detached service.
+  pending.child.stdin.end();
+  return pending;
+}
 const binary = z
   .object({
     path: z.string().min(1),
@@ -71,21 +107,9 @@ export async function processIdentity(pid) {
   }
   if (process.platform === "win32") {
     for (let attempt = 0; attempt < 4; attempt++) {
-      const { stdout } = await exec(
-        "powershell.exe",
-        [
-          "-NoProfile",
-          "-NonInteractive",
-          "-Command",
-          "$p=Get-CimInstance Win32_Process -Filter ('ProcessId = '+$env:NAI_SERVICE_QUERY_PID); if($p){[pscustomobject]@{pid=[int]$p.ProcessId;parent_pid=[int]$p.ParentProcessId;program=$p.ExecutablePath;command=$p.CommandLine;created=$p.CreationDate.ToUniversalTime().ToString('o')} | ConvertTo-Json -Compress}",
-        ],
-        {
-          windowsHide: true,
-          encoding: "utf8",
-          timeout: 5000,
-          maxBuffer: 131072,
-          env: { ...process.env, NAI_SERVICE_QUERY_PID: String(pid) },
-        },
+      const { stdout } = await windowsQuery(
+        "$p=Get-CimInstance Win32_Process -Filter ('ProcessId = '+$env:NAI_SERVICE_QUERY_PID); if($p){[pscustomobject]@{pid=[int]$p.ProcessId;parent_pid=[int]$p.ParentProcessId;program=$p.ExecutablePath;command=$p.CommandLine;created=$p.CreationDate.ToUniversalTime().ToString('o')} | ConvertTo-Json -Compress}",
+        { NAI_SERVICE_QUERY_PID: String(pid) },
       );
       if (!stdout.trim()) return null;
       const identity = JSON.parse(stdout);
@@ -147,21 +171,10 @@ export async function childProcessIdentities(parentPid) {
     parentPid < 1
   )
     throw new Error("Invalid Windows parent identity");
-  const { stdout } = await exec(
-    "powershell.exe",
-    [
-      "-NoProfile",
-      "-NonInteractive",
-      "-Command",
-      "$serviceChildren=@(Get-CimInstance Win32_Process -Filter ('ParentProcessId = '+$env:NAI_SERVICE_QUERY_PID) | Select-Object -ExpandProperty ProcessId);ConvertTo-Json -InputObject $serviceChildren -Compress",
-    ],
-    {
-      windowsHide: true,
-      encoding: "utf8",
-      timeout: 5000,
-      maxBuffer: 65536,
-      env: { ...process.env, NAI_SERVICE_QUERY_PID: String(parentPid) },
-    },
+  const { stdout } = await windowsQuery(
+    "$serviceChildren=@(Get-CimInstance Win32_Process -Filter ('ParentProcessId = '+$env:NAI_SERVICE_QUERY_PID) | Select-Object -ExpandProperty ProcessId);ConvertTo-Json -InputObject $serviceChildren -Compress",
+    { NAI_SERVICE_QUERY_PID: String(parentPid) },
+    65536,
   );
   const ids = JSON.parse(stdout);
   if (!Array.isArray(ids) || ids.length > 64)
@@ -174,25 +187,12 @@ export async function discoverServiceRunner(profilePath, boot) {
   if (process.platform !== "win32")
     throw new Error("Service discovery is not qualified on this platform");
   z.uuid().parse(boot);
-  const { stdout } = await exec(
-    "powershell.exe",
-    [
-      "-NoProfile",
-      "-NonInteractive",
-      "-Command",
-      "$serviceCandidates=@(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -and $_.CommandLine -and $_.ExecutablePath.ToLowerInvariant() -eq $env:NAI_SERVICE_NODE.ToLowerInvariant() -and $_.CommandLine.ToLowerInvariant().Contains($env:NAI_SERVICE_PROFILE.ToLowerInvariant()) -and $_.CommandLine.Contains($env:NAI_SERVICE_BOOT)} | ForEach-Object {[pscustomobject]@{pid=[int]$_.ProcessId;parent_pid=[int]$_.ParentProcessId;program=$_.ExecutablePath;command=$_.CommandLine;created=$_.CreationDate.ToUniversalTime().ToString('o')}});ConvertTo-Json -InputObject $serviceCandidates -Compress",
-    ],
+  const { stdout } = await windowsQuery(
+    "$serviceCandidates=@(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -and $_.CommandLine -and $_.ExecutablePath.ToLowerInvariant() -eq $env:NAI_SERVICE_NODE.ToLowerInvariant() -and $_.CommandLine.ToLowerInvariant().Contains($env:NAI_SERVICE_PROFILE.ToLowerInvariant()) -and $_.CommandLine.Contains($env:NAI_SERVICE_BOOT)} | ForEach-Object {[pscustomobject]@{pid=[int]$_.ProcessId;parent_pid=[int]$_.ParentProcessId;program=$_.ExecutablePath;command=$_.CommandLine;created=$_.CreationDate.ToUniversalTime().ToString('o')}});ConvertTo-Json -InputObject $serviceCandidates -Compress",
     {
-      windowsHide: true,
-      encoding: "utf8",
-      timeout: 5000,
-      maxBuffer: 131072,
-      env: {
-        ...process.env,
-        NAI_SERVICE_NODE: process.execPath,
-        NAI_SERVICE_PROFILE: resolve(profilePath),
-        NAI_SERVICE_BOOT: boot,
-      },
+      NAI_SERVICE_NODE: process.execPath,
+      NAI_SERVICE_PROFILE: resolve(profilePath),
+      NAI_SERVICE_BOOT: boot,
     },
   );
   const candidates = JSON.parse(stdout);
