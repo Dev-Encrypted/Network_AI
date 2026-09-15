@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "version": "0.13.0-private-service-preview",
+  "observed_date": "2026-09-15",
+  "fixture_harness": {
+    "initial_result": "FAIL",
+    "initial_cases_reported_passed": 3,
+    "initial_cases_failed": 2,
+    "credited_as_fault_proof": 0,
+    "cause": "The disposable TCP fixture omitted a socket error handler. Readiness probes closed sockets and ECONNRESET could terminate the fixture before fault injection.",
+    "correction": "Handle connection-reset errors and assert that the exact host, child and descendant are live immediately before injection.",
+    "corrected_fixture_suite": "The complete release suite is recorded in validation-v0.13.json."
+  },
+  "node_restart_assertion": {
+    "initial_result": "FAIL",
+    "expected_state": "INTERRUPTED",
+    "actual_state": "CANCELLED",
+    "error_code": "execution_interrupted",
+    "billing_state": "REFUNDED",
+    "charged_microtu": "0",
+    "node_epoch_before": 18,
+    "node_epoch_after": 19,
+    "retained_physical_claims": 0,
+    "signed_receipts": 0,
+    "cause": "Gateway delivery cleanup can set CANCELLING before node-epoch reconciliation. Reconciliation then records CANCELLED with execution_interrupted; the earlier test incorrectly required one race-dependent label.",
+    "correction": "Require INTERRUPTED or CANCELLED plus execution_interrupted, an advanced node epoch, zero charge, REFUNDED billing, no physical claim and no receipt from the terminated node. No accounting or gateway rule was weakened."
+  },
+  "windows_stop_observation": {
+    "initial_result": "FAIL",
+    "operation": "controlled shutdown before build",
+    "error_type": "TypeError",
+    "cause": "CIM briefly returned a dying process row with a null command line after an earlier positive process observation.",
+    "correction": "Bounded retries require readable program, command and creation identity. A gone process is recognized; a persistently unreadable live process keeps its registry entry and refuses unsafe adoption or termination.",
+    "recovery": "The tracked partial shutdown resumed and completed before the next build and restart."
+  },
+  "registry_namespace_review": {
+    "initial_namespace": "Local",
+    "release_namespace": "Global",
+    "cause": "A session-local Windows mutex gives separate logon sessions different locks for the same registry path.",
+    "correction": "The native helper selects the global namespace and the JavaScript caller requires a matching namespace acknowledgement. The installed prototype pin was preserved in a private backup and explicitly replaced while every managed service was stopped.",
+    "scope": "Global namespace selection and same-session contention/owner-loss fixtures are checked. Actual multiple Windows logon sessions remain unmeasured."
+  },
+  "direct_cli_start": {
+    "initial_result": "FAIL",
+    "exit_code": 13,
+    "observed_after": "Core services and the original CPU route were ready; the mixed route had not started.",
+    "cause": "The direct lab entry point awaited start at module scope. Starting installed device recipes dynamically imported a module that imports lab lifecycle helpers, leaving a circular unresolved top-level await.",
+    "correction": "The entry point finishes module evaluation and handles the asynchronous command rejection explicitly. A subsequent direct start reuses live owned services and proceeds with the remaining recipe.",
+    "scope": "Earlier exported-function upgrade harnesses did not exercise this direct CLI entry path."
+  },
+  "outbox_fault_coverage": {
+    "initial_result": "FAIL",
+    "observed": {
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "created_at": "2026-09-15T15:50:43.958Z",
+      "started_at": "2026-09-15T15:50:44.003Z",
+      "finished_at": "2026-09-15T15:50:45.357Z",
+      "charged_microtu": "220000",
+      "control_new_launch_at": "2026-09-15T15:50:49.828Z",
+      "requested_restart_delay_ms": 4000
+    },
+    "cause": "The short response settled before the coordinator outage reached receipt delivery. A fixed restart delay did not prove that the outbox was exercised.",
+    "correction": "Observe the current service boot before requesting inference, submit its boot-bound stop without delayed process inspection, and keep the coordinator unavailable until a matching completed receipt is observed on disk. Bound receipt waiting, require receipt_pending in the completed stream, restore the coordinator, then require one terminal settlement and removal of the accepted outbox file.",
+    "scope": "The failed attempt is not credited as receipt-outage proof; it did not show a lost receipt or duplicate charge."
+  },
+  "pending_stream_observation": {
+    "initial_result": "FAIL",
+    "completed_receipt_observed_on_disk_while_offline": true,
+    "initial_wait_ms": 2000,
+    "node_signed_request_timeout_ms": 5000,
+    "correction": "The test now permits seven seconds after persistence for the node to finish its existing five-second receipt request and emit receipt_pending. This changes an acceptance observation bound, not the node timeout or settlement contract.",
+    "recovery": "The finally block restored the coordinator after the failed observation."
+  },
+  "browser_login_coverage": {
+    "initial_result": "FAIL",
+    "passed": 9,
+    "failed": 2,
+    "configured_login_limit_per_minute": 10,
+    "failed_journeys": [
+      "bounded renewal",
+      "cooperative plan"
+    ],
+    "observation": "The two journeys remained at the login form with a rate-limit/error alert after a rapid sequence of real logins.",
+    "correction": "A shared browser helper requires HTTP 201 or an explicit HTTP 429, honors Retry-After when forwarded, otherwise waits a bounded full limit window, and extends only the test deadline. It clears entered passwords from failed-login DOM state before diagnostics.",
+    "application_rate_limit_weakened": false,
+    "scope": "The full corrected browser run and its distinct counts are recorded separately; the first nine passes are not added again."
+  },
+  "preserved": {
+    "changed_applied_migrations": 0,
+    "changed_contributor_profiles": 0,
+    "new_model_downloads": 0,
+    "model_or_account_identity_replacements": 0
+  },
+  "boundary": "These observations distinguish harness corrections, a real process-inspection race and an OS namespace design correction. They do not establish public or independent-host readiness."
+}

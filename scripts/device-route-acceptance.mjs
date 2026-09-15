@@ -12,6 +12,7 @@ import {
   runtime,
   protectDirectory,
   faultContributorComponent,
+  faultServiceComponent,
 } from "./lab.mjs";
 import {
   deviceRouteDirectory,
@@ -22,14 +23,24 @@ import { loadDeviceRecipe } from "./device-route-profile.mjs";
 import { workerStatus } from "../packages/contributor/src/supervisor.mjs";
 import { loadProfile, hashFile } from "../packages/contributor/src/profile.mjs";
 import { availableDevices } from "../packages/contributor/src/devices.mjs";
+import {
+  serviceStatus,
+  childProcessIdentities,
+  processIdentity,
+} from "./service-process.mjs";
 const { values: args } = parseArgs({
   options: {
     id: { type: "string" },
     fault: { type: "boolean", default: false },
+    "root-host-fault": { type: "boolean", default: false },
     "competing-gpu-model": { type: "string" },
     "competing-cpu-model": { type: "string" },
   },
 });
+assert.ok(
+  !(args.fault && args["root-host-fault"]),
+  "Select one distinct fault campaign at a time",
+);
 const location = deviceRouteDirectory(args.id),
   recipe = await loadDeviceRecipe(join(location, "recipe.json"));
 const installed = JSON.parse(
@@ -466,6 +477,98 @@ try {
     await infer("after_cuda_worker_reload");
     report.after_recovery = await snapshots();
     pass("same_profile_and_identities_reload_after_cuda_failure");
+  }
+  if (args["root-host-fault"]) {
+    const services = await json(join(runtime, "processes.json")),
+      name = `device_${recipe.id}_cluster`,
+      entry = services[name];
+    assert.ok(
+      entry.service,
+      "Root host fault requires the installed protected service",
+    );
+    const before = await serviceStatus(entry.service.profile);
+    const descendants = await childProcessIdentities(before.child_pid);
+    const engine = descendants.find(
+      (p) =>
+        p.program.toLowerCase() ===
+        join(recipe.root_engine_directory, "llama-server.exe").toLowerCase(),
+    );
+    assert.ok(
+      engine,
+      "Observe the actual owned model server before injecting failure",
+    );
+    const siblings = [];
+    for (const [key, value] of Object.entries(services))
+      if (key !== name && value.service) {
+        const s = await serviceStatus(value.service.profile);
+        if (s.live)
+          siblings.push({
+            profile: value.service.profile,
+            boot: s.boot_id,
+            pid: s.pid,
+          });
+      }
+    const active = await stream();
+    recovery = true;
+    const faultAt = Date.now();
+    const killed = await faultServiceComponent(name, "host");
+    const terminal = await until(async () => {
+      const s = await api(`/sessions/${active.id}`);
+      return (
+        ["FAILED", "INTERRUPTED", "CANCELLED"].includes(s.state) &&
+        s.billing_state === "REFUNDED" &&
+        s
+      );
+    }, 45);
+    await active.drained;
+    assert.equal(terminal.charged_microtu, "0");
+    assert.ok(terminal.participants.every((p) => p.paid_microtu === "0"));
+    assert.equal(
+      (
+        await db.query(
+          "SELECT count(*)::int AS n FROM active_session_domains WHERE session_id=$1",
+          [active.id],
+        )
+      ).rows[0].n,
+      0,
+    );
+    for (const pid of [
+      killed.host.pid,
+      killed.child.pid,
+      killed.guardian_pid,
+      engine.pid,
+    ])
+      await until(async () => !(await processIdentity(pid)));
+    for (const sibling of siblings) {
+      const current = await serviceStatus(sibling.profile);
+      assert.equal(current.live, true);
+      assert.equal(current.pid, sibling.pid);
+      assert.equal(current.boot_id, sibling.boot);
+    }
+    report.service_faults = [
+      {
+        injected: "terminate_owned_root_service_host",
+        guardian_sha256: killed.guardian_sha256,
+        state: terminal.state,
+        billing_state: terminal.billing_state,
+        charged_microtu: "0",
+        retained_claims: 0,
+        terminal_and_cleanup_ms: Date.now() - faultAt,
+        owned_host_guardian_cluster_and_model_server_gone: true,
+        unchanged_live_sibling_services: siblings.length,
+        client_cancel_injected: false,
+      },
+    ];
+    pass(
+      "root_host_loss_closes_actual_model_process_tree_refunds_and_preserves_other_services",
+    );
+    await stopDeviceRoute(recipe.id);
+    await startDeviceRoute(recipe.id);
+    await ready();
+    recovery = false;
+    await infer("after_root_service_host_reload");
+    report.after_recovery = await snapshots();
+    pass("same_model_route_and_participants_reload_after_root_host_failure");
   }
   const engine = await json(join(location, "engine", "status.json"));
   delete engine.pids;

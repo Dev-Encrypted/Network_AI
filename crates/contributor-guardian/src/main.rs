@@ -7,9 +7,10 @@ use std::io::{self, Write};
 struct Settings {
     parent_pid: u32,
     boot_id: String,
+    lock_key: Option<String>,
 }
 fn settings(args: &[String]) -> Result<Settings, &'static str> {
-    if args.len() != 4 || args[0] != "--parent-pid" || args[2] != "--boot-id" {
+    if ![4, 6].contains(&args.len()) || args[0] != "--parent-pid" || args[2] != "--boot-id" {
         return Err("guardian_arguments");
     }
     let parent_pid = args[1]
@@ -32,6 +33,19 @@ fn settings(args: &[String]) -> Result<Settings, &'static str> {
     Ok(Settings {
         parent_pid,
         boot_id: args[3].clone(),
+        lock_key: if args.len() == 6 {
+            if args[4] != "--registry-lock"
+                || args[5].len() != 64
+                || !args[5]
+                    .bytes()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+            {
+                return Err("guardian_lock_key");
+            }
+            Some(args[5].clone())
+        } else {
+            None
+        },
     })
 }
 
@@ -42,7 +56,7 @@ mod windows {
     use windows_sys::Win32::{
         Foundation::{
             CloseHandle, FILETIME, GetHandleInformation, HANDLE, HANDLE_FLAG_INHERIT,
-            INVALID_HANDLE_VALUE, WAIT_OBJECT_0, WAIT_TIMEOUT,
+            INVALID_HANDLE_VALUE, WAIT_ABANDONED_0, WAIT_OBJECT_0, WAIT_TIMEOUT,
         },
         System::{
             Diagnostics::ToolHelp::{
@@ -56,9 +70,9 @@ mod windows {
                 SetInformationJobObject,
             },
             Threading::{
-                GetCurrentProcess, GetCurrentProcessId, GetProcessTimes, INFINITE, OpenProcess,
-                PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_SET_QUOTA, PROCESS_SYNCHRONIZE,
-                PROCESS_TERMINATE, WaitForSingleObject,
+                CreateMutexW, GetCurrentProcess, GetCurrentProcessId, GetProcessTimes, INFINITE,
+                OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_SET_QUOTA,
+                PROCESS_SYNCHRONIZE, PROCESS_TERMINATE, ReleaseMutex, WaitForSingleObject,
             },
         },
     };
@@ -199,13 +213,93 @@ mod windows {
         }
         Ok(())
     }
+    pub fn registry_lock(c: &Settings) -> Result<(), &'static str> {
+        use std::{
+            io::Read,
+            sync::mpsc,
+            time::{Duration, Instant},
+        };
+        if actual_parent()? != c.parent_pid {
+            return Err("guardian_parent_mismatch");
+        }
+        let key = c.lock_key.as_ref().ok_or("guardian_lock_key")?;
+        let name: Vec<u16> = format!("Global\\NetworkAIRegistry-{key}\0")
+            .encode_utf16()
+            .collect();
+        // SAFETY: Valid, non-inheritable handles are held for this entire scope.
+        // The mutex is acquired and released on this same main OS thread.
+        unsafe {
+            let parent = Handle::take(
+                OpenProcess(
+                    PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_SYNCHRONIZE,
+                    0,
+                    c.parent_pid,
+                ),
+                "guardian_parent_open",
+            )?;
+            if created(parent.0)? > created(GetCurrentProcess())?
+                || WaitForSingleObject(parent.0, 0) != WAIT_TIMEOUT
+            {
+                return Err("guardian_parent_not_current");
+            }
+            let mutex = Handle::take(
+                CreateMutexW(ptr::null(), 0, name.as_ptr()),
+                "guardian_mutex_create",
+            )?;
+            let deadline = Instant::now() + Duration::from_secs(15);
+            loop {
+                if WaitForSingleObject(parent.0, 0) != WAIT_TIMEOUT {
+                    return Err("guardian_parent_exited");
+                }
+                match WaitForSingleObject(mutex.0, 100) {
+                    WAIT_OBJECT_0 | WAIT_ABANDONED_0 => break,
+                    WAIT_TIMEOUT if Instant::now() < deadline => continue,
+                    WAIT_TIMEOUT => return Err("guardian_mutex_timeout"),
+                    _ => return Err("guardian_mutex_wait"),
+                }
+            }
+            struct OwnedMutex(HANDLE);
+            impl Drop for OwnedMutex {
+                fn drop(&mut self) {
+                    // SAFETY: This thread acquired the mutex and drops it before its handle.
+                    unsafe {
+                        ReleaseMutex(self.0);
+                    }
+                }
+            }
+            let _owned = OwnedMutex(mutex.0);
+            let ack = serde_json::json!({"schema_version":1,"kind":"registry_mutex","namespace":"global","parent_pid":c.parent_pid,"guardian_pid":GetCurrentProcessId(),"boot_id":c.boot_id,"lock_key":key});
+            writeln!(io::stdout().lock(), "{ack}").map_err(|_| "guardian_ack_write")?;
+            io::stdout().flush().map_err(|_| "guardian_ack_flush")?;
+            let (send, receive) = mpsc::channel();
+            std::thread::spawn(move || {
+                let mut byte = [0_u8; 1];
+                let _ = io::stdin().read(&mut byte);
+                let _ = send.send(());
+            });
+            loop {
+                if WaitForSingleObject(parent.0, 0) != WAIT_TIMEOUT {
+                    break;
+                }
+                match receive.recv_timeout(Duration::from_millis(100)) {
+                    Ok(()) | Err(mpsc::RecvTimeoutError::Disconnected) => break,
+                    Err(mpsc::RecvTimeoutError::Timeout) => (),
+                }
+            }
+        }
+        Ok(())
+    }
 }
 fn main() {
     let result: Result<(), &'static str> = settings(&std::env::args().skip(1).collect::<Vec<_>>())
         .and_then(|c| {
             #[cfg(windows)]
             {
-                windows::run(&c)
+                if c.lock_key.is_some() {
+                    windows::registry_lock(&c)
+                } else {
+                    windows::run(&c)
+                }
             }
             #[cfg(not(windows))]
             {
@@ -252,5 +346,15 @@ mod tests {
         a.remove(4);
         a[0] = "--arbitrary-pid".into();
         assert_eq!(settings(&a), Err("guardian_arguments"));
+    }
+    #[test]
+    fn registry_lock_requires_an_explicit_canonical_key() {
+        let mut a = args("123", "82ef5e77-c819-43b1-868c-6d6231735ac2");
+        a.extend(["--registry-lock".into(), "a".repeat(64)]);
+        assert_eq!(settings(&a).unwrap().lock_key, Some("a".repeat(64)));
+        a[5] = "C:\\private\\file".into();
+        assert_eq!(settings(&a), Err("guardian_lock_key"));
+        a[4] = "--arbitrary-command".into();
+        assert_eq!(settings(&a), Err("guardian_lock_key"));
     }
 }

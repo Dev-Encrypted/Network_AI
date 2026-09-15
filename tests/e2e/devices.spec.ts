@@ -1,5 +1,6 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 import { test, expect } from "@playwright/test";
+import { loginThroughBrowser } from "./login";
 import { readFile, mkdir } from "node:fs/promises";
 
 test("the real mixed model explains device budgets and unequal placement on desktop and mobile", async ({
@@ -19,9 +20,7 @@ test("the real mixed model explains device budgets and unequal placement on desk
     await readFile(".runtime/private-lab/config.json", "utf8"),
   );
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await page.getByRole("button", { name: "Modelos", exact: true }).click();
   const card = page.locator(".model-card").filter({
     has: page.getByRole("heading", {

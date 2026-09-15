@@ -39,7 +39,7 @@ jobs:
       - run: cargo +1.93.1 clippy --locked --all-targets -- -D warnings
 
   windows-contributor:
-    name: Windows contributor containment
+    name: Windows contributor and service containment
     runs-on: windows-2025
     timeout-minutes: 15
     steps:
@@ -75,6 +75,8 @@ jobs:
       - run: pnpm contributor:pack
       - run: rustup toolchain install 1.93.1 --profile minimal
       - run: cargo +1.93.1 build --locked -p network-ai-node -p network-ai-gateway
+      - name: Exercise installed-recipe discovery without model weights
+        run: mkdir -p .runtime/private-lab/device-routes
       - run: pnpm lab:start --no-build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm exec playwright test --grep 'route proposal|mobile layout|browser proxy'

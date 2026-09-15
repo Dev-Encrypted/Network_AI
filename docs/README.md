@@ -6,6 +6,8 @@ The [cooperative fund guide](implementation/COOPERATIVE_FUNDS.md) explains the i
 
 ## Reading paths
 
+The [service supervision guide](implementation/SERVICE_SUPERVISION.md) explains Windows process ownership for the coordinator, gateway, interface, links and root-model launcher. Version 0.13 preserves the existing contributor profiles and adds durable launch reconciliation; operating-system service installation and reboot recovery remain separate work.
+
 The [device guide](implementation/HETEROGENEOUS_CONTRIBUTORS.md) explains explicit CPU/CUDA contributions, observed memory budgets, unequal placement, and how mixed routes reuse existing physical resource reservations.
 
 The [contributor guide](implementation/PORTABLE_CONTRIBUTORS.md) explains independently supervised worker processes, participant-only credentials, signed readiness, pinned engines and standalone packaging. [Version 0.11](implementation/CONTRIBUTOR_PROCESS_CONTAINMENT.md) adds Windows crash containment; the [v0.10.1 correction](implementation/CONTRIBUTOR_STATUS_RECOVERY.md) covers status-file recovery. The [v0.9 transport guide](implementation/GUARDED_RPC_TRANSPORT.md) explains the model-stage RPC path over paired QUIC identities. The installed 32B demonstration uses one physical computer and retains the private trust boundary.

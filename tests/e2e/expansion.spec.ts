@@ -1,6 +1,7 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 // Browser evidence uses the actual one-account route. It never fabricates independent operators or mature health.
 import { test, expect } from "@playwright/test";
+import { loginThroughBrowser } from "./login";
 import { readFile, mkdir } from "node:fs/promises";
 import { randomUUID, createHash } from "node:crypto";
 import { expectReadyRoute } from "./readiness";
@@ -20,9 +21,7 @@ test("private expansion forms bind support, preserve retry identity and explain 
     "Requires the real installed route; no fabricated capacity is substituted",
   );
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await expect(
     page.getByRole("button", { name: "Cooperação", exact: true }),
   ).toBeVisible();

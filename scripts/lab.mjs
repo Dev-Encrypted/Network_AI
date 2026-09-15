@@ -4,6 +4,7 @@ import { protectDirectory } from "../packages/contributor/src/permissions.mjs";
 import {
   workerEnvironment,
   loadProfile,
+  hashFile,
 } from "../packages/contributor/src/profile.mjs";
 import {
   requestStop as requestWorkerStop,
@@ -31,6 +32,18 @@ import {
 import { setTimeout as delay } from "node:timers/promises";
 import { finished } from "node:stream/promises";
 import net from "node:net";
+import {
+  launchService,
+  serviceOwned,
+  updateRegistry,
+} from "./service-manager.mjs";
+import {
+  serviceStatus,
+  readServiceProfile,
+  requestServiceStop,
+  processIdentity,
+  sameProcess,
+} from "./service-process.mjs";
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const runtime = join(root, ".runtime", "private-lab");
@@ -402,9 +415,12 @@ async function readProcesses() {
 }
 async function rpcStatusReady(entry) {
   try {
+    const pid = entry.service
+      ? (await serviceStatus(entry.service.profile)).child_pid
+      : entry.pid;
     const s = JSON.parse(await readFile(entry.options.rpcStatusFile, "utf8"));
     return (
-      s.pid === entry.pid &&
+      s.pid === pid &&
       s.transport === "iroh-direct-quic-guarded-rpc" &&
       Math.abs(Date.now() - s.observed_at_unix_ms) < 5000
     );
@@ -413,14 +429,32 @@ async function rpcStatusReady(entry) {
   }
 }
 async function waitLaunched(entry, health) {
+  if (entry.service) {
+    let observed = false;
+    for (let i = 0; i < 30; i++) {
+      const s = await serviceStatus(entry.service.profile);
+      if (s.live && s.child_alive) {
+        observed = true;
+        break;
+      }
+      if (!(await owned(entry)) && i > 2)
+        throw new Error("Managed service exited before startup");
+      await delay(250);
+    }
+    if (!observed)
+      throw new Error("Managed service did not establish a live owned child");
+  }
   if (entry.options?.workerConfigPath) {
+    const expectedPid = entry.service
+      ? (await serviceStatus(entry.service.profile)).child_pid
+      : entry.pid;
     for (let i = 0; i < 60; i++) {
       const s = await workerStatus(entry.options.workerConfigPath).catch(
         () => null,
       );
       if (
         s?.live &&
-        s.pid === entry.pid &&
+        s.pid === expectedPid &&
         ["WAITING_ROOT", "READY"].includes(s.phase)
       )
         return;
@@ -449,6 +483,8 @@ async function waitLaunched(entry, health) {
     entry.options?.healthSeconds ?? 45,
     entry.options?.healthKeyFile,
   );
+  if (entry.service && !(await owned(entry)))
+    throw new Error("Service ownership was lost during its health check");
 }
 export async function launch(name, program, args, port, health, options = {}) {
   const c = await config();
@@ -468,6 +504,34 @@ export async function launch(name, program, args, port, health, options = {}) {
     await unlink(expected).catch((e) => {
       if (e.code !== "ENOENT") throw e;
     });
+  }
+  if (process.platform === "win32") {
+    const environment = options.workerConfigPath
+      ? {}
+      : options.linkConfigPath
+        ? { NETWORK_AI_LINK_CONFIG: options.linkConfigPath }
+        : options.rpcStatusFile || options.shutdownFile
+          ? {}
+          : name === "web"
+            ? {
+                NEXT_TELEMETRY_DISABLED: "1",
+                NETWORK_AI_CONTROL_URL: `http://127.0.0.1:${c.control_port}`,
+                NETWORK_AI_GATEWAY_URL: `http://127.0.0.1:${c.gateway_port}`,
+              }
+            : { NETWORK_AI_CONFIG: options.configPath ?? configPath };
+    const entry = await launchService(
+      root,
+      runtime,
+      name,
+      program,
+      args,
+      port,
+      options,
+      environment,
+    );
+    await waitLaunched(entry, health);
+    console.log(`${name}: pronto com supervisão em 127.0.0.1:${port}`);
+    return;
   }
   const out = await open(join(runtime, `${name}.out.log`), "a");
   const err = await open(join(runtime, `${name}.err.log`), "a");
@@ -504,11 +568,14 @@ export async function launch(name, program, args, port, health, options = {}) {
     started_at: new Date().toISOString(),
     options,
   };
-  await privateJson(processesPath, processes);
+  await updateRegistry(root, runtime, (current) => {
+    current[name] = processes[name];
+  });
   await waitLaunched(processes[name], health);
   console.log(`${name}: pronto em 127.0.0.1:${port}`);
 }
 async function owned(entry) {
+  if (entry?.service) return serviceOwned(entry);
   if (!entry || !Number.isSafeInteger(entry.pid)) return false;
   try {
     if (process.platform === "win32") {
@@ -761,6 +828,9 @@ export async function faultContributorComponent(
     throw new Error("Contributor supervisor is not the tracked process");
   const s = await workerStatus(expected),
     { profile, pin } = await loadProfile(expected, false);
+  const supervisorPid = entry.service
+    ? (await serviceStatus(entry.service.profile)).child_pid
+    : entry.pid;
   const program =
     component === "supervisor"
       ? entry.program
@@ -772,20 +842,20 @@ export async function faultContributorComponent(
               .path;
   const pid =
     component === "supervisor"
-      ? entry.pid
+      ? supervisorPid
       : component === "guardian"
         ? s.containment?.guardian_pid
         : s.component_pids[component];
   if (
     ["supervisor", "guardian"].includes(component) &&
     (s.containment?.kind !== "windows_job" ||
-      s.containment.parent_pid !== entry.pid ||
+      s.containment.parent_pid !== supervisorPid ||
       s.containment.boot_id !== s.boot_id)
   )
     throw new Error(
       "Hard termination requires the confirmed current Windows job",
     );
-  if (!s.live || s.pid !== entry.pid || !(await owned({ pid, program })))
+  if (!s.live || s.pid !== supervisorPid || !(await owned({ pid, program })))
     throw new Error("Contributor component ownership could not be verified");
   if (process.platform === "win32") {
     const script = `$p=Get-CimInstance Win32_Process -Filter "ProcessId = ${pid}"; if($p){$p | Select-Object ExecutablePath,ParentProcessId,CommandLine | ConvertTo-Json -Compress}`;
@@ -798,19 +868,83 @@ export async function faultContributorComponent(
     );
     if (
       actual.ExecutablePath.toLowerCase() !== program.toLowerCase() ||
-      (component !== "supervisor" && actual.ParentProcessId !== entry.pid) ||
+      (component !== "supervisor" &&
+        actual.ParentProcessId !== supervisorPid) ||
       (component === "guardian" && !actual.CommandLine.includes(s.boot_id))
     )
       throw new Error("Contributor process parent or exact executable differs");
   }
   process.kill(pid);
 }
+export async function faultServiceComponent(name, component) {
+  if (
+    !/^[a-z][a-z0-9_-]{0,63}$/.test(name) ||
+    !["host", "guardian", "child"].includes(component)
+  )
+    throw new Error("Choose a tracked managed service component");
+  const entry = (await readProcesses())[name];
+  if (!entry?.service || !(await owned(entry)))
+    throw new Error("Service is not the live tracked launch");
+  const expected = join(
+    runtime,
+    "managed-services",
+    name,
+    entry.service.boot_id,
+    "profile.json",
+  );
+  if (entry.service.profile !== expected)
+    throw new Error(
+      "Service profile path differs from its registered identity",
+    );
+  const s = await serviceStatus(expected),
+    profile = await readServiceProfile(expected);
+  if (
+    !s.live ||
+    !s.child_alive ||
+    s.containment?.parent_pid !== s.pid ||
+    s.containment?.boot_id !== s.boot_id
+  )
+    throw new Error("Live service containment could not be established");
+  const guardianIdentity = await processIdentity(s.containment.guardian_pid);
+  if (
+    !guardianIdentity ||
+    guardianIdentity.parent_pid !== s.pid ||
+    !guardianIdentity.command.includes(s.boot_id) ||
+    guardianIdentity.program.toLowerCase() !==
+      profile.guardian.path.toLowerCase() ||
+    (await hashFile(profile.guardian.path)) !== profile.guardian.sha256
+  )
+    throw new Error("Service guardian parent, boot, executable or pin differs");
+  const identity =
+    component === "host"
+      ? s.identity.runner
+      : component === "child"
+        ? s.identity.child
+        : guardianIdentity;
+  if (!(await sameProcess(identity)))
+    throw new Error("Service component identity changed");
+  process.kill(identity.pid);
+  return {
+    boot_id: s.boot_id,
+    host: s.identity.runner,
+    child: s.identity.child,
+    guardian_pid: s.containment.guardian_pid,
+    guardian_sha256: profile.guardian.sha256,
+  };
+}
 async function stopNames(names) {
   const processes = await readProcesses();
   for (const name of names) {
     const entry = processes[name];
     if (await owned(entry)) {
-      if (entry.options?.workerConfigPath) {
+      if (entry.service) {
+        await requestServiceStop(entry.service.profile);
+        for (let i = 0; i < 40 && (await owned(entry)); i++) await delay(250);
+        if (await owned(entry))
+          throw new Error(
+            "Managed service did not stop; its launch identity was retained",
+          );
+      } else if (entry.options?.workerConfigPath) {
         const device =
           /^device_([a-z][a-z0-9-]{0,31})_contributor_([1-9]|1[0-5])$/.exec(
             name,
@@ -859,9 +993,14 @@ async function stopNames(names) {
       } else process.kill(entry.pid);
       console.log(`${name}: encerrado`);
     }
-    delete processes[name];
+    await updateRegistry(root, runtime, (current) => {
+      if (
+        current[name]?.service?.boot_id === entry?.service?.boot_id &&
+        current[name]?.pid === entry?.pid
+      )
+        delete current[name];
+    });
   }
-  await privateJson(processesPath, processes);
   // Database and volume are retained. This command affects no other Docker project.
 }
 export async function startCpuCluster(cpu) {
@@ -1095,6 +1234,9 @@ export async function status() {
         ? await rpcStatusReady(entry)
         : await listening(entry.port),
       port: entry.port,
+      ...(entry.service
+        ? { supervision: await serviceStatus(entry.service.profile) }
+        : {}),
       ...(entry.options?.rpcStatusFile
         ? {
             transport: "iroh-direct-quic-guarded-rpc",
@@ -1170,5 +1312,11 @@ if (
     restart: () => restart(process.argv[3]),
   }[process.argv[2] ?? "status"];
   if (!action) throw new Error("Use init, start, stop, status or backup");
-  await action();
+  // Device-route commands import this module's lifecycle helpers. Finish module
+  // evaluation before awaiting the command so a dynamic import cannot wait on
+  // the CLI's own unresolved top-level await.
+  void action().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
 }

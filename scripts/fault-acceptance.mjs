@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import { join } from "node:path";
+import { createRequire } from "node:module";
 import { config, restart, runtime } from "./lab.mjs";
 const c = await config();
 const base = `http://127.0.0.1:${c.control_port}/api/v1`;
@@ -63,10 +64,13 @@ await restart("node");
 let recovered;
 for (let i = 0; i < 30; i++) {
   recovered = await getSession(id);
-  if (recovered.state === "INTERRUPTED") break;
+  if (["INTERRUPTED", "CANCELLED"].includes(recovered.state)) break;
   await delay(500);
 }
-assert.equal(recovered.state, "INTERRUPTED");
+// The gateway may request cleanup before the new node epoch reaches the
+// reconciler. Both terminal labels must still identify the actual interruption.
+assert.ok(["INTERRUPTED", "CANCELLED"].includes(recovered.state));
+assert.equal(recovered.error_code, "execution_interrupted");
 assert.equal(recovered.charged_microtu, "0");
 assert.equal(recovered.billing_state, "REFUNDED");
 const after = await (
@@ -74,6 +78,35 @@ const after = await (
 ).json();
 assert.ok(after.epoch > before.epoch);
 assert.equal(after.ready, true);
+const { Pool } = createRequire(
+  new URL("../apps/control-api/package.json", import.meta.url),
+)("pg");
+const db = new Pool({
+  connectionString: c.database_url,
+  options: "-c search_path=nai,public",
+});
+try {
+  assert.equal(
+    (
+      await db.query(
+        "SELECT count(*)::int AS n FROM active_session_domains WHERE session_id=$1",
+        [id],
+      )
+    ).rows[0].n,
+    0,
+  );
+  assert.equal(
+    (
+      await db.query(
+        "SELECT count(*)::int AS n FROM receipts WHERE session_id=$1",
+        [id],
+      )
+    ).rows[0].n,
+    0,
+  );
+} finally {
+  await db.end();
+}
 await drain;
 await writeFile(
   join(runtime, "fault-report.json"),
@@ -87,6 +120,10 @@ await writeFile(
       epoch_after: after.epoch,
       recovery_ms: Date.now() - start,
       state: recovered.state,
+      error_code: recovered.error_code,
+      client_cancel_injected: false,
+      retained_physical_claims: 0,
+      signed_receipts_from_terminated_node: 0,
       billing_state: recovered.billing_state,
       charged_microtu: "0",
       ready_after: true,

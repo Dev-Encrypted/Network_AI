@@ -25,7 +25,7 @@ The original 58-item backlog and its detailed historical decomposition remain in
 | R15: independent continuity | Named operators, quorum, partition, restoration, key rotation and replacement gateway | Required |
 | R16: operational pilot | Confirmed costs and responsible operators; actual 7/30-day pilot evidence | Required |
 | R17: optional commercial service | Seller responsibility, capped funding, settlement, disputes, payouts and exit tested end to end | Separate path; disabled |
-| R18: broader product | Desktop contributor, localization, model adapters, multimodality and locally bounded coding agent | Standalone private CPU/CUDA CLI/package, explicit legacy upgrade, managed local recipes and Windows process-tree guardian available; GUI, root/coordinator service supervision, OS resource isolation, further engines and broader product work remain |
+| R18: broader product | Desktop contributor, localization, model adapters, multimodality and locally bounded coding agent | Standalone private CPU/CUDA CLI/package, explicit legacy upgrade, managed recipes, contributor containment and Windows root/coordinator service supervision available; GUI, installed-service/reboot recovery, OS resource isolation, further engines and broader product work remain |
 
 Through v0.8, private circulation and expansion are executable mechanisms. A live one-account 32B cycle demonstrates recycling and honest expansion refusals; separate isolated fixtures demonstrate the positive expansion transaction, rollback and restoration. Neither is a real 24-hour recovery observation, independent-provider economy or successful mature study. [Current validation and remaining work](../implementation/STATUS.md).
 

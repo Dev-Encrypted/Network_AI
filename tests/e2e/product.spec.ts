@@ -1,5 +1,6 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 import { test, expect } from "@playwright/test";
+import { loginThroughBrowser } from "./login";
 import { readFile, mkdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { expectReadyRoute } from "./readiness";
@@ -18,9 +19,7 @@ test("complete route readiness survives a lost funding response and preserves th
     "Requires the explicitly installed private CPU route; no fake readiness is substituted.",
   );
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await page.getByRole("button", { name: "Meus nós", exact: true }).click();
   const section = page.locator(".route-availability-section");
   const reason = `Browser funded route window ${randomUUID().slice(0, 8)}`;
@@ -123,9 +122,7 @@ test("route proposal, consent, qualification and withdrawal work in the browser"
   page,
 }) => {
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await page.getByRole("button", { name: "Meus nós", exact: true }).click();
   const auth = { headers: { Origin: config.web_origin } };
   const me = await (await page.request.get("/api/v1/me")).json();
@@ -232,9 +229,7 @@ test("availability funding, operator acceptance and closure work in the browser"
   page,
 }) => {
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await page.getByRole("button", { name: "Meus nós", exact: true }).click();
   const section = page.locator(".availability-section");
   await expect(
@@ -285,9 +280,7 @@ test("login, real streamed chat, session, wallet, API key and node controls", as
   await expect(
     page.getByRole("heading", { name: "Entre no seu ambiente" }),
   ).toBeVisible();
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await expect(
     page.getByRole("heading", { name: "Uma conversa. Toda uma rede." }),
   ).toBeVisible();
@@ -358,9 +351,7 @@ test("mobile layout has accessible navigation and no page overflow", async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await expect(
     page.getByRole("heading", { name: "Uma conversa. Toda uma rede." }),
   ).toBeVisible();
@@ -410,9 +401,7 @@ test("logout fences a delayed quote and clears conversation state", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await expect(
     page.getByRole("heading", { name: "Uma conversa. Toda uma rede." }),
   ).toBeVisible();
@@ -441,9 +430,7 @@ test("logout fences a delayed quote and clears conversation state", async ({
   ).toBeVisible();
   release.resolve();
   await finished.promise;
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await expect(
     page.getByRole("heading", { name: "Uma conversa. Toda uma rede." }),
   ).toBeVisible();
@@ -464,9 +451,7 @@ test("bounded renewal controls preserve retry identity and revoke only future op
     "Requires the installed 32B route; no fabricated capacity is substituted.",
   );
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await expect(
     page.getByRole("button", { name: "Cooperação", exact: true }),
   ).toBeVisible();
@@ -674,9 +659,7 @@ test("cooperative plan, funding retry, readiness consent and opted-in chat work 
     "Requires the installed 32B route; never fabricated by CI.",
   );
   await page.goto("/");
-  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
-  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await loginThroughBrowser(page, config);
   await page.getByRole("button", { name: "Cooperação", exact: true }).click();
   await expectReadyRoute(page.request, profile.route_id);
   const section = page.getByRole("region", { name: "Fundos cooperativos" });

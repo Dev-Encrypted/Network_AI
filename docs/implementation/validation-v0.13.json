@@ -1,0 +1,373 @@
+{
+  "version": "0.13.0-private-service-preview",
+  "validation_local_dates": [
+    "2026-09-15"
+  ],
+  "timezone": "America/Sao_Paulo",
+  "scope": "One Windows host and operator. Actual private model and process recovery; no cross-host, wider GPU, installed-service/reboot or public-network qualification.",
+  "tests": {
+    "integration_and_integer_accounting": 95,
+    "node_unit_and_socket": 36,
+    "rust_total": 17,
+    "rust_guardian_parser": 3,
+    "rust_guardian_parser_included_in_total": true,
+    "python_f0": 21,
+    "browser": 11,
+    "windows_contributor_and_service_process_fixtures": 13,
+    "total_automated_distinct": 193
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_sources_unchanged": true,
+    "applied_migrations_001_through_010_checked_read_only": true,
+    "served_browser_version": "0.13.0"
+  },
+  "campaigns": {
+    "root_model_service": {
+      "report": "evidence/qwen3-32b-service-supervision-v0.13.json",
+      "completed_requests": 4,
+      "faulted_refunded_requests": 1,
+      "unchanged_sibling_services": 19,
+      "terminal_and_cleanup_ms": 31390
+    },
+    "core_recovery": {
+      "report": "evidence/service-core-recovery-v0.13.json",
+      "node_epoch_fenced": true,
+      "receipt_outbox_settled": true
+    }
+  },
+  "restore": {
+    "report": "evidence/service-backup-restore-v0.13.json",
+    "journal_entries": 714,
+    "projection_mismatches": 0
+  },
+  "initial_observations": "evidence/service-initial-observations-v0.13.json",
+  "native_service_guardian": {
+    "sha256": "67238e8860cb0fc320a3ccf03a709834a04806e3a9c0eaf7f87909e66cf3904c",
+    "registry_mutex_namespace": "global",
+    "source_only_release": true,
+    "prebuilt_binary_distributed": false
+  },
+  "contributor_source_package": {
+    "version": "0.12.0",
+    "source_and_artifact_unchanged": true,
+    "sha256": "18fe068e8cff0fb99c7adbf4ca048ef21994f4c268a4d26f05976ce06633fd32",
+    "release": "https://github.com/Dev-Encrypted/Network_AI/releases/tag/v0.12.0-private-device-preview"
+  },
+  "final_runtime_observation": {
+    "observed_at": "2026-09-15T16:05:19.542Z",
+    "schema_version": 1,
+    "physical_hosts": 1,
+    "applied_migrations_checked_read_only": 10,
+    "active_work": {
+      "sessions": 0,
+      "route_windows": 0
+    },
+    "installed_execution_definition_preserved": true,
+    "extracted_package_checks_all_four_real_profiles": [
+      {
+        "group": "original_cpu",
+        "stage": 1,
+        "phase": "READY",
+        "live": true,
+        "ready": true,
+        "status_fresh": true,
+        "profile_valid": true,
+        "guardian_bound_to_current_parent": true,
+        "private_profile_bindings_preserved": true,
+        "process_containment": "windows_job",
+        "device": null,
+        "rpc_memory": null
+      },
+      {
+        "group": "original_cpu",
+        "stage": 2,
+        "phase": "READY",
+        "live": true,
+        "ready": true,
+        "status_fresh": true,
+        "profile_valid": true,
+        "guardian_bound_to_current_parent": true,
+        "private_profile_bindings_preserved": true,
+        "process_containment": "windows_job",
+        "device": null,
+        "rpc_memory": null
+      },
+      {
+        "group": "mixed",
+        "stage": 1,
+        "phase": "READY",
+        "live": true,
+        "ready": true,
+        "status_fresh": true,
+        "profile_valid": true,
+        "guardian_bound_to_current_parent": true,
+        "private_profile_bindings_preserved": true,
+        "process_containment": "windows_job",
+        "device": {
+          "kind": "CUDA",
+          "name": "NVIDIA GeForce RTX 4090",
+          "buffer_budget_mib": 3072,
+          "reserve_mib": 1024,
+          "memory_total_mib": 24564,
+          "memory_free_mib": 2383,
+          "observation_source": "nvidia-smi",
+          "observed_at_unix_ms": 1789487415939,
+          "os_memory_isolation": false
+        },
+        "rpc_memory": {
+          "scope": "observed_rpc_buffers_only",
+          "limit_bytes": "3221225472",
+          "reserve_bytes": "1073741824",
+          "allocated_bytes": "2286248960",
+          "peak_allocated_bytes": "2286248960",
+          "live_buffers": 3,
+          "rejected_allocations": 0,
+          "os_memory_isolation": false
+        }
+      },
+      {
+        "group": "mixed",
+        "stage": 2,
+        "phase": "READY",
+        "live": true,
+        "ready": true,
+        "status_fresh": true,
+        "profile_valid": true,
+        "guardian_bound_to_current_parent": true,
+        "private_profile_bindings_preserved": true,
+        "process_containment": "windows_job",
+        "device": {
+          "kind": "CPU",
+          "name": "System RAM",
+          "buffer_budget_mib": 20480,
+          "reserve_mib": 8192,
+          "memory_total_mib": 130755,
+          "memory_free_mib": 21845,
+          "observation_source": "node:os",
+          "observed_at_unix_ms": 1789487415940,
+          "os_memory_isolation": false
+        },
+        "rpc_memory": {
+          "scope": "observed_rpc_buffers_only",
+          "limit_bytes": "21474836480",
+          "reserve_bytes": "8589934592",
+          "allocated_bytes": "17691924608",
+          "peak_allocated_bytes": "17691924608",
+          "live_buffers": 3,
+          "rejected_allocations": 0,
+          "os_memory_isolation": false
+        }
+      }
+    ],
+    "served_ui_version": "0.13.0",
+    "original_cpu_root_ready": true,
+    "mixed_root_ready": true,
+    "original_local_model_node_ready": true,
+    "original_lm_studio_model_still_served": true,
+    "managed_services": [
+      {
+        "name": "control",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "node",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "gateway",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "web",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "route_control_1",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "route_contributor_1",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "route_control_2",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "route_contributor_2",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "route_rpc_root_1",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "route_rpc_root_2",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "route_cluster",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "route_root",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "device_qwen32-mixed_control_1",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "device_qwen32-mixed_contributor_1",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "device_qwen32-mixed_rpc_1",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "device_qwen32-mixed_control_2",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "device_qwen32-mixed_contributor_2",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "device_qwen32-mixed_rpc_2",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "device_qwen32-mixed_cluster",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      },
+      {
+        "name": "device_qwen32-mixed_root",
+        "live": true,
+        "child_alive": true,
+        "phase": "RUNNING",
+        "status_fresh": true,
+        "containment": "windows_job",
+        "guardian_parent_boot_and_pin_verified": true
+      }
+    ],
+    "private_configuration_fingerprints_preserved": 7,
+    "service_guardian_sha256": "67238e8860cb0fc320a3ccf03a709834a04806e3a9c0eaf7f87909e66cf3904c",
+    "registry_mutex_namespace": "global",
+    "result": "PASS"
+  },
+  "validation_notes": [
+    "Counts identify distinct cases. Repeated checks and live campaigns are not added to the automated total. Rust guardian parser cases are included in rust_total.",
+    "Windows fixtures use actual disposable processes, including the final global mutex, sibling preservation, incomplete launcher recovery, invalid-pin rejection and read-only status-viewer recovery. No model weights are used in those fixtures.",
+    "The full browser suite ran against the private working application and real configured models. Linux CI runs three model-independent browser journeys; Windows CI runs all thirteen process fixtures. CI also exercises installed-recipe discovery through the direct lab CLI without model weights.",
+    "The initial root-host campaign passed with the earlier private prototype guardian. The selected main campaign was repeated with the final global-namespace guardian pin and final launch source. Earlier private reports remain preserved.",
+    "No migration, original contributor profile, model artifact, stage identity, provider account or route definition was changed by the service upgrade. The first prototype service pin was explicitly replaced after all managed services stopped.",
+    "The backup is an isolated restore of the working database snapshot at its own observation time, before the final model and browser campaigns. It does not claim to contain later journal entries."
+  ],
+  "boundaries": [
+    "ordinary child process lifecycle containment, not OS user/filesystem/network/resource isolation or malicious-engine safety",
+    "global namespace follows the Windows contract; actual concurrent logon sessions remain unmeasured",
+    "no installed Windows service, reboot recovery, automatic respawn/update or public HA",
+    "one computer and account; independent GPU/host/OS/WAN/model-quality qualification remains",
+    "public verification, distributed continuity, calibrated exchange, approved issuance, funded pilots and cash settlement remain unfinished"
+  ]
+}

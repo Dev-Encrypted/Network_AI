@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "node_restart": {
+    "evidence_type": "REAL_NODE_PROCESS_RESTART",
+    "observed_at": "2026-09-15T15:50:43.477Z",
+    "physical_hosts": 1,
+    "epoch_before": 21,
+    "epoch_after": 22,
+    "recovery_ms": 9198,
+    "state": "CANCELLED",
+    "error_code": "execution_interrupted",
+    "client_cancel_injected": false,
+    "retained_physical_claims": 0,
+    "signed_receipts_from_terminated_node": 0,
+    "billing_state": "REFUNDED",
+    "charged_microtu": "0",
+    "ready_after": true
+  },
+  "control_outage": {
+    "evidence_type": "REAL_CONTROL_OUTAGE_WITH_RECEIPT_OUTBOX",
+    "observed_at": "2026-09-15T15:57:25.313Z",
+    "observed_control_outage_ms": 10206,
+    "outage_observation": "first failed health check through confirmed restored readiness",
+    "receipt_wait_bound_ms": 12000,
+    "pending_stream_wait_bound_ms": 7000,
+    "receipt_observed_on_disk_while_control_unavailable": true,
+    "outbox_removed_after_acceptance": true,
+    "terminal_settlements": 1,
+    "stream_completed_while_receipt_pending": true,
+    "state": "COMPLETED",
+    "billing_state": "SETTLED",
+    "charged_microtu": "451000"
+  },
+  "client_cancellation_scope": "No client cancellation was injected in these two campaigns; the gateway may request internal cleanup.",
+  "scope": "Live same-host model/node and coordinator recovery. The outage is measured from the first failed health check through confirmed restored readiness. The separate 12000ms bound limits receipt observation, not total shutdown/startup. No independent coordinator, HA or public economic claim."
+}

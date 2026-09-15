@@ -18,6 +18,8 @@ Private material lives in `.runtime/private-lab/`, excluded from Git. Windows in
 
 `lab:start` builds and launches owned background services. After a validated build, `pnpm lab:start --no-build` reuses binaries. To update application code, first run `pnpm lab:stop`, then build and start. Rebuilding Next.js over a running instance's output can invalidate its assets, so startup guards against this condition.
 
+On Windows, version 0.13 places each managed service under its own pinned job guardian before starting its child. This includes root-model launchers, core application processes and private links. The temporary command itself is outside those jobs. Build `network-ai-contributor-guardian` before the first protected start. The [service guide](SERVICE_SUPERVISION.md) covers ownership, durable launch intents, registry locking, status-file behavior and recovery. LM Studio remains external to the managed process trees.
+
 ## Local addresses
 
 | Service | Address |
@@ -179,7 +181,7 @@ Version 0.10.1 corrects the contributor supervisor's handling of Windows status-
 
 `pnpm test:contributors` runs real 32B requests, concurrency and owned child-failure/recovery checks on the selected portable profile. It spends only existing LAB_TU. `pnpm contributor:pack` builds and extracts a standalone source archive with Zod and licenses, then runs its CLI and identity command. Model weights, native executables, private credentials and raw logs are excluded.
 
-Graceful shutdown requests target the contributor's current boot; only verified owned processes are used for fault injection. After control-link or worker loss, inspect terminal sessions and pending receipts before full model/route reload. Version 0.11 requires a pinned Windows job guardian for the contributor process tree. Build `network-ai-contributor-guardian`, then use `pnpm lab:route-contributors upgrade` on the existing portable route after commitments drain. This retains the current transport binaries, keys and model. A forced crash may leave the last status phase unchanged even after all protected processes are gone. Follow the [containment and recovery guide](CONTRIBUTOR_PROCESS_CONTAINMENT.md); root-model/service supervision and resource isolation remain separate requirements.
+Graceful shutdown requests target the contributor's current boot; only verified owned processes are used for fault injection. After control-link or worker loss, inspect terminal sessions and pending receipts before full model/route reload. Version 0.11 requires a pinned Windows job guardian for the contributor process tree. Build `network-ai-contributor-guardian`, then use `pnpm lab:route-contributors upgrade` on the existing portable route after commitments drain. This retains the current transport binaries, keys and model. A forced crash may leave the last status phase unchanged even after all protected processes are gone. Follow the [contributor containment guide](CONTRIBUTOR_PROCESS_CONTAINMENT.md) and the v0.13 [service supervision guide](SERVICE_SUPERVISION.md); operating-system resource isolation remains separate work.
 
 ## Mixed CPU/CUDA device recipes
 

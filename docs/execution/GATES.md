@@ -1,6 +1,6 @@
 # Current advancement and launch gates
 
-Status reflects the preserved F0 evidence and private implementation through v0.12, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). Portable CPU/CUDA contributor supervision, observed buffer budgets, unequal placement, signed readiness, Windows status-file recovery and contributor crash containment are implemented. One mixed CPU/RTX 4090 route is measured; independent-host, broader GPU, public-trust and economic gates remain open. A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
+Status reflects the preserved F0 evidence and private implementation through v0.13, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). CPU/CUDA contributor budgets, unequal placement, signed readiness, contributor containment and managed Windows service ownership are implemented. Actual root-model failure, process cleanup, refund, sibling preservation and reload were measured on one computer. Independent-host, broader OS/GPU, public-trust and economic gates remain open. A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
 
 | Gate | Current evidence | Still required |
 |---|---|---|
@@ -8,7 +8,7 @@ Status reflects the preserved F0 evidence and private implementation through v0.
 | FC02: economics and liquidity | Event study completed; fictional parameters rejected; existing-credit circulation and expansion predicates executed privately | New calibration, observed independent costs/behavior, fresh holdout, real recovery, mature cohort acceptance and public economic qualification |
 | FC03: capacity and exchange | Official 32.8B Q4_K_M executed through CPU and mixed CPU/CUDA routes; explicit allocation budgets, 1:9 layer weights, shared CPU/GPU admission, all-stage receipts, zero-charge worker loss and reload recovery measured on one computer | Broader devices and physical hosts, numerical/quality/context/performance qualification, sustained recovery and measured contribution-to-consumption exchange ratios |
 | FC04: optional commerce | Historical adapter reference only | Responsible seller, bounded payments, finality, payouts, disputes and exit |
-| FC05: trust and continuity | Local transport controls, node epochs, receipt outbox and database restore | Independent operators, quorum, adversarial verification, partitions and replacement gateway recovery |
+| FC05: trust and continuity | Local transport controls, node epochs, receipt outbox, database restore and Windows service process-tree ownership | Independent operators, quorum, adversarial verification, partitions and replacement gateway recovery |
 | FC06: funded pilot and opening | Private application and time-bounded in-kind support declarations available | Independently confirmed operating/closure resources, named responsibilities and actual 7/30-day pilots |
 
 ## Concrete capacity gaps
