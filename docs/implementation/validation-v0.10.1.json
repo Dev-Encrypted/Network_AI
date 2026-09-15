@@ -1,0 +1,104 @@
+{
+  "version": "0.10.1-private-contributor-preview",
+  "validation_local_dates": [
+    "2026-09-15"
+  ],
+  "timezone": "America/Sao_Paulo",
+  "scope": "Private Windows installation; one physical computer, account and CPU resource domain. Real Qwen3-32B work survives a controlled Windows status-file read lock. Independent-host, GPU, public-economic and OS-isolation qualification remain open.",
+  "tests": {
+    "integration_and_integer_accounting": 94,
+    "node_unit_and_socket": 21,
+    "rust_runtime": 4,
+    "rust_http_private_link": 3,
+    "rust_rpc_transport": 5,
+    "rust_f0": 2,
+    "python_f0": 21,
+    "browser": 10,
+    "total_automated_distinct": 160
+  },
+  "new_coverage": {
+    "atomic_status_and_fault_classification_cases": 4,
+    "current_boot_stop_without_readable_status": 1,
+    "in_process_health_matches_http_snapshot": true,
+    "live_32b_windows_status_read_lock": true
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_sources_unchanged": true,
+    "applied_migrations_001_through_009_checked_read_only": true,
+    "served_browser_version": "0.10.1"
+  },
+  "original_code_reproduction": {
+    "report": "evidence/contributor-status-reproduction-v0.10.json",
+    "version": "0.10.0",
+    "phase": "WAITING_ROOT",
+    "lock_requested_ms": 1200,
+    "supervisor_exited": true,
+    "inference_executed": false,
+    "first_later_shutdown_cause_not_recoverable": true
+  },
+  "live_campaign": {
+    "report": "evidence/qwen3-32b-contributor-status-v0.10.1.json",
+    "lock_requested_ms": 9000,
+    "lock_elapsed_ms": 9038,
+    "session_during_lock": "RUNNING",
+    "stale_status_did_not_claim_readiness": true,
+    "guard_ready_during_stale_telemetry": true,
+    "same_supervisor_boot_and_children_survived": true,
+    "session": {
+      "state": "COMPLETED",
+      "billing_state": "SETTLED",
+      "prompt_tokens": 23,
+      "completion_tokens": 128,
+      "charged_microtu": "407000",
+      "provider_paid_microtu": "325600",
+      "platform_fee_microtu": "81400",
+      "accepted_receipts": 3,
+      "physical_domains": 1
+    },
+    "new_lab_grants": 0,
+    "ledger_projection_mismatches": 0
+  },
+  "standalone_package": {
+    "report": "evidence/contributor-package-v0.10.1.json",
+    "schema_version": 1,
+    "version": "0.10.1",
+    "filename": "network-ai-contributor-0.10.1.tgz",
+    "sha256": "c79ebf361af18a5e39a1dd1b1bb1881847de2a67bbb150250b17219addcec0f4",
+    "bytes": 1174868,
+    "dependency": {
+      "name": "zod",
+      "version": "4.6.5",
+      "bundled": true,
+      "license_included": true
+    },
+    "extraction_and_cli_without_coordinator_source": true,
+    "model_or_engine_included": false,
+    "executable_signing_or_multi_host_qualification": false,
+    "extracted_cli_checked_both_installed_profiles": true
+  },
+  "restore": {
+    "report": "evidence/contributor-backup-restore-v0.10.1.json",
+    "journal_entries": 496,
+    "active_complete_route_windows": 0,
+    "all_checked_projection_mismatches": 0,
+    "runtime_permissions_preserved": true
+  },
+  "validation_notes": [
+    "All 160 distinct automated cases were rerun locally for this patch. The nine-second real fault campaign is additional acceptance evidence, not a unit fixture.",
+    "The CI application job runs three model-independent browser journeys. Seven other journeys and the actual 32B lock campaign use the original local installation and models.",
+    "A separate final check used the extracted source package CLI against both actual contributor profiles, verified current READY/fresh status, rendered the 0.10.1 interface and checked all nine applied migration hashes without writes.",
+    "Old v0.10 evidence, tag and package remain unchanged; its complete fault campaign is historical evidence, not a rerun under this patch.",
+    "Replacement EPERM/EBUSY/EACCES is treated as telemetry degradation only after the new snapshot was written and temporary-file cleanup succeeded. Persistent replacement permission errors can also degrade telemetry. Other storage errors and child exits still drain the contributor."
+  ],
+  "boundaries": [
+    "one physical Windows CPU host and account, not independent providers",
+    "diagnostic status is not execution/payment authority",
+    "no Windows Job Object/service or hostile-engine OS sandbox yet",
+    "independent GPU/Linux/WAN/NAT/relay and sustained recovery qualification",
+    "independent observed costs, successful economics, approved issuance, public work verification, distributed continuity and cash settlement"
+  ]
+}

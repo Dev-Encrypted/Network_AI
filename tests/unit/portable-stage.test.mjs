@@ -190,6 +190,7 @@ test(
     const health = async () =>
       (await fetch(`http://127.0.0.1:${httpPort}/health`)).json();
     assert.equal((await health()).ready, false);
+    assert.deepEqual(agent.health(), await health());
     assert.equal(declarations.length, 0);
     async function greet() {
       const socket = connect(guardPort, "127.0.0.1");
@@ -207,6 +208,7 @@ test(
     const first = await greet();
     await waitFor(async () => (await health()).ready);
     assert.equal((await health()).readiness_source, "coordinator_route_lease");
+    assert.deepEqual(agent.health(), await health());
     const generation = declarations[0].rpc_generation;
     replay = true;
     await waitFor(async () => !(await health()).ready); // expiry fences before next heartbeat

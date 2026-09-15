@@ -6,6 +6,8 @@ The contributor does not need a database connection, administrator password, coo
 
 This is a **private Windows x64 CPU preview**. The reference engine is llama.cpp **b10964**, commit `b29c606e28a01b1bc8c1351026a0fa6e616bf6c4`. It does not expose a public marketplace or qualify arbitrary hardware and models. The accompanying 32B experiment uses two contributor profiles on one computer. Process/configuration separation on that computer is not operating-system isolation or evidence of two independent providers.
 
+**Version 0.10.1:** Windows readers holding the status file no longer terminate otherwise healthy work. Atomic replacement retries are bounded, stale telemetry cannot claim readiness, and the supervisor reads its guard's health in process. The [fault report and upgrade guide](https://github.com/Dev-Encrypted/Network_AI/blob/main/docs/implementation/CONTRIBUTOR_STATUS_RECOVERY.md) explains the reproduced defect and real 32B test.
+
 ## What you need
 
 - Node.js 24; the measured installation uses 24.13.0.
@@ -61,7 +63,9 @@ node bin/worker.mjs status --config C:/NetworkAI/participant/worker.json
 node bin/worker.mjs stop --config C:/NetworkAI/participant/worker.json
 ```
 
-`status` reports process IDs, timestamps, current phase and readiness; it does not expose keys. `stop` writes a request for the current supervisor boot. It does not kill a PID read from an old file. After stopping, verify `STOPPED` and `live: false` in the status. A component failure reports `FAILED`; inspect the private logs before restarting. A dead supervisor's stale lock is recoverable, while an apparently live lock is preserved.
+`status` reports process IDs, timestamps, current phase and readiness; it does not expose keys. `process_alive` only checks whether the recorded PID exists. `status_fresh` becomes false when the observation is five seconds old, and both `live` and `ready` then become false even if `last_reported_ready` was true. This distinguishes a stale diagnostic snapshot from confirmed current readiness; stale telemetry alone is not evidence that the worker exited.
+
+`stop` reads the current boot from `worker.lock`, so unreadable or stale telemetry does not prevent a graceful request. It does not kill a PID read from an old file. After stopping, verify `STOPPED`, `process_alive: false` and `live: false` once status can be read again. A component failure reports `FAILED`; inspect the private logs before restarting. A dead supervisor's stale lock is recoverable, while an apparently live lock is preserved.
 
 ## How readiness and payment differ
 
@@ -72,6 +76,8 @@ The declaration lasts at most four seconds and cannot extend beyond six seconds 
 Readiness declarations **do not authorize inference or create money**. The existing coordinator-issued execution capability, physical-domain reservation, stage claim and complete-route receipt rules still apply. A new RPC connection invalidates readiness and any prepared work from the old connection. Accepted execution retains its separate bounded deadline; it is not replayed after failure. Credits remain experimental `LAB_TU`, without cash redemption or approved public issuance.
 
 ## Failure and privacy boundaries
+
+A status-file replacement denied with `EPERM`, `EBUSY` or `EACCES` degrades telemetry and is retried on later monitor intervals. The old file may remain readable, but its timestamp expires. This treatment applies only after writing a complete temporary snapshot succeeded and cleanup also succeeded. Actual write/encoding/cleanup failures and other replacement errors drain the contributor. Private logs identify `worker_status_degraded`, `worker_status_recovered` or a classified `worker_monitor_failed` without including private paths. A persistent replacement permission problem needs operator attention even while work continues.
 
 The supervisor owns its CPU worker and its two transport processes. If one exits, it closes the guard, ends its other children and retains durable pending receipts. A root model process that has lost a stage must be reloaded together with its route; reconnecting alone does not restore model tensors or replay inference. Follow the coordinator's session/refund and recovery workflow. A forced OS termination of the supervisor itself can leave child processes behind; this preview does not install a Windows Job Object or system service. After such a termination, inspect the recorded components and port ownership before recovery. Startup refuses occupied ports instead of taking over unrelated processes.
 

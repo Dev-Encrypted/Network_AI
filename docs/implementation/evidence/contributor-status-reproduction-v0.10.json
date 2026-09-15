@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "version": "0.10.0-private-contributor-preview",
+  "source_commit": "a57907cb9210041885465fe07b3fe9354c109e66",
+  "observed_at": "2026-09-15T04:55:07.417Z",
+  "scope": "controlled read-only status-file sharing lock on the owned second supervisor",
+  "before_live": true,
+  "after_live": false,
+  "after_phase": "WAITING_ROOT",
+  "original_later_failure_cause_not_recoverable_from_v010_log": true,
+  "physical_hosts": 1,
+  "compute": "CPU",
+  "requested_lock_ms": 1200,
+  "inference_request_executed": false,
+  "interpretation": "Original published supervisor exited during a controlled Windows status read lock in WAITING_ROOT. This demonstrates a defect but does not establish the cause of the earlier unclassified shutdown."
+}

@@ -596,6 +596,22 @@ export async function createStageAgent(raw, options) {
         if (liveRpc === connection) liveRpc = null;
       });
   });
+  const health = () => ({
+    status: "ok",
+    mode: "private_lab",
+    component: "rpc_stage",
+    node_id: c.node_id,
+    epoch,
+    ready: readyNow() && api.listening && rpc.listening,
+    running: active ? 1 : 0,
+    startup_compute_commands: startup.completed_commands,
+    startup_budget_closed: startupClosed,
+    rpc_route_bound: routeBinding !== null,
+    readiness_source: c.readiness_mode,
+    readiness_expires_ms: portable
+      ? (readinessLease?.value.expires_ms ?? null)
+      : null,
+  });
   const api = httpServer(
     { maxHeaderSize: 8192, requestTimeout: 10000, headersTimeout: 5000 },
     async (req, res) => {
@@ -603,24 +619,7 @@ export async function createStageAgent(raw, options) {
       res.setHeader("Cache-Control", "no-store");
       try {
         if (req.method === "GET" && req.url === "/health") {
-          res.end(
-            JSON.stringify({
-              status: "ok",
-              mode: "private_lab",
-              component: "rpc_stage",
-              node_id: c.node_id,
-              epoch,
-              ready: readyNow(),
-              running: active ? 1 : 0,
-              startup_compute_commands: startup.completed_commands,
-              startup_budget_closed: startupClosed,
-              rpc_route_bound: routeBinding !== null,
-              readiness_source: c.readiness_mode,
-              readiness_expires_ms: portable
-                ? (readinessLease?.value.expires_ms ?? null)
-                : null,
-            }),
-          );
+          res.end(JSON.stringify(health()));
           return;
         }
         requireValue(
@@ -818,7 +817,7 @@ export async function createStageAgent(raw, options) {
           ticking = false;
         });
     }, 2000);
-    return { stop, nodePort: c.node_port, rpcListenPort: listenPort };
+    return { stop, health, nodePort: c.node_port, rpcListenPort: listenPort };
   } catch (error) {
     await stop();
     throw error;

@@ -1,7 +1,7 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID, createHash } from "node:crypto";
@@ -15,6 +15,7 @@ import {
   workerEnvironment,
   verifyPinnedFiles,
 } from "../../packages/contributor/src/profile.mjs";
+import { requestStop } from "../../packages/contributor/src/supervisor.mjs";
 const node = randomUUID();
 const settings = {
   schema_version: 1,
@@ -117,6 +118,32 @@ test("contributor children do not inherit coordinator keys, Node injection, or p
       GGML_RPC_NO_RDMA: "1",
     },
   );
+});
+test("graceful stop is bound to the current lock and works without fresh readable telemetry", async (t) => {
+  const dir = await directory(t);
+  const { path } = await configureWorker(dir, invitation, settings);
+  const state = join(dir, "state"),
+    boot = randomUUID();
+  await mkdir(state);
+  await writeFile(
+    join(state, "worker.lock"),
+    JSON.stringify({ pid: process.pid, boot_id: boot }),
+  );
+  await writeFile(
+    join(state, "worker-status.json"),
+    "unreadable or incomplete old telemetry",
+  );
+  const response = await requestStop(path);
+  assert.equal(response.boot_id, boot);
+  assert.equal(
+    JSON.parse(await readFile(join(state, "stop.request"), "utf8")).boot_id,
+    boot,
+  );
+  await writeFile(
+    join(state, "worker.lock"),
+    JSON.stringify({ pid: 0, boot_id: boot }),
+  );
+  await assert.rejects(requestStop(path), { code: "worker_not_running" });
 });
 test("engine verification rejects modified or unexpected loadable files", async (t) => {
   const dir = await directory(t),

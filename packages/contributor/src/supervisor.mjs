@@ -1,14 +1,7 @@
 // Copyright 2026 Dev-Encrypted. SPDX-License-Identifier: Apache-2.0
 import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import {
-  mkdir,
-  open,
-  readFile,
-  unlink,
-  writeFile,
-  rename,
-} from "node:fs/promises";
+import { mkdir, open, readFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { connect, createServer } from "node:net";
@@ -22,12 +15,10 @@ import {
   hashFile,
 } from "./profile.mjs";
 import { protectDirectory } from "./permissions.mjs";
+import { atomicJson, StatusPublisher } from "./state.mjs";
 
 async function json(file, value) {
-  await writeFile(file, JSON.stringify(value, null, 2) + "\n", {
-    mode: 0o600,
-    flush: true,
-  });
+  await atomicJson(file, value);
 }
 function alive(pid) {
   try {
@@ -96,9 +87,9 @@ export async function startWorker(file) {
     polling = false,
     failure = null;
   const fingerprint = await hashFile(loaded.path);
+  const statusPublisher = new StatusPublisher(statusFile);
   async function status(ready = false) {
-    const temporary = statusFile + ".tmp";
-    await json(temporary, {
+    await statusPublisher.publish({
       schema_version: 1,
       pid: process.pid,
       boot_id: boot,
@@ -114,7 +105,6 @@ export async function startWorker(file) {
       readiness_source: "coordinator_route_lease",
       scope: "private_contributor_processes; not physical-host qualification",
     });
-    await rename(temporary, statusFile);
   }
   // Serialize status writes so a slow periodic observation cannot overwrite STOPPED.
   let statusQueue = Promise.resolve();
@@ -247,22 +237,28 @@ export async function startWorker(file) {
         } catch (e) {
           if (e.code !== "ENOENT") throw e;
         }
-        const response = await fetch(
-          `http://127.0.0.1:${c.node.http_port}/health`,
-          { signal: AbortSignal.timeout(1000) },
-        );
-        const health = await response.json();
-        requireValue(
-          response.ok && health.node_id === c.node.id,
-          "worker_guard_health",
-        );
+        // The guard lives in this process. Use its exact HTTP health snapshot
+        // directly; a loopback fetch timeout is not evidence that a child died.
+        const health = agent.health();
+        requireValue(health.node_id === c.node.id, "worker_guard_identity");
         if (!stopping) {
           phase = health.ready ? "READY" : "WAITING_ROOT";
           await publish(health.ready);
         }
       })()
-        .catch(() => {
-          void stop("worker_health_failed");
+        .catch((error) => {
+          const code = /^[a-z_]{1,64}$/.test(error.code ?? "")
+            ? error.code
+            : "worker_monitor_failed";
+          console.error(
+            JSON.stringify({
+              event: "worker_monitor_failed",
+              code,
+              io_code: error.io_code ?? null,
+              operation: error.atomic_operation ?? null,
+            }),
+          );
+          void stop(code);
         })
         .finally(() => {
           polling = false;
@@ -279,23 +275,36 @@ export async function workerStatus(file) {
   const status = JSON.parse(
     await readFile(join(state, "worker-status.json"), "utf8"),
   );
+  const processAlive =
+      Number.isSafeInteger(status.pid) && status.pid > 0 && alive(status.pid),
+    fresh = Math.abs(Date.now() - status.observed_at_unix_ms) < 5000;
   return {
     ...status,
+    process_alive: processAlive,
+    status_fresh: fresh,
+    last_reported_ready: Boolean(status.ready),
+    ready: Boolean(
+      status.ready && processAlive && fresh && status.phase === "READY",
+    ),
     live:
-      Number.isSafeInteger(status.pid) &&
-      status.pid > 0 &&
-      alive(status.pid) &&
-      Math.abs(Date.now() - status.observed_at_unix_ms) < 5000 &&
+      processAlive &&
+      fresh &&
       ["READY", "WAITING_ROOT", "STARTING"].includes(status.phase),
   };
 }
 export async function requestStop(file) {
-  const { state } = await loadProfile(file, false),
-    status = await workerStatus(file);
-  requireValue(status.live, "worker_not_running");
+  const { state } = await loadProfile(file, false);
+  const lock = JSON.parse(await readFile(join(state, "worker.lock"), "utf8"));
+  requireValue(
+    Number.isSafeInteger(lock.pid) &&
+      lock.pid > 0 &&
+      alive(lock.pid) &&
+      /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(lock.boot_id ?? ""),
+    "worker_not_running",
+  );
   await json(join(state, "stop.request"), {
-    boot_id: status.boot_id,
+    boot_id: lock.boot_id,
     requested_at_unix_ms: Date.now(),
   });
-  return { requested: true, boot_id: status.boot_id };
+  return { requested: true, boot_id: lock.boot_id };
 }

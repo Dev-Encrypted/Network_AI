@@ -1,5 +1,7 @@
 # Portable contributor workers
 
+**Current patch: v0.10.1.** The [status recovery guide](CONTRIBUTOR_STATUS_RECOVERY.md) describes a corrected Windows file-sharing failure, stale-status semantics, upgrade steps and a real 32B request that continued through a nine-second diagnostic-file lock. The v0.10 feature campaign below remains preserved as historical evidence.
+
 Version 0.10 separates a contributor's CPU worker, protocol guard and two authenticated transports from the root's model server. The root no longer has to start the contributor's worker process or give the contributor its model API credential. The standalone package accepts the participant's own keys, a private invitation and explicit public route/peer settings.
 
 This implements a private contributor operating path. The recorded installation still uses **one Windows computer, one operator account, one physical CPU/RAM domain and one slot**. It uses the already installed official Qwen3-32B Q4_K_M, with no second model download or GPU takeover. Configurations and process trees are separated; the OS account and hardware are shared. Independent-host, heterogeneous-GPU, adversarial-engine, economic and public-admission qualification remain open.

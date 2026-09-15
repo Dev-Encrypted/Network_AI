@@ -1,6 +1,6 @@
 # Current advancement and launch gates
 
-Status reflects the preserved F0 evidence and private implementation through v0.10, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). Portable CPU contributor supervision and signed readiness are implemented; physical-host, GPU, public-trust and economic gates remain open. A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
+Status reflects the preserved F0 evidence and private implementation through v0.10.1, validated on September 14–15, 2026 (America/Sao_Paulo; raw reports use UTC). Portable CPU contributor supervision, signed readiness and Windows status-file recovery are implemented; physical-host, GPU, public-trust and economic gates remain open. A gate requires the stated evidence; a document, passing unit test or public repository is not enough.
 
 | Gate | Current evidence | Still required |
 |---|---|---|

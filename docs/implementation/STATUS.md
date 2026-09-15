@@ -1,5 +1,13 @@
 # Private-preview implementation and validation status
 
+## Version 0.10.1 correction
+
+The contributor monitor now separates diagnostic-file replacement failures from execution failures and reads its in-process guard health without a self-HTTP timeout. A stale status snapshot cannot report current readiness. Graceful stop uses the current lock boot even when telemetry cannot be read. Actual write/cleanup errors and tracked child exits still drain the contributor. [Behavior, cause limits and upgrade instructions](CONTRIBUTOR_STATUS_RECOVERY.md).
+
+A controlled read lock reproduced a supervisor shutdown in the original v0.10 code while waiting for the root. The first later `worker_health_failed` shutdown had insufficient logging to establish its particular cause. With the correction, a **real 32B request continued through a 9,038 ms Windows status-file lock**, preserving the supervisor boot and all children. The request settled 23 input/128 output tokens, three receipts and 407,000 micro-LAB_TU with no extra grant or projection mismatch. This is a one-host CPU reliability result. [Live evidence](evidence/qwen3-32b-contributor-status-v0.10.1.json), [versioned validation](validation-v0.10.1.json).
+
+All **160 distinct automated cases** passed locally for this patch: 94 integration, 21 Node unit/socket, 14 Rust, 21 Python F0 and ten browser journeys. Type checking, application build, Rust formatting and Clippy passed. The [isolated working-database restore](evidence/contributor-backup-restore-v0.10.1.json) preserved 496 journals, balanced projections and runtime permissions. The [extracted source package](evidence/contributor-package-v0.10.1.json) validated both installed profiles; both supervisors and the root were ready during the final check. No applied migration or preserved F0 source changed. The previous v0.10 measurements below remain historical records.
+
 ## Version 0.10 additions
 
 The [portable contributor package](PORTABLE_CONTRIBUTORS.md) supervises a participant's pinned Windows CPU worker, stage guard and both authenticated transport peers. It has strict private profiles, participant-generated keys, local binary verification, a filtered child environment, persistent node identity, current-boot shutdown and whole-contributor cleanup after an owned child fails. Short-lived coordinator-signed readiness declarations replace root-backend credential polling in this mode. They bind the exact stage epoch, route/model, RPC generation and request challenge; they do not authorize execution or mint credits. The root model server uses externally supervised workers.

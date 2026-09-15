@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "evidence_type": "REAL_32B_WITH_WINDOWS_STATUS_READ_LOCK",
+  "observed_at": "2026-09-15T05:10:36.504Z",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "physical_resource_domains": 1,
+  "compute": "CPU",
+  "unit": "LAB_TU",
+  "lock_requested_ms": 9000,
+  "new_lab_grants": 0,
+  "os_isolation_established": false,
+  "public_network_operation_approved": false,
+  "stale_status_did_not_claim_readiness": true,
+  "live_guard_ready_during_stale_telemetry": true,
+  "session_state_during_lock": "RUNNING",
+  "lock_elapsed_ms": 9038,
+  "same_supervisor_boot_and_children_survived": true,
+  "session": {
+    "state": "COMPLETED",
+    "billing_state": "SETTLED",
+    "prompt_tokens": 23,
+    "completion_tokens": 128,
+    "charged_microtu": "407000",
+    "provider_paid_microtu": "325600",
+    "platform_fee_microtu": "81400",
+    "accepted_receipts": 3,
+    "physical_domains": 1
+  },
+  "diagnostics": [
+    {
+      "event": "worker_status_degraded",
+      "code": "EPERM",
+      "operation": "replace"
+    },
+    {
+      "event": "worker_status_recovered"
+    }
+  ],
+  "ledger_projection_mismatches": 0,
+  "result": "PASS",
+  "measurement_notes": [
+    "Controlled Windows FileShare.Read lock on the owned second contributor status file during actual Qwen3-32B inference; the model output was consumed without being retained.",
+    "Status was sampled after a real 5600 ms delay. Process-alive observation alone is not identity or readiness proof; stale CLI telemetry correctly reported ready and live false while the guard and accepted session continued.",
+    "Same supervisor boot and child process IDs were compared before and after the lock. One account and physical CPU domain retain all receipts and compensation; no independent providers or OS isolation are established.",
+    "Original v0.10 standby reproduction is a separate observation. The cause of the first post-publication worker_health_failed event cannot be recovered from the original generic log.",
+    "No second computer, new grant, additional model download, model prompt publication, fabricated receipt or takeover of the other application GPU was used."
+  ]
+}
