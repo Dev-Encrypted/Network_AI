@@ -14,6 +14,10 @@ import { Routes } from "../../apps/control-api/src/routes.js";
 import { Availability } from "../../apps/control-api/src/availability.js";
 import { RouteAvailability } from "../../apps/control-api/src/route-availability.js";
 import { Sessions } from "../../apps/control-api/src/sessions.js";
+import {
+  Cooperative,
+  recycle,
+} from "../../apps/control-api/src/cooperative.js";
 import { capacity } from "../../apps/control-api/src/capacity.js";
 import { createAccounts } from "../../apps/control-api/src/ledger.js";
 import {
@@ -211,8 +215,12 @@ async function fixture(t: TestContext, shared = false, qualified = true) {
   return { root, buyer, providers, modelId, manifest, parts, route, proposal };
 }
 type Fixture = Awaited<ReturnType<typeof fixture>>;
-async function job(f: Fixture, model = f.modelId) {
-  const q = await market.quote(f.buyer, { model, max_output_tokens: 128 });
+async function job(f: Fixture, model = f.modelId, pool?: string) {
+  const q = await market.quote(f.buyer, {
+    model,
+    max_output_tokens: 128,
+    ...(pool ? { cooperative_pool_id: pool } : {}),
+  });
   return sessions.create(f.buyer, {
     quote_id: q.id,
     idempotency_key: randomUUID(),
@@ -224,8 +232,8 @@ async function job(f: Fixture, model = f.modelId) {
     message_count: 1,
   });
 }
-async function started(f: Fixture) {
-  const s = await job(f),
+async function started(f: Fixture, pool?: string) {
+  const s = await job(f, f.modelId, pool),
     a = await sessions.admit(s.id);
   assert.equal(a.state, "PREPARING");
   assert.equal(a.participants.length, 3);
@@ -1192,4 +1200,459 @@ test("route readiness payment projections, escrow remainders and domain claims r
     ).rowCount,
     0,
   );
+});
+
+const coop = () => new Cooperative(db);
+async function poolFixture(
+  t: TestContext,
+  working = "10000000",
+  reserve = "0",
+) {
+  const f = await fixture(t);
+  const data = {
+    name: "Isolated cooperative fund",
+    support_until: new Date(Date.now() + 3600000).toISOString(),
+    idempotency_key: randomUUID(),
+    groups: [
+      {
+        key: "essential",
+        route_ids: [f.route.id],
+        rate_microtu_per_second: "100",
+        duration_seconds: 60,
+      },
+    ],
+  };
+  const p = await coop().create(f.buyer, data);
+  for (const [destination, value] of [
+    ["WORKING", working],
+    ["RESERVE", reserve],
+  ])
+    if (BigInt(value!) > 0n)
+      await coop().fund(f.buyer, p.id, {
+        destination,
+        amount_microtu: value,
+        policy_sha256: p.policy_sha256,
+        consent: "COMMITTED_LAB_CREDITS_NO_REDEMPTION",
+        idempotency_key: randomUUID(),
+      });
+  return { f, p, data };
+}
+async function coopWindow(f: Fixture, p: any, source = "WORKING") {
+  const l = await coop().offer(f.buyer, p.id, {
+    group_key: "essential",
+    source,
+    reason: "Isolated essential complete-route coverage",
+    idempotency_key: randomUUID(),
+  });
+  for (const provider of new Map(f.providers.map((v) => [v.id, v])).values())
+    await new RouteAvailability(db).accept(provider, l.id, {
+      terms_sha256: l.terms_sha256,
+    });
+  return l;
+}
+async function settleCoop(f: Fixture, p: any) {
+  const v = await started(f, p.id);
+  for (const part of f.parts.slice(1))
+    await sessions.stageReceipt(part.nodeId, v.stage);
+  await sessions.receipt(f.parts[0].nodeId, v.root);
+  return await sessions.get(f.buyer, v.s.id);
+}
+
+test("cooperation: floor-first recycling conserves microcredits across all destinations", () => {
+  assert.deepEqual(recycle(100n, 0n, 0n, 30n, 50n, 40n), {
+    floor: 30n,
+    reserve: 40n,
+    working: 20n,
+    burned: 10n,
+  });
+  assert.deepEqual(recycle(1n, 30n, 40n, 30n, 50n, 40n), {
+    floor: 0n,
+    reserve: 0n,
+    working: 1n,
+    burned: 0n,
+  });
+  for (let q = 0n; q < 300n; q++) {
+    const a = recycle(q, 7n, 3n, 37n, 59n, 47n);
+    assert.equal(a.floor + a.reserve + a.working + a.burned, q);
+  }
+});
+test("cooperation: committed funding needs exact policy consent, is atomic and idempotent", async (t) => {
+  const { f, p } = await poolFixture(t, "0");
+  const before = await balance(f.buyer);
+  const b = {
+    destination: "WORKING",
+    amount_microtu: "50000",
+    policy_sha256: p.policy_sha256,
+    consent: "COMMITTED_LAB_CREDITS_NO_REDEMPTION",
+    idempotency_key: randomUUID(),
+  };
+  const a = await Promise.all([
+    coop().fund(f.buyer, p.id, b),
+    coop().fund(f.buyer, p.id, b),
+  ]);
+  assert.equal(a[0].id, a[1].id);
+  assert.equal(before - (await balance(f.buyer)), 50000n);
+  await assert.rejects(
+    coop().fund(f.buyer, p.id, { ...b, amount_microtu: "50001" }),
+    /Identificador/,
+  );
+  await assert.rejects(
+    coop().fund(f.buyer, p.id, {
+      ...b,
+      idempotency_key: randomUUID(),
+      policy_sha256: hash("wrong"),
+    }),
+    /hash/,
+  );
+  await assert.rejects(
+    coop().fund(f.buyer, p.id, {
+      ...b,
+      idempotency_key: randomUUID(),
+      amount_microtu: "100000001",
+    }),
+    /Saldo/,
+  );
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        p.working_account,
+      ])
+    ).rows[0].balance,
+    "50000",
+  );
+});
+test("cooperation: a plan cannot double count the same physical capacity across groups", async (t) => {
+  const { f, data } = await poolFixture(t);
+  await assert.rejects(
+    coop().create(f.buyer, {
+      ...data,
+      idempotency_key: randomUUID(),
+      groups: [data.groups[0], { ...data.groups[0], key: "duplicate" }],
+    }),
+    /duplicar/,
+  );
+  await assert.rejects(
+    coop().manage(f.root, (await coop().list(f.root))[0].id, {
+      paused: true,
+      reason: "Unauthorized alteration attempt",
+    }),
+    /responsável/,
+  );
+});
+test("cooperation: one funded complete window per group and exact readiness-only provider consent", async (t) => {
+  const { f, p } = await poolFixture(t);
+  const input = {
+    group_key: "essential",
+    source: "WORKING",
+    reason: "Explicit funded readiness-only terms",
+    idempotency_key: randomUUID(),
+  };
+  const [l, retry] = await Promise.all([
+    coop().offer(f.buyer, p.id, input),
+    coop().offer(f.buyer, p.id, input),
+  ]);
+  assert.equal(l.id, retry.id);
+  assert.equal(l.terms.compensation, "READINESS_ONLY");
+  assert.equal(l.terms.cooperative.policy_sha256, p.policy_sha256);
+  await assert.rejects(
+    coop().offer(f.buyer, p.id, { ...input, idempotency_key: randomUUID() }),
+    /já tem/,
+  );
+  await assert.rejects(
+    new RouteAvailability(db).accept(f.root, l.id, {
+      terms_sha256: hash("wrong"),
+    }),
+    /termos/,
+  );
+  await new RouteAvailability(db).cancel(f.buyer, l.id);
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        p.working_account,
+      ])
+    ).rows[0].balance,
+    "10000000",
+  );
+});
+test("cooperation: protected reserve requires an essential working shortfall and records one incident", async (t) => {
+  const { f, p } = await poolFixture(t, "10000", "30000");
+  const input = {
+    group_key: "essential",
+    source: "RESERVE",
+    reason: "Essential renewal requires protected contingency",
+    idempotency_key: randomUUID(),
+  };
+  await assert.rejects(coop().offer(f.buyer, p.id, input), /capital de giro/);
+  const q = await poolFixture(t, "0", "30000");
+  const l = await coop().offer(q.f.buyer, q.p.id, input);
+  assert.equal(l.terms.cooperative.funding_source, "RESERVE");
+  const retry = await coop().offer(q.f.buyer, q.p.id, input);
+  assert.equal(retry.id, l.id);
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM cooperative_incidents WHERE pool_id=$1",
+        [q.p.id],
+      )
+    ).rows[0].n,
+    1,
+  );
+  await new RouteAvailability(db).cancel(q.f.buyer, l.id);
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        q.p.reserve_account,
+      ])
+    ).rows[0].balance,
+    "30000",
+  );
+});
+test("cooperation: uncovered requests do not block eligible ordinary work", async (t) => {
+  const { f, p } = await poolFixture(t);
+  const waiting = await job(f, f.modelId, p.id);
+  const ordinary = await job(f);
+  assert.equal((await sessions.admit(waiting.id)).state, "QUEUED");
+  assert.equal((await sessions.admit(ordinary.id)).state, "PREPARING");
+  await sessions.cancel(f.buyer, ordinary.id);
+  await sessions.cancel(f.buyer, waiting.id);
+});
+test("cooperation: signed admission binds coverage, caps execution deadline and recycles only verified consumption", async (t) => {
+  const { f, p } = await poolFixture(t);
+  const l = await coopWindow(f, p);
+  const j = await started(f, p.id);
+  const claims = JSON.parse(
+    Buffer.from(j.a.capability.split(".")[1], "base64url").toString(),
+  );
+  assert.equal(claims.coverage_lease_id, l.id);
+  assert.equal(claims.cooperative_pool_id, p.id);
+  const active = await sessions.get(f.buyer, j.s.id);
+  const lease = (
+    await db.pool.query(
+      "SELECT ends_ms FROM route_availability_leases WHERE id=$1",
+      [l.id],
+    )
+  ).rows[0];
+  assert.ok(
+    new Date(active.execution_deadline).getTime() <= Number(lease.ends_ms),
+  );
+  for (const part of f.parts.slice(1))
+    await sessions.stageReceipt(part.nodeId, j.stage);
+  const before = (
+    await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+      p.reserve_account,
+    ])
+  ).rows[0].balance;
+  await sessions.receipt(f.parts[0].nodeId, j.root);
+  await sessions.receipt(f.parts[0].nodeId, j.root);
+  const done = await sessions.get(f.buyer, j.s.id);
+  assert.equal(done.billing_state, "SETTLED");
+  assert.equal(done.charged_microtu, "160000");
+  assert.ok(done.participants.every((v: any) => v.paid_microtu === "0"));
+  assert.equal(
+    BigInt(
+      (
+        await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+          p.reserve_account,
+        ])
+      ).rows[0].balance,
+    ) - BigInt(before),
+    160000n,
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM cooperative_settlements WHERE session_id=$1",
+        [j.s.id],
+      )
+    ).rows[0].n,
+    1,
+  );
+  await assert.rejects(
+    db.pool.query(
+      "UPDATE sessions SET cooperative_pool_id=NULL,cooperative_policy_sha256=NULL WHERE id=$1",
+      [j.s.id],
+    ),
+    /immutable|must match its quote/,
+  );
+});
+test("cooperation: completed usage refund reverses exact destinations once without changing grants", async (t) => {
+  const { f, p } = await poolFixture(t);
+  await coopWindow(f, p);
+  const done = await settleCoop(f, p);
+  const b = await balance(f.buyer);
+  await assert.rejects(
+    coop().refund(f.buyer, done.id, {
+      reason: "Consumer cannot approve own settlement refund",
+    }),
+    /administração/,
+  );
+  const input = { reason: "Verified isolated service dispute full refund" };
+  const a = await Promise.all([
+    coop().refund(admin, done.id, input),
+    coop().refund(admin, done.id, input),
+  ]);
+  assert.equal(a[0].journal_id, a[1].journal_id);
+  assert.equal((await balance(f.buyer)) - b, 160000n);
+  assert.equal(
+    (await sessions.get(f.buyer, done.id)).billing_state,
+    "REFUNDED",
+  );
+});
+test("cooperation: refunds cannot spend escrow or create replacement credits after recycled funds are spent", async (t) => {
+  const { f, p } = await poolFixture(t, "0", "6000");
+  await coopWindow(f, p, "RESERVE");
+  const done = await settleCoop(f, p);
+  const l = (await new RouteAvailability(db).list(f.buyer)).find(
+    (v) => v.terms.cooperative?.pool_id === p.id,
+  )!;
+  await owner.query(
+    "UPDATE route_availability_leases SET started_ms=started_ms-3600000,ends_ms=ends_ms-3600000 WHERE id=$1",
+    [l.id],
+  );
+  await new RouteAvailability(db).reconcile();
+  await coop().offer(f.buyer, p.id, {
+    group_key: "essential",
+    source: "WORKING",
+    reason: "Recycled working capital funds next useful window",
+    idempotency_key: randomUUID(),
+  });
+  await assert.rejects(
+    coop().refund(admin, done.id, {
+      reason: "Refund must wait for exact destination replenishment",
+    }),
+    /Saldo/,
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM cooperative_refunds WHERE session_id=$1",
+        [done.id],
+      )
+    ).rows[0].n,
+    0,
+  );
+});
+test("cooperation: operational pause blocks new acceptances while preserving already funded obligations", async (t) => {
+  const { f, p } = await poolFixture(t);
+  const l = await coop().offer(f.buyer, p.id, {
+    group_key: "essential",
+    source: "WORKING",
+    reason: "Pause before final independent operator acceptance",
+    idempotency_key: randomUUID(),
+  });
+  await coop().manage(f.buyer, p.id, {
+    paused: true,
+    reason: "Bounded operational support is paused",
+  });
+  for (const provider of f.providers.slice(0, 2))
+    await new RouteAvailability(db).accept(provider, l.id, {
+      terms_sha256: l.terms_sha256,
+    });
+  await assert.rejects(
+    new RouteAvailability(db).accept(f.providers[2]!, l.id, {
+      terms_sha256: l.terms_sha256,
+    }),
+    /apoio operacional/,
+  );
+  await new RouteAvailability(db).cancel(f.buyer, l.id);
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        p.working_account,
+      ])
+    ).rows[0].balance,
+    "10000000",
+  );
+});
+
+test("cooperation: spent destinations and burn reversals remain exactly backed", async (t) => {
+  const { f, p } = await poolFixture(t, "10000000", "25920000");
+  await coopWindow(f, p);
+  const done = await settleCoop(f, p);
+  const x = (
+    await db.pool.query(
+      "SELECT * FROM cooperative_settlements WHERE session_id=$1",
+      [done.id],
+    )
+  ).rows[0];
+  assert.equal(x.burned_microtu, "160000");
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        p.burn_account,
+      ])
+    ).rows[0].balance,
+    "160000",
+  );
+  await coop().refund(admin, done.id, {
+    reason: "Verified service correction reverses only original burn",
+  });
+  assert.equal(
+    (
+      await db.pool.query("SELECT balance FROM ledger_accounts WHERE id=$1", [
+        p.burn_account,
+      ])
+    ).rows[0].balance,
+    "0",
+  );
+});
+test("cooperation: recovery requires continuous full-day observations and resets after a coordinator gap", async (t) => {
+  const { f, p } = await poolFixture(t, "10000000", "25920000");
+  await coop().reconcile();
+  assert.equal(
+    (await coop().list(f.buyer)).find((v) => v.id === p.id)!.state,
+    "RECOVERY",
+  );
+  // An isolated fixture clock proves the transition; this is not a real 24-hour campaign.
+  await owner.query(
+    "UPDATE cooperative_pools SET healthy_since=now()-interval '25 hours',sample_at=now() WHERE id=$1",
+    [p.id],
+  );
+  await coop().reconcile();
+  assert.equal(
+    (await coop().list(f.buyer)).find((v) => v.id === p.id)!.state,
+    "NORMAL",
+  );
+  await owner.query(
+    "UPDATE cooperative_pools SET sample_at=now()-interval '7 seconds' WHERE id=$1",
+    [p.id],
+  );
+  await coop().reconcile();
+  assert.equal(
+    (await coop().list(f.buyer)).find((v) => v.id === p.id)!.state,
+    "RECOVERY",
+  );
+  await coop().manage(f.buyer, p.id, {
+    paused: true,
+    reason: "End of bounded isolated recovery contract",
+  });
+  await coop().reconcile();
+  assert.equal(
+    (await coop().list(f.buyer)).find((v) => v.id === p.id)!.state,
+    "HIBERNATING",
+  );
+});
+test("cooperation: committed plans, settlements and runtime policy permissions are immutable", async (t) => {
+  const { f, p } = await poolFixture(t);
+  await assert.rejects(
+    db.pool.query("UPDATE cooperative_pools SET policy='{}' WHERE id=$1", [
+      p.id,
+    ]),
+    { code: "42501" },
+  );
+  await assert.rejects(
+    db.pool.query(
+      "INSERT INTO cooperative_groups(pool_id,group_key,model_id,rate_microtu_per_second,duration_seconds) VALUES($1,'extra',$2,100,60)",
+      [p.id, f.modelId],
+    ),
+    /committed cooperative plan/,
+  );
+  await assert.rejects(
+    db.pool.query("DELETE FROM cooperative_funding WHERE pool_id=$1", [p.id]),
+    { code: "42501" },
+  );
+  const overall = (
+    await db.pool.query("SELECT sum(balance)::text AS n FROM ledger_accounts")
+  ).rows[0].n;
+  assert.equal(overall, "0");
 });

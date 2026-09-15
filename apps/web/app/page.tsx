@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AvailabilityPanel } from "./availability";
 import { RoutesPanel } from "./routes";
+import { CooperativePanel, type CooperativePool } from "./cooperative";
 import { RouteAvailabilityPanel } from "./route-availability";
 import {
   ArrowDownLeft,
@@ -63,6 +64,8 @@ type Node = {
   last_seen: string;
 };
 type Session = {
+  cooperative_pool_id?: string | null;
+  coverage_lease_id?: string | null;
   id: string;
   state: string;
   model_id: string;
@@ -108,13 +111,21 @@ type Key = {
 };
 type ChatMessage = { role: "user" | "assistant"; content: string };
 type View =
-  "chat" | "models" | "nodes" | "sessions" | "wallet" | "keys" | "admin";
+  | "chat"
+  | "models"
+  | "nodes"
+  | "sessions"
+  | "wallet"
+  | "keys"
+  | "admin"
+  | "cooperative";
 const views = [
   { id: "chat", label: "Conversar", icon: MessageSquare },
   { id: "models", label: "Modelos", icon: Layers3 },
   { id: "nodes", label: "Meus nós", icon: Network },
   { id: "sessions", label: "Sessões", icon: RefreshCw },
   { id: "wallet", label: "Créditos", icon: Wallet },
+  { id: "cooperative", label: "Cooperação", icon: Network },
   { id: "keys", label: "Acesso à API", icon: KeyRound },
 ] as const;
 const stateLabel: Record<string, string> = {
@@ -200,6 +211,8 @@ export default function Home() {
     accounts: [],
     journal: [],
   });
+  const [pools, setPools] = useState<CooperativePool[]>([]);
+  const [cooperativePool, setCooperativePool] = useState("");
   const [keys, setKeys] = useState<Key[]>([]);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -242,12 +255,13 @@ export default function Home() {
   const refresh = useCallback(async () => {
     const epoch = authEpoch.current;
     try {
-      const [m, n, s, w, k] = await Promise.all([
+      const [m, n, s, w, k, c] = await Promise.all([
         api<{ data: Model[] }>("/models"),
         api<{ data: Node[] }>("/nodes"),
         api<{ data: Session[] }>("/sessions"),
         api<WalletData>("/wallet"),
         api<{ data: Key[] }>("/keys"),
+        api<{ data: CooperativePool[] }>("/cooperative/pools"),
       ]);
       if (epoch !== authEpoch.current) return;
       setModels(m.data);
@@ -255,6 +269,7 @@ export default function Home() {
       setSessions(s.data);
       setWallet(w);
       setKeys(k.data);
+      setPools(c.data);
       setSelected(
         (old) =>
           old ||
@@ -316,6 +331,8 @@ export default function Home() {
       setNodes([]);
       setSessions([]);
       setKeys([]);
+      setPools([]);
+      setCooperativePool("");
       setWallet({ accounts: [], journal: [] });
       setDetail(null);
       setSelected("");
@@ -383,6 +400,7 @@ export default function Home() {
       const quote = await api<{ id: string }>("/quotes", "POST", {
         model: selected,
         max_output_tokens: maxTokens,
+        ...(cooperativePool ? { cooperative_pool_id: cooperativePool } : {}),
       });
       if (epoch !== authEpoch.current) return;
       const response = await fetch("/inference/v1/chat/completions", {
@@ -524,7 +542,7 @@ export default function Home() {
           </div>
           <footer>
             Um projeto de <strong>Dev-Encrypted</strong>
-            <span>v0.5 · Ambiente privado</span>
+            <span>v0.6 · Ambiente privado</span>
           </footer>
         </section>
         <section className="login-side">
@@ -725,7 +743,10 @@ export default function Home() {
                         aria-label="Modelo de inferência"
                         disabled={generating}
                         value={selected}
-                        onChange={(event) => setSelected(event.target.value)}
+                        onChange={(event) => {
+                          setSelected(event.target.value);
+                          setCooperativePool("");
+                        }}
                       >
                         {models.map((item) => (
                           <option key={item.id} value={item.id}>
@@ -737,6 +758,38 @@ export default function Home() {
                     </label>
                     <Badge state={model?.available ? "READY" : "OFFLINE"} />
                   </div>
+                  <label className="cooperative-choice">
+                    Destino do consumo
+                    <select
+                      aria-label="Destino do consumo"
+                      value={cooperativePool}
+                      disabled={generating}
+                      onChange={(e) => setCooperativePool(e.target.value)}
+                    >
+                      <option value="">
+                        Remuneração por inferência (80/20)
+                      </option>
+                      {pools
+                        .filter(
+                          (p) =>
+                            !p.paused &&
+                            new Date(p.support_until).getTime() > Date.now() &&
+                            p.groups.some((g) => g.model_id === selected),
+                        )
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            Fundo cooperativo: {p.name}
+                          </option>
+                        ))}
+                    </select>
+                    {cooperativePool && (
+                      <small>
+                        O consumo retorna ao fundo. Operadores recebem pela
+                        janela contratada; a sessão só começa com cobertura
+                        aceita e completa. Não há prioridade extra na fila.
+                      </small>
+                    )}
+                  </label>
                   <details className="mobile-cost">
                     <summary>
                       Reserva máxima: {maximumReservation} LAB_TU
@@ -1300,6 +1353,14 @@ export default function Home() {
                       </table>
                     </div>
                   )}
+                  {detail.cooperative_pool_id && (
+                    <p className="section-footnote">
+                      Consumo cooperativo. Os valores de inferência por etapa
+                      são zero porque a remuneração vem da janela de prontidão
+                      aceita. Consulte o fundo em Cooperação e a janela em Meus
+                      nós.
+                    </p>
+                  )}
                   <ol className="timeline">
                     {detail.events?.map((event) => (
                       <li key={event.sequence}>
@@ -1423,6 +1484,9 @@ export default function Home() {
                 )}
               </div>
             </>
+          )}
+          {view === "cooperative" && (
+            <CooperativePanel user={user} request={api} onChange={refresh} />
           )}
           {view === "keys" && (
             <>
@@ -1558,7 +1622,7 @@ export default function Home() {
           <span>
             NETWORK AI <i>by Dev-Encrypted</i>
           </span>
-          <span>Ambiente privado · v0.5 · Sem oferta comercial</span>
+          <span>Ambiente privado · v0.6 · Sem oferta comercial</span>
         </footer>
       </div>
     </div>

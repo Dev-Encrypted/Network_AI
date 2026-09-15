@@ -87,10 +87,25 @@ export class Market {
       "Saída acima do limite deste modelo.",
     );
     const maximum = quoteMaximum(manifest, data.max_output_tokens);
+    const pool = data.cooperative_pool_id
+      ? (
+          await this.db.pool.query(
+            `SELECT p.* FROM cooperative_pools p
+      WHERE p.id=$1 AND NOT p.paused AND p.support_until>now() AND EXISTS(SELECT 1 FROM cooperative_groups g WHERE g.pool_id=p.id AND g.model_id=$2)`,
+            [data.cooperative_pool_id, data.model],
+          )
+        ).rows[0]
+      : null;
+    need(
+      !data.cooperative_pool_id || pool,
+      409,
+      "pool_unavailable",
+      "Este plano não oferece o modelo ou está sem apoio operacional.",
+    );
     const id = randomUUID();
     const quote = await this.db.pool.query(
-      `INSERT INTO quotes(id,user_id,model_id,manifest,manifest_sha256,max_output_tokens,maximum_microtu,expires_at)
-      VALUES($1,$2,$3,$4,$5,$6,$7,now()+interval '60 seconds') RETURNING *`,
+      `INSERT INTO quotes(id,user_id,model_id,manifest,manifest_sha256,max_output_tokens,maximum_microtu,expires_at,cooperative_pool_id,cooperative_policy_sha256)
+      VALUES($1,$2,$3,$4,$5,$6,$7,now()+interval '60 seconds',$8,$9) RETURNING *`,
       [
         id,
         user.id,
@@ -99,6 +114,8 @@ export class Market {
         row.manifest_sha256,
         data.max_output_tokens,
         maximum.toString(),
+        pool?.id ?? null,
+        pool?.policy_sha256 ?? null,
       ],
     );
     return {
@@ -106,6 +123,10 @@ export class Market {
       unit: "LAB_TU",
       metering: "engine_reported",
       reservation_policy: "context_upper_bound",
+      compensation: pool ? "READINESS_ONLY" : "INFERENCE_80_20",
+      consumption_destination: pool
+        ? "COOPERATIVE_POOL"
+        : "PROVIDERS_AND_LAB_WORKING",
     };
   }
   async wallet(user: User) {

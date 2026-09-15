@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "evidence_type": "REAL_INSTALLED_32B_COOPERATIVE_CYCLE",
+  "observed_at": "2026-09-15T00:59:10.699Z",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "model_id": "qwen3-32b-route-private",
+  "compute": "CPU",
+  "unit": "LAB_TU",
+  "cash_payments": false,
+  "fabricated_database_observations": false,
+  "sustainable_economics_established": false,
+  "public_operation_approved": false,
+  "checks": [
+    {
+      "name": "existing_credits_fund_one_complete_window_and_leave_zero_free_working_balance",
+      "passed": true
+    },
+    {
+      "name": "real_32b_consumption_recycles_into_working_with_no_second_inference_payout",
+      "passed": true
+    },
+    {
+      "name": "recycled_consumption_funds_a_second_complete_window_without_another_contribution",
+      "passed": true
+    },
+    {
+      "name": "both_windows_settle_and_release_claims_with_balanced_ledger_and_no_grants",
+      "passed": true
+    }
+  ],
+  "inference": {
+    "state": "COMPLETED",
+    "billing_state": "SETTLED",
+    "prompt_tokens": 18,
+    "completion_tokens": 8,
+    "charged_microtu": "42000",
+    "elapsed_ms": 4289,
+    "participant_inference_payout_microtu": "0",
+    "allocation": {
+      "floor": "42000",
+      "before": {
+        "reserve": "0",
+        "working": "0"
+      },
+      "burned": "0",
+      "policy": "private-cooperative-floor-first-v1",
+      "reserve": "0",
+      "targets": {
+        "floor": "2157369",
+        "reserve": "25920000",
+        "working": "8637369"
+      },
+      "working": "0",
+      "compensation": "READINESS_ONLY",
+      "issuance_microtu": "0"
+    }
+  },
+  "policy_sha256": "2d2e8c7af6b04a35251db08d2a4ea3f50481ca808dc92d4433d461c4fa36193f",
+  "initial_existing_funding_microtu": "3000",
+  "first_window": {
+    "state": "COMPLETED",
+    "budget_microtu": "3000",
+    "paid_microtu": "3000",
+    "joint_ready_ms": "30000",
+    "components": [
+      {
+        "ordinal": 0,
+        "role": "ROOT",
+        "paid_microtu": "300",
+        "credited_ms": "30000"
+      },
+      {
+        "ordinal": 1,
+        "role": "STAGE",
+        "paid_microtu": "1350",
+        "credited_ms": "30000"
+      },
+      {
+        "ordinal": 2,
+        "role": "STAGE",
+        "paid_microtu": "1350",
+        "credited_ms": "30000"
+      }
+    ]
+  },
+  "renewal": {
+    "funding_source": "RECYCLED_WORKING_CREDITS",
+    "additional_contributions_microtu": "0",
+    "before": {
+      "working": "42000",
+      "reserve": "0",
+      "burned": "0",
+      "held": "0"
+    },
+    "after_hold": {
+      "working": "39000",
+      "reserve": "0",
+      "burned": "0",
+      "held": "3000"
+    }
+  },
+  "second_window": {
+    "state": "COMPLETED",
+    "budget_microtu": "3000",
+    "paid_microtu": "3000",
+    "joint_ready_ms": "30000",
+    "components": [
+      {
+        "ordinal": 0,
+        "role": "ROOT",
+        "paid_microtu": "300",
+        "credited_ms": "30000"
+      },
+      {
+        "ordinal": 1,
+        "role": "STAGE",
+        "paid_microtu": "1350",
+        "credited_ms": "30000"
+      },
+      {
+        "ordinal": 2,
+        "role": "STAGE",
+        "paid_microtu": "1350",
+        "credited_ms": "30000"
+      }
+    ]
+  },
+  "final": {
+    "state": "RECOVERY",
+    "balances": {
+      "working": "39000",
+      "reserve": "0",
+      "burned": "0",
+      "held": "0"
+    },
+    "targets": {
+      "floor": "2160000",
+      "working": "8640000",
+      "reserve": "25920000"
+    },
+    "metrics": {
+      "recycled_microtu": "42000",
+      "normal_readiness_cost_microtu": "6000"
+    }
+  },
+  "result": "PASS"
+}

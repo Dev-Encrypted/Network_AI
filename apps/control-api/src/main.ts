@@ -23,6 +23,7 @@ import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
 import { RouteAvailability } from "./route-availability.js";
+import { Cooperative } from "./cooperative.js";
 import { Routes } from "./routes.js";
 import { ApiController } from "./controller.js";
 import { AppError } from "./errors.js";
@@ -33,6 +34,7 @@ const auth = new Auth(db, config);
 const sessions = new Sessions(db, config);
 const availability = new Availability(db);
 const routeAvailability = new RouteAvailability(db);
+const cooperative = new Cooperative(db);
 @Module({
   controllers: [ApiController],
   providers: [
@@ -42,6 +44,7 @@ const routeAvailability = new RouteAvailability(db);
     { provide: Sessions, useValue: sessions },
     { provide: Availability, useValue: availability },
     { provide: RouteAvailability, useValue: routeAvailability },
+    { provide: Cooperative, useValue: cooperative },
     { provide: Routes, useValue: new Routes(db, auth) },
   ],
 })
@@ -148,6 +151,7 @@ await db.pool.query("SELECT 1 FROM schema_migrations WHERE version=1");
 await sessions.reap();
 await availability.reconcile();
 await routeAvailability.reconcile();
+await cooperative.reconcile();
 let reaping = false;
 const timer = setInterval(() => {
   if (reaping) return;
@@ -156,6 +160,7 @@ const timer = setInterval(() => {
     .reap()
     .then(() => availability.reconcile())
     .then(() => routeAvailability.reconcile())
+    .then(() => cooperative.reconcile())
     .catch(() => process.stderr.write("Reconciliation retry pending\n"))
     .finally(() => {
       reaping = false;

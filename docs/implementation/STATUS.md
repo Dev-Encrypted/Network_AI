@@ -1,12 +1,22 @@
 # Private-preview implementation and validation status
 
-## Version 0.5 additions
+## Version 0.6 additions
+
+The private application now implements immutable essential coverage plans, existing-credit contributions, separate working/reserve/burn accounts, protected essential contingency incidents, readiness-only provider consent and cooperative quote/session binding. Verified consumption replenishes the working floor, reserve and working target in order. An exactly backed full refund reverses the original destinations once; it cannot spend another contract's escrow or mint a replacement. The interface exposes these operations and the consumer's explicit choice. [Contracts and arithmetic](COOPERATIVE_FUNDS.md).
+
+The actual installed 32B CPU route completed a two-window cycle using one computer and one operator account. An initial 3,000-microcredit contribution funded the first 30-second window. A request used 18 input and eight output tokens and recycled its 42,000-microcredit charge into working capital. That consumption funded the second window without another contribution or grant. Both windows paid exactly 3,000 microcredits, released their physical-domain claim and left 39,000 in working capital. The campaign remained in `RECOVERY`, then paused new promises. [Allowlisted report](evidence/qwen3-32b-cooperative-cycle.json).
+
+Automated coverage includes 60 integration/accounting cases, seven unit/socket tests, nine Rust tests and 21 preserved Python F0 tests. The browser adds a cooperative plan, lost funding response retry, explicit provider consent and selected-pool chat journey to the previous seven. Snapshot restoration includes cooperative records and projections. [Version 0.6 validation](validation-v0.6.json).
+
+This closes a private circulation mechanism, not the entire economic controller. The 24-hour state transition is tested with an isolated database clock; there is no real 24-hour healthy campaign or successful 30-day mature study. Demand-backed expansion, observed cost calibration, qualified issuance, diverse operators, public verification/quorum, cross-host execution and paid-market settlement remain open. All previous F0 failures retain their original status.
+
+## Preserved version 0.5 campaign
 
 Complete-route readiness now has one pre-funded budget, immutable per-component maximums, exact-term acceptance by every distinct provider, shared-domain exclusion across both readiness APIs, and fixed-window draining. A failed or withdrawing stage stops earning its own future entitlement; eligible peers preserve their accepted obligations. Remaining escrow is returned to the sponsor at the fixed end. The PT-BR interface exposes funding, consent, component payments, joint-ready time and closure. This compensation is explicitly additional to normal inference settlement.
 
 The September 14 local campaign used the already-installed official 32B CPU route and actual signed agents. A 30-second window paid 25,483 micro-LAB_TU and refunded 4,517. An API pause stopped one stage's readiness earnings while its peers continued earning. After resumption, a real inference completed with 18 input and seven output tokens and separately settled 39,000 microcredits. No new grant, model copy or cash transfer was used. [Exact terms and evidence](ROUTE_AVAILABILITY.md), [allowlisted report](evidence/qwen3-32b-route-availability.json).
 
-Coverage adds 13 real-PostgreSQL cases to the previous 34 and a seventh browser journey, including a lost funding response retried without a duplicate hold. Readiness escrow, component projections, domain claims and restricted permissions are included in isolated backup restoration. [Version 0.5 validation](validation-v0.5.json). As with v0.4, the actual model evidence uses one account and one physical host. Common-fund circulation, the candidate reserve/issuance controller, independent verification and a successful economic study remain unfinished.
+Coverage adds 13 real-PostgreSQL cases to the previous 34 and a seventh browser journey, including a lost funding response retried without a duplicate hold. Readiness escrow, component projections, domain claims and restricted permissions are included in isolated backup restoration. [Version 0.5 validation](validation-v0.5.json). As with v0.4, the actual model evidence uses one account and one physical host. At that release, common-fund circulation, the candidate reserve/issuance controller, independent verification and a successful economic study were unfinished; the v0.6 section above records the new private circulation boundary.
 
 ## Preserved version 0.4 campaign
 
@@ -70,7 +80,7 @@ Detailed private reports live under `.runtime/private-lab/`. The public report c
 1. **Capacity and links:** different devices and physical hosts, per-stage memory, LAN/WAN/NAT/relay, and integrated qualified transport.
 2. **Models above 27B:** broaden quality/context qualification beyond the executed official 32B Q4_K_M profile, then validate distinct-device routes, integrated cross-participant distribution, state and recovery. Official BF16 and Kimi gaps remain as recorded in F0.
 3. **Public trust:** independent usage/work verification, adversarial operators, anti-Sybil, exact offer licensing, and appropriate content/privacy policies.
-4. **Economics:** fix circulation and coverage, implement the complete elastic and recovery predicates, and evaluate new parameters with fresh holdout seeds and observed costs.
+4. **Economics:** qualify the implemented private circulation/coverage rules, implement demand-backed expansion and issuance, and evaluate new parameters with fresh holdout seeds and observed costs.
 5. **Continuity:** independent operators, federation/consensus, authority rotation, replacement coordinators, and recovery of keys/data on other hosts.
 6. **Commercial path:** separate payments, liabilities, seller responsibilities, settlement, disputes and payouts. None is activated here.
 

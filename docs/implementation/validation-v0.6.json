@@ -1,0 +1,72 @@
+{
+  "version": "0.6.0-private-cooperative-preview",
+  "observed_on_local_date": "2026-09-14",
+  "timezone": "America/Sao_Paulo",
+  "scope": "Private Windows application and real installed official 32B CPU route; one physical host, one operator account, three signed agents and one coordinator.",
+  "physical_hosts": 1,
+  "operator_accounts": 1,
+  "independent_operators": 0,
+  "tests": {
+    "integration_and_integer_accounting": 60,
+    "new_cooperative_cases": 13,
+    "artifact_acquisition": 3,
+    "rpc_socket_protocol": 4,
+    "rust_runtime": 4,
+    "rust_private_link": 3,
+    "rust_f0": 2,
+    "python_f0": 21,
+    "browser": 8,
+    "total_automated_without_double_counting_new_cases": 105
+  },
+  "build_and_checks": {
+    "typescript_typecheck": true,
+    "application_build": true,
+    "rust_format": true,
+    "rust_clippy": true,
+    "f0_economic_sources_unchanged": true
+  },
+  "real_campaign": {
+    "report": "evidence/qwen3-32b-cooperative-cycle.json",
+    "initial_existing_funding_microtu": "3000",
+    "windows": 2,
+    "seconds_per_window": 30,
+    "total_readiness_paid_microtu": "6000",
+    "actual_consumption_recycled_microtu": "42000",
+    "final_working_microtu": "39000",
+    "new_contributions_for_second_window_microtu": "0",
+    "new_grants": 0,
+    "independent_economic_participants": 0,
+    "state_before_pause": "RECOVERY"
+  },
+  "browser_campaign": {
+    "lost_funding_response_reuses_idempotency": true,
+    "explicit_readiness_only_consent": true,
+    "quote_freezes_selected_pool": true,
+    "real_32b_chat": true,
+    "desktop_mobile_visual_review": true,
+    "mobile_width": 390,
+    "requires_existing_managed_route": true,
+    "no_fake_readiness_substituted_in_ci": true
+  },
+  "isolated_restore": {
+    "report": "evidence/cooperative-backup-restore.json",
+    "same_exported_snapshot": true,
+    "journal_entries": 198,
+    "active_complete_route_windows": 1,
+    "cooperative_pools": 2,
+    "cooperative_settlements": 1,
+    "projection_mismatches": 0,
+    "runtime_permissions_preserved": true
+  },
+  "unqualified_or_unfinished": [
+    "real 24-hour recovery campaign",
+    "fresh successful mature economic study",
+    "demand-backed expansion and autonomous renewal mandates",
+    "candidate cooperative issuance and exposure governance",
+    "independent heterogeneous GPU/WAN routes",
+    "independent work verification and anti-Sybil controls",
+    "distributed consensus and public operating quorum",
+    "cash payments, disputes and payouts",
+    "funded public pilot and production operation"
+  ]
+}

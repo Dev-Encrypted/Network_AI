@@ -19,6 +19,7 @@ import { need } from "./errors.js";
 import { availableAccount, heldAccount, post } from "./ledger.js";
 import { canonical, capability, hash } from "./security.js";
 import { capacity } from "./capacity.js";
+import { cooperativeEligibility, recycleSettlement } from "./cooperative.js";
 
 type Row = Record<string, any>;
 const terminal = (state: string): boolean =>
@@ -153,8 +154,8 @@ export class Sessions {
           { session_id: id },
         );
       const result = await tx.query(
-        `INSERT INTO sessions(id,user_id,quote_id,model_id,manifest_sha256,idempotency_key,request_sha256,request_bytes,state,hold_microtu,queue_deadline)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,'QUEUED',$9,now()+interval '120 seconds') RETURNING *`,
+        `INSERT INTO sessions(id,user_id,quote_id,model_id,manifest_sha256,idempotency_key,request_sha256,request_bytes,state,hold_microtu,queue_deadline,cooperative_pool_id,cooperative_policy_sha256)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,'QUEUED',$9,now()+interval '120 seconds',$10,$11) RETURNING *`,
         [
           id,
           user.id,
@@ -165,6 +166,8 @@ export class Sessions {
           data.request_sha256,
           data.request_bytes,
           hold.toString(),
+          quote.cooperative_pool_id,
+          quote.cooperative_policy_sha256,
         ],
       );
       await this.event(tx, id, "queued", { maximum_microtu: hold.toString() });
@@ -211,6 +214,13 @@ export class Sessions {
       max_input_bytes: manifest.max_input_bytes,
       prepare_id: scope.endsWith("prepare") ? null : session.prepare_id,
       exp: Math.floor(new Date(session.execution_deadline).getTime() / 1000),
+      ...(session.coverage_lease_id
+        ? {
+            cooperative_pool_id: session.cooperative_pool_id,
+            coverage_lease_id: session.coverage_lease_id,
+            coverage_terms_sha256: session.coverage_terms_sha256,
+          }
+        : {}),
       ...(session.route_id
         ? { route_id: session.route_id, route_sha256: session.route_sha256 }
         : {}),
@@ -243,7 +253,7 @@ export class Sessions {
       const next = (
         await tx.query(`SELECT s.id FROM sessions s JOIN users u ON u.id=s.user_id
         WHERE s.state='QUEUED' AND s.queue_deadline>now() AND EXISTS (
-          SELECT 1 FROM ready_execution_offers o WHERE o.model_id=s.model_id AND NOT EXISTS (
+          SELECT 1 FROM ready_execution_offers o WHERE o.model_id=s.model_id AND ${cooperativeEligibility("s", "o")} AND NOT EXISTS (
             SELECT 1 FROM resource_domains d WHERE d.id=ANY(o.domain_ids)
             AND (SELECT count(*) FROM active_session_domains a WHERE a.resource_domain_id=d.id)>=d.slots))
         ORDER BY u.last_admitted_at,s.created_at,s.id LIMIT 1`)
@@ -252,11 +262,11 @@ export class Sessions {
         return { state: "QUEUED", retry_after_ms: 300 };
       const offer = (
         await tx.query(
-          `SELECT o.* FROM ready_execution_offers o WHERE o.model_id=$1 AND NOT EXISTS (
+          `SELECT o.* FROM ready_execution_offers o CROSS JOIN sessions s WHERE s.id=$2 AND o.model_id=$1 AND ${cooperativeEligibility("s", "o")} AND NOT EXISTS (
             SELECT 1 FROM resource_domains d WHERE d.id=ANY(o.domain_ids)
             AND (SELECT count(*) FROM active_session_domains a WHERE a.resource_domain_id=d.id)>=d.slots)
           ORDER BY o.last_seen DESC,o.offer_key LIMIT 1`,
-          [s.model_id],
+          [s.model_id, s.id],
         )
       ).rows[0];
       if (!offer) return { state: "QUEUED", retry_after_ms: 300 };
@@ -276,11 +286,29 @@ export class Sessions {
             ])
           ).rows[0]
         : null;
+      const coverage = s.cooperative_pool_id
+        ? (
+            await tx.query(
+              `SELECT l.* FROM cooperative_windows cw JOIN route_availability_leases l ON l.id=cw.lease_id
+        WHERE cw.pool_id=$1 AND l.route_id=$2 AND l.state IN ('ACTIVE','DRAINING') AND l.ends_ms>extract(epoch FROM now())*1000+10000 FOR SHARE OF l`,
+              [s.cooperative_pool_id, offer.route_id],
+            )
+          ).rows[0]
+        : null;
+      need(
+        !s.cooperative_pool_id || coverage,
+        409,
+        "coverage_ended",
+        "A janela cooperativa terminou; solicite outra cotação.",
+      );
+      const deadline = coverage
+        ? new Date(Math.min(Date.now() + 180000, Number(coverage.ends_ms)))
+        : new Date(Date.now() + 180000);
       const attempt = randomUUID();
       const updated = (
         await tx.query(
           `UPDATE sessions SET state='PREPARING',node_id=$2,resource_domain_id=$3,attempt_id=$4,node_epoch=$5,
-        execution_deadline=now()+interval '180 seconds',route_id=$6,route_sha256=$7 WHERE id=$1 RETURNING *`,
+        execution_deadline=$8,route_id=$6,route_sha256=$7,coverage_lease_id=$9,coverage_terms_sha256=$10 WHERE id=$1 RETURNING *`,
           [
             id,
             node.id,
@@ -289,6 +317,9 @@ export class Sessions {
             node.epoch,
             route?.id ?? null,
             route?.route_sha256 ?? null,
+            deadline,
+            coverage?.id ?? null,
+            coverage?.terms_sha256 ?? null,
           ],
         )
       ).rows[0];
@@ -742,7 +773,12 @@ export class Sessions {
       [heldAccount(s.user_id), -hold],
       [availableAccount(s.user_id), hold - charge],
     ];
-    if (charge > 0n) {
+    let allocation: Record<string, unknown> | undefined;
+    if (charge > 0n && s.cooperative_pool_id) {
+      const recycled = await recycleSettlement(tx, s, charge);
+      lines.push(...recycled.lines);
+      allocation = recycled.allocation;
+    } else if (charge > 0n) {
       const fee = (charge * 2000n) / 10000n;
       if (s.route_id) {
         const members = (
@@ -780,12 +816,21 @@ export class Sessions {
           session_id: s.id,
           state,
           charge_microtu: charge.toString(),
-          fee_bps: 2000,
+          fee_bps: s.cooperative_pool_id ? 0 : 2000,
+          ...(allocation
+            ? {
+                cooperative_pool_id: s.cooperative_pool_id,
+                coverage_lease_id: s.coverage_lease_id,
+                allocation,
+              }
+            : {}),
           ...(s.route_id
             ? {
                 route_id: s.route_id,
                 route_sha256: s.route_sha256,
-                payout_policy: "ordinal-prefix-v1",
+                payout_policy: s.cooperative_pool_id
+                  ? "accepted-readiness-only"
+                  : "ordinal-prefix-v1",
               }
             : {}),
         },

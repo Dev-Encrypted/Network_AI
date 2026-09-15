@@ -135,3 +135,12 @@ Version 0.5 requires migration 006. Back up first, finish funded windows when pr
 Reconciliation preserves funded windows across restarts, but unobserved gaps over six seconds are not extrapolated into compensation. After a restart, inspect the window's state, per-component observed time, escrow and refund events. `pnpm test:backup` restores into another database and verifies route-readiness tables, individual/total budget projections, escrow and runtime permissions. The dump and source comparison share an exported PostgreSQL snapshot, so concurrent new payments are not mistaken for missing restored entries. The working database is preserved.
 
 With the managed 32B route already installed, `pnpm test:route-availability --fault` exercises an actual 30-second funded window, one bounded stage pause, recovery and real inference using that same model copy. It spends at most 0.030 LAB_TU on readiness plus the separately quoted request charge. Use a domain without another active readiness window. This campaign's evidence is local control behavior, not independent hardware or economic qualification.
+
+
+## Cooperative preview upgrade and acceptance
+
+Version 0.6 adds migration 007. Preserve a backup, let accepted windows finish when practical, stop the managed control/interface before initialization, then run `pnpm lab:init`, `pnpm build` and `pnpm lab:start --no-build`. Previously applied migrations are checksummed; never edit them in place. A paused cooperative plan preserves funds and accepted windows. Reaffirming operational support permits new windows without changing old accepted deadlines.
+
+With the managed official 32B route already installed, `pnpm test:cooperative` runs two bounded 30-second windows and one real inference. It commits only 3,000 existing microcredits to initial working capital; it issues no grants and downloads no model. Consumed credits are recycled into the same plan to fund the next window. The plan is paused afterward; its remaining credits remain committed to that plan. Reports are private under `.runtime/private-lab/cooperative-campaigns/`. Use the interface's **Cooperação** view to inspect or explicitly resume it. [Full fund lifecycle](COOPERATIVE_FUNDS.md).
+
+`pnpm test:backup` now verifies cooperative table counts, original session/window/policy references and restored ledger projections against the dump's exported snapshot. Restore failures never overwrite the working database. The public release publishes only allowlisted summaries, not private backups or configuration.

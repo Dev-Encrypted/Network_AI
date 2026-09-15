@@ -66,157 +66,174 @@ export class RouteAvailability {
       })
       .strict()
       .parse(body);
+    return this.db.transaction((tx) => this.offerTransaction(tx, user, data));
+  }
+
+  async offerTransaction(
+    tx: PoolClient,
+    user: User,
+    data: {
+      route_id: string;
+      duration_seconds: number;
+      rate_microtu_per_second: string;
+      purpose: string;
+      reason: string;
+      idempotency_key: string;
+    },
+    funding?: { account: string; terms: Record<string, any> },
+  ) {
     const budget =
       BigInt(data.rate_microtu_per_second) * BigInt(data.duration_seconds);
     need(budget <= MAX_AMOUNT, 400, "amount_overflow", "Valor fora do limite.");
-    const digest = hash(canonical(data));
-    return this.db.transaction(async (tx) => {
-      // Both contract APIs serialize new commitments for the same sponsor.
-      await tx.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [user.id]);
-      const existing = (
-        await tx.query(
-          "SELECT * FROM route_availability_leases WHERE sponsor_id=$1 AND idempotency_key=$2",
-          [user.id, data.idempotency_key],
-        )
-      ).rows[0];
-      if (existing) {
-        need(
-          existing.request_sha256 === digest,
-          409,
-          "idempotency_conflict",
-          "Identificador usado com outros termos.",
-        );
-        return this.publicRow(existing);
-      }
-      const count = (
-        await tx.query(
-          `SELECT ((SELECT count(*) FROM availability_leases WHERE sponsor_id=$1 AND state IN ('OFFERED','ACTIVE'))+
-        (SELECT count(*) FROM route_availability_leases WHERE sponsor_id=$1 AND state IN ('OFFERED','ACTIVE','DRAINING')))::int AS n`,
-          [user.id],
-        )
-      ).rows[0].n;
-      need(
-        count < 4,
-        429,
-        "lease_limit",
-        "Você já tem quatro contratos abertos.",
-      );
-      const route = (
-        await tx.query(
-          `SELECT r.* FROM execution_routes r
-        WHERE r.id=$1 AND EXISTS(SELECT 1 FROM ready_execution_offers o WHERE o.route_id=r.id)`,
-          [data.route_id],
-        )
-      ).rows[0];
-      need(
-        route,
-        409,
-        "route_not_ready",
-        "A oferta precisa de uma rota qualificada, aceita e inteiramente pronta.",
-      );
-      const members = (
-        await tx.query(
-          "SELECT * FROM route_members WHERE route_id=$1 ORDER BY ordinal",
-          [route.id],
-        )
-      ).rows;
-      const maxima = splitByBps(
-        budget,
-        members.map((m) => m.share_bps),
-      );
-      need(
-        maxima.every((n) => n > 0n),
-        400,
-        "lease_allocation",
-        "O orçamento precisa remunerar todas as etapas com pelo menos um microcrédito.",
-      );
-      const id = randomUUID();
-      const escrow = `route-lease:${id}:escrow`;
-      const terms = {
-        policy,
-        lease_id: id,
-        sponsor_id: user.id,
-        route_id: route.id,
-        route_sha256: route.route_sha256,
-        manifest_sha256: route.manifest_sha256,
-        duration_seconds: data.duration_seconds,
-        rate_microtu_per_second: data.rate_microtu_per_second,
-        budget_microtu: budget.toString(),
-        purpose: data.purpose,
-        reason: data.reason,
-        compensation: "ADDITIONAL_TO_INFERENCE",
-        cancellation: "PRESERVE_OTHER_ACCEPTED_COMPONENTS_UNTIL_END",
-        members: members.map((m, i) => ({
-          node_id: m.node_id,
-          provider_id: m.provider_id,
-          resource_domain_id: m.resource_domain_id,
-          ordinal: m.ordinal,
-          role: m.role,
-          share_bps: m.share_bps,
-          maximum_microtu: maxima[i]!.toString(),
-        })),
-      };
-      const termsHash = hash(canonical(terms));
+    const digest = hash(
+      canonical(funding ? { ...data, cooperative: funding.terms } : data),
+    );
+    // Both contract APIs serialize new commitments for the same sponsor.
+    await tx.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [user.id]);
+    const existing = (
       await tx.query(
-        "INSERT INTO ledger_accounts(id,owner_id,kind) VALUES($1,$2,'LEASE_ESCROW')",
-        [escrow, user.id],
+        "SELECT * FROM route_availability_leases WHERE sponsor_id=$1 AND idempotency_key=$2",
+        [user.id, data.idempotency_key],
+      )
+    ).rows[0];
+    if (existing) {
+      need(
+        existing.request_sha256 === digest,
+        409,
+        "idempotency_conflict",
+        "Identificador usado com outros termos.",
       );
-      await post(
-        tx,
-        `route-lease:${id}:fund`,
-        "ROUTE_AVAILABILITY_RESERVE",
-        [
-          [availableAccount(user.id), -budget],
-          [escrow, budget],
-        ],
-        { lease_id: id, terms_sha256: termsHash, policy },
-      );
-      const row = (
-        await tx.query(
-          `INSERT INTO route_availability_leases(id,sponsor_id,route_id,route_sha256,manifest_sha256,
+      return this.publicRow(existing);
+    }
+    const count = (
+      await tx.query(
+        `SELECT ((SELECT count(*) FROM availability_leases WHERE sponsor_id=$1 AND state IN ('OFFERED','ACTIVE'))+
+        (SELECT count(*) FROM route_availability_leases WHERE sponsor_id=$1 AND state IN ('OFFERED','ACTIVE','DRAINING')))::int AS n`,
+        [user.id],
+      )
+    ).rows[0].n;
+    need(
+      count < 4,
+      429,
+      "lease_limit",
+      "Você já tem quatro contratos abertos.",
+    );
+    const route = (
+      await tx.query(
+        `SELECT r.* FROM execution_routes r
+        WHERE r.id=$1 AND EXISTS(SELECT 1 FROM ready_execution_offers o WHERE o.route_id=r.id)`,
+        [data.route_id],
+      )
+    ).rows[0];
+    need(
+      route,
+      409,
+      "route_not_ready",
+      "A oferta precisa de uma rota qualificada, aceita e inteiramente pronta.",
+    );
+    const members = (
+      await tx.query(
+        "SELECT * FROM route_members WHERE route_id=$1 ORDER BY ordinal",
+        [route.id],
+      )
+    ).rows;
+    const maxima = splitByBps(
+      budget,
+      members.map((m) => m.share_bps),
+    );
+    need(
+      maxima.every((n) => n > 0n),
+      400,
+      "lease_allocation",
+      "O orçamento precisa remunerar todas as etapas com pelo menos um microcrédito.",
+    );
+    const id = randomUUID();
+    const escrow = `route-lease:${id}:escrow`;
+    const terms = {
+      policy,
+      lease_id: id,
+      sponsor_id: user.id,
+      route_id: route.id,
+      route_sha256: route.route_sha256,
+      manifest_sha256: route.manifest_sha256,
+      duration_seconds: data.duration_seconds,
+      rate_microtu_per_second: data.rate_microtu_per_second,
+      budget_microtu: budget.toString(),
+      purpose: data.purpose,
+      reason: data.reason,
+      compensation: funding ? "READINESS_ONLY" : "ADDITIONAL_TO_INFERENCE",
+      ...(funding ? { cooperative: funding.terms } : {}),
+      cancellation: "PRESERVE_OTHER_ACCEPTED_COMPONENTS_UNTIL_END",
+      members: members.map((m, i) => ({
+        node_id: m.node_id,
+        provider_id: m.provider_id,
+        resource_domain_id: m.resource_domain_id,
+        ordinal: m.ordinal,
+        role: m.role,
+        share_bps: m.share_bps,
+        maximum_microtu: maxima[i]!.toString(),
+      })),
+    };
+    const termsHash = hash(canonical(terms));
+    await tx.query(
+      "INSERT INTO ledger_accounts(id,owner_id,kind) VALUES($1,$2,'LEASE_ESCROW')",
+      [escrow, funding ? null : user.id],
+    );
+    await post(
+      tx,
+      `route-lease:${id}:fund`,
+      "ROUTE_AVAILABILITY_RESERVE",
+      [
+        [funding?.account ?? availableAccount(user.id), -budget],
+        [escrow, budget],
+      ],
+      { lease_id: id, terms_sha256: termsHash, policy },
+    );
+    const row = (
+      await tx.query(
+        `INSERT INTO route_availability_leases(id,sponsor_id,route_id,route_sha256,manifest_sha256,
         terms_sha256,terms,purpose,reason,idempotency_key,request_sha256,escrow_account,duration_seconds,rate_microtu_per_second,budget_microtu)
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
-          [
-            id,
-            user.id,
-            route.id,
-            route.route_sha256,
-            route.manifest_sha256,
-            termsHash,
-            terms,
-            data.purpose,
-            data.reason,
-            data.idempotency_key,
-            digest,
-            escrow,
-            data.duration_seconds,
-            data.rate_microtu_per_second,
-            budget.toString(),
-          ],
-        )
-      ).rows[0];
-      for (const m of terms.members)
-        await tx.query(
-          `INSERT INTO route_availability_members(lease_id,node_id,provider_id,resource_domain_id,ordinal,role,share_bps,maximum_microtu)
+        [
+          id,
+          user.id,
+          route.id,
+          route.route_sha256,
+          route.manifest_sha256,
+          termsHash,
+          terms,
+          data.purpose,
+          data.reason,
+          data.idempotency_key,
+          digest,
+          escrow,
+          data.duration_seconds,
+          data.rate_microtu_per_second,
+          budget.toString(),
+        ],
+      )
+    ).rows[0];
+    for (const m of terms.members)
+      await tx.query(
+        `INSERT INTO route_availability_members(lease_id,node_id,provider_id,resource_domain_id,ordinal,role,share_bps,maximum_microtu)
           VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,
-          [
-            id,
-            m.node_id,
-            m.provider_id,
-            m.resource_domain_id,
-            m.ordinal,
-            m.role,
-            m.share_bps,
-            m.maximum_microtu,
-          ],
-        );
-      await this.event(tx, id, "offered", {
-        terms_sha256: termsHash,
-        budget_microtu: budget.toString(),
-        policy,
-      });
-      return this.publicRow(row);
+        [
+          id,
+          m.node_id,
+          m.provider_id,
+          m.resource_domain_id,
+          m.ordinal,
+          m.role,
+          m.share_bps,
+          m.maximum_microtu,
+        ],
+      );
+    await this.event(tx, id, "offered", {
+      terms_sha256: termsHash,
+      budget_microtu: budget.toString(),
+      policy,
     });
+    return this.publicRow(row);
   }
 
   async accept(user: User, id: string, body: unknown) {
@@ -297,6 +314,26 @@ export class RouteAvailability {
         "Uma das capacidades físicas já possui contrato ativo.",
       );
       const now = await clock(tx);
+      if (row.terms.cooperative) {
+        const p = (
+          await tx.query(
+            "SELECT paused,support_until FROM cooperative_pools WHERE id=$1",
+            [row.terms.cooperative.pool_id],
+          )
+        ).rows[0];
+        need(
+          p &&
+            !p.paused &&
+            Math.min(
+              new Date(p.support_until).getTime(),
+              new Date(row.terms.cooperative.support_until).getTime(),
+            ) >=
+              now + row.duration_seconds * 1000,
+          409,
+          "support_window",
+          "O apoio operacional não cobre mais a janela completa.",
+        );
+      }
       const observation = await this.observe(tx, row, now);
       need(
         observation.joint,
@@ -556,7 +593,12 @@ export class RouteAvailability {
         "ROUTE_AVAILABILITY_REFUND",
         [
           [row.escrow_account, -remaining],
-          [availableAccount(row.sponsor_id), remaining],
+          [
+            row.terms.cooperative
+              ? `coop:${row.terms.cooperative.pool_id}:${row.terms.cooperative.funding_source === "WORKING" ? "working" : "reserve"}`
+              : availableAccount(row.sponsor_id),
+            remaining,
+          ],
         ],
         { lease_id: row.id, terms_sha256: row.terms_sha256, policy },
       );

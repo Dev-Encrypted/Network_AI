@@ -1996,3 +1996,41 @@ td small,
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.cooperative-choice {
+  display: grid;
+  gap: 8px;
+  padding: 12px 20px;
+  font-size: 0.85rem;
+}
+.cooperative-choice select {
+  min-width: 0;
+  width: 100%;
+}
+.cooperative-choice small {
+  line-height: 1.5;
+}
+.cooperative-group {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.cooperative-consent {
+  display: flex !important;
+  align-items: start;
+  line-height: 1.5;
+}
+.cooperative-consent input {
+  width: auto;
+  margin-top: 4px;
+}
+.cooperative-card small {
+  display: block;
+  margin-top: 6px;
+}
+.cooperative-card .route-actions {
+  margin-top: 16px;
+}

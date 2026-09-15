@@ -449,3 +449,176 @@ test("logout fences a delayed quote and clears conversation state", async ({
   await expect(page.locator(".message")).toHaveCount(0);
   expect(inferenceRequests).toBe(0);
 });
+
+test("cooperative plan, funding retry, readiness consent and opted-in chat work in the browser", async ({
+  page,
+}) => {
+  const profile = await readFile(".runtime/private-lab/cpu-route.json", "utf8")
+    .then(JSON.parse)
+    .catch(() => null);
+  test.skip(
+    !profile,
+    "Requires the installed 32B route; never fabricated by CI.",
+  );
+  await page.goto("/");
+  await page.getByLabel("Usuário", { exact: true }).fill(config.admin_login);
+  await page.getByLabel("Senha", { exact: true }).fill(config.admin_password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await page.getByRole("button", { name: "Cooperação", exact: true }).click();
+  const section = page.getByRole("region", { name: "Fundos cooperativos" });
+  await section
+    .getByText("Criar plano de capacidade essencial", { exact: true })
+    .click();
+  const name = `Browser cooperative fund ${randomUUID().slice(0, 8)}`;
+  await section.getByLabel("Nome do fundo", { exact: true }).fill(name);
+  await section
+    .getByRole("combobox", { name: "Rota do grupo 1", exact: true })
+    .selectOption(profile.route_id);
+  await section
+    .getByLabel("Duração de cada janela (segundos)", { exact: true })
+    .fill("30");
+  const created = page.waitForResponse(
+    (r) =>
+      r.url().endsWith("/cooperative/pools") && r.request().method() === "POST",
+  );
+  await section
+    .getByRole("button", { name: "Criar fundo cooperativo", exact: true })
+    .click();
+  const p = await (await created).json();
+  expect(p.id).toBeTruthy();
+  let leaseId: string | undefined,
+    dropped = false,
+    fundingId: string | undefined;
+  const auth = { headers: { Origin: config.web_origin } };
+  await page.route(`**/cooperative/pools/${p.id}/fund`, async (route) => {
+    if (!dropped) {
+      dropped = true;
+      const r = await route.fetch();
+      expect(r.status()).toBe(201);
+      fundingId = (await r.json()).id;
+      await route.abort("failed");
+    } else await route.continue();
+  });
+  try {
+    const card = page.locator(`[data-pool-id="${p.id}"]`);
+    await card
+      .getByText("Contribuir com créditos existentes", { exact: true })
+      .click();
+    await card
+      .getByLabel("Contribuição em microcréditos", { exact: true })
+      .fill("3000");
+    await card.getByRole("checkbox").check();
+    await card
+      .getByRole("button", { name: "Contribuir para o fundo", exact: true })
+      .click();
+    await expect(section.getByRole("alert")).toBeVisible();
+    const retry = page.waitForResponse(
+      (r) =>
+        r.url().endsWith(`/cooperative/pools/${p.id}/fund`) &&
+        r.request().method() === "POST",
+    );
+    await card
+      .getByRole("button", { name: "Contribuir para o fundo", exact: true })
+      .click();
+    expect((await (await retry).json()).id).toBe(fundingId);
+    await card.getByText("Financiar próxima janela", { exact: true }).click();
+    await card
+      .getByLabel("Motivo da janela", { exact: true })
+      .fill("Browser confirms accepted cooperative readiness-only capacity");
+    const window = page.waitForResponse(
+      (r) =>
+        r.url().endsWith(`/cooperative/pools/${p.id}/windows`) &&
+        r.request().method() === "POST",
+    );
+    await card
+      .getByRole("button", {
+        name: "Financiar janela cooperativa",
+        exact: true,
+      })
+      .click();
+    const l = await (await window).json();
+    leaseId = l.id;
+    expect(leaseId).toBeTruthy();
+    await page.getByRole("button", { name: "Meus nós", exact: true }).click();
+    const coverage = page.locator(".coverage-card").filter({
+      hasText: l.terms_sha256,
+    });
+    await coverage.getByText("Termos desta janela", { exact: true }).click();
+    await expect(coverage).toContainText(
+      "não existe um segundo pagamento 80/20",
+    );
+    await coverage
+      .getByRole("button", { name: "Aceitar janela cooperativa", exact: true })
+      .click();
+    await expect(coverage).toContainText("Janela ativa");
+    await page.getByRole("button", { name: "Conversar", exact: true }).click();
+    await page
+      .getByRole("combobox", { name: "Modelo de inferência", exact: true })
+      .selectOption(profile.model_id);
+    await page
+      .getByRole("combobox", { name: "Destino do consumo", exact: true })
+      .selectOption(p.id);
+    await page.getByLabel("Limite de saída", { exact: true }).last().fill("64");
+    await page
+      .getByLabel("Sua mensagem")
+      .fill("Say only: cooperative credits work. /no_think");
+    const q = page.waitForResponse(
+      (r) => r.url().endsWith("/quotes") && r.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "Enviar mensagem" }).click();
+    expect((await (await q).json()).cooperative_pool_id).toBe(p.id);
+    await expect(page.locator(".message.assistant p")).not.toBeEmpty({
+      timeout: 25000,
+    });
+    await expect(
+      page.getByRole("button", { name: "Interromper", exact: true }),
+    ).toHaveCount(0, { timeout: 25000 });
+    await page.getByRole("button", { name: "Cooperação", exact: true }).click();
+    const finalCard = page.locator(`[data-pool-id="${p.id}"]`);
+    await finalCard
+      .getByText("Consumo e destino dos créditos", { exact: true })
+      .click();
+    await expect(finalCard.locator("tbody tr")).toHaveCount(1, {
+      timeout: 10000,
+    });
+    await mkdir(".runtime/private-lab/screenshots", { recursive: true });
+    await finalCard.screenshot({
+      path: ".runtime/private-lab/screenshots/cooperative-desktop.png",
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await finalCard.scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await finalCard.screenshot({
+      path: ".runtime/private-lab/screenshots/cooperative-mobile.png",
+    });
+  } finally {
+    if (leaseId) {
+      await page.request.post(`/api/v1/availability/routes/${leaseId}/cancel`, {
+        ...auth,
+        data: {},
+      });
+      await expect
+        .poll(
+          async () => {
+            const r = await page.request.get("/api/v1/availability/routes");
+            return (await r.json()).data.find((l: any) => l.id === leaseId)
+              ?.state;
+          },
+          { timeout: 35000 },
+        )
+        .toMatch(/COMPLETED|CANCELLED/);
+    }
+    await page.request.post(`/api/v1/cooperative/pools/${p.id}/manage`, {
+      ...auth,
+      data: {
+        paused: true,
+        reason:
+          "Browser acceptance completed; preserve funds and prevent new promises",
+      },
+    });
+  }
+});

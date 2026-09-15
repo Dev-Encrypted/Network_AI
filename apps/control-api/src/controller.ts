@@ -17,6 +17,7 @@ import { Nodes } from "./nodes.js";
 import { Sessions } from "./sessions.js";
 import { Availability } from "./availability.js";
 import { RouteAvailability } from "./route-availability.js";
+import { Cooperative } from "./cooperative.js";
 import { Routes } from "./routes.js";
 import { capacity } from "./capacity.js";
 import { need } from "./errors.js";
@@ -31,6 +32,7 @@ export class ApiController {
     @Inject(Sessions) readonly sessions: Sessions,
     @Inject(Availability) readonly availability: Availability,
     @Inject(RouteAvailability) readonly routeAvailability: RouteAvailability,
+    @Inject(Cooperative) readonly cooperative: Cooperative,
     @Inject(Routes) readonly routes: Routes,
   ) {}
   internal(req: FastifyRequest) {
@@ -121,6 +123,45 @@ export class ApiController {
     return {
       data: await this.availability.list(await this.auth.authenticate(req)),
     };
+  }
+  @Get("cooperative/pools") async pools(@Req() req: FastifyRequest) {
+    return {
+      data: await this.cooperative.list(await this.auth.authenticate(req)),
+    };
+  }
+  @Post("cooperative/pools") async createPool(
+    @Req() req: FastifyRequest,
+    @Body() body: unknown,
+  ) {
+    return this.cooperative.create(await this.auth.authenticate(req), body);
+  }
+  @Post("cooperative/pools/:id/fund") async fundPool(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.cooperative.fund(await this.auth.authenticate(req), id, body);
+  }
+  @Post("cooperative/pools/:id/windows") async poolWindow(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.cooperative.offer(await this.auth.authenticate(req), id, body);
+  }
+  @Post("cooperative/pools/:id/manage") async managePool(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.cooperative.manage(await this.auth.authenticate(req), id, body);
+  }
+  @Post("cooperative/refunds/:id") async refundCooperation(
+    @Req() req: FastifyRequest,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    return this.cooperative.refund(await this.auth.authenticate(req), id, body);
   }
   @Get("availability/routes") async routeLeases(@Req() req: FastifyRequest) {
     return {

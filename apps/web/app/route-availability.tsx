@@ -16,6 +16,14 @@ type Participant = {
   withdrawn_at: string | null;
 };
 type Lease = {
+  terms: {
+    compensation: string;
+    cooperative?: {
+      pool_id: string;
+      policy_sha256: string;
+      funding_source: string;
+    };
+  };
   id: string;
   sponsor_id: string;
   route_name: string;
@@ -387,6 +395,19 @@ export function RouteAvailabilityPanel({ user, request, onChange }: Props) {
                 participantes preservam a janela aceita. O orçamento restante
                 fica reservado até o prazo, inclusive durante uma falha.
               </p>
+              <p>
+                {l.terms.compensation === "READINESS_ONLY"
+                  ? "Janela cooperativa: receba pelo tempo pronto observado. Nas sessões que escolherem este fundo, todo o consumo retorna ao fundo e não existe um segundo pagamento 80/20 por inferência. Sessões comuns mantêm seus termos de inferência."
+                  : "A remuneração desta janela é adicional à remuneração por inferência."}
+              </p>
+              {l.terms.cooperative && (
+                <p className="route-hash">
+                  Fundo {l.terms.cooperative.pool_id} · origem{" "}
+                  {l.terms.cooperative.funding_source}. Créditos não utilizados
+                  retornam ao fundo. Política aceita:{" "}
+                  {l.terms.cooperative.policy_sha256}.
+                </p>
+              )}
               <p className="route-hash">
                 SHA-256 dos termos: <code>{l.terms_sha256}</code>
               </p>
@@ -406,7 +427,9 @@ export function RouteAvailabilityPanel({ user, request, onChange }: Props) {
                     )
                   }
                 >
-                  Aceitar janela
+                  {l.terms.compensation === "READINESS_ONLY"
+                    ? "Aceitar janela cooperativa"
+                    : "Aceitar janela"}
                 </button>
               )}
               {l.state === "OFFERED" && (
@@ -421,7 +444,7 @@ export function RouteAvailabilityPanel({ user, request, onChange }: Props) {
                           "POST",
                           {},
                         ),
-                      "Oferta cancelada; orçamento devolvido ao patrocinador.",
+                      "Oferta cancelada; orçamento devolvido à conta de origem.",
                     )
                   }
                 >

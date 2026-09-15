@@ -90,6 +90,7 @@ export type ChatRequest = z.infer<typeof chatSchema>;
 
 export const quoteSchema = z
   .object({
+    cooperative_pool_id: uuid.optional(),
     model: z.string().min(1).max(80),
     max_output_tokens: z.number().int().min(1).max(8192),
   })

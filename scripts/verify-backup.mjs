@@ -95,6 +95,15 @@ try {
     "route_availability_acceptances",
     "route_availability_events",
     "availability_domain_claims",
+    "cooperative_pools",
+    "cooperative_groups",
+    "cooperative_routes",
+    "cooperative_funding",
+    "cooperative_incidents",
+    "cooperative_windows",
+    "cooperative_settlements",
+    "cooperative_refunds",
+    "cooperative_events",
   ];
   const routeCounts = {};
   for (const table of routeTables) {
@@ -111,7 +120,7 @@ try {
   const routeProjection =
     await restored.query(`SELECT s.id FROM sessions s JOIN session_participants p ON p.session_id=s.id
     WHERE s.route_id IS NOT NULL GROUP BY s.id HAVING sum(p.paid_microtu) <>
-    CASE WHEN s.billing_state='SETTLED' THEN s.charged_microtu-floor(s.charged_microtu::numeric*2000/10000) ELSE 0 END`);
+    CASE WHEN s.billing_state='SETTLED' AND s.cooperative_pool_id IS NULL THEN s.charged_microtu-floor(s.charged_microtu::numeric*2000/10000) ELSE 0 END`);
   assert.equal(routeProjection.rowCount, 0);
   const coverageEscrow =
     await restored.query(`SELECT l.id FROM route_availability_leases l JOIN ledger_accounts a ON a.id=l.escrow_account
@@ -177,6 +186,21 @@ try {
       ),
     { code: "42501" },
   );
+  const cooperativeMismatches =
+    await restored.query(`SELECT cs.session_id FROM cooperative_settlements cs JOIN sessions s ON s.id=cs.session_id
+    JOIN cooperative_pools cp ON cp.id=cs.pool_id JOIN cooperative_windows cw ON cw.lease_id=cs.coverage_lease_id
+    WHERE cs.charge_microtu<>s.charged_microtu OR cs.pool_id<>s.cooperative_pool_id OR cs.pool_id<>cw.pool_id OR cs.policy_sha256<>cp.policy_sha256
+    OR cs.charge_microtu<>cs.working_microtu+cs.reserve_microtu+cs.burned_microtu
+    OR NOT EXISTS(SELECT 1 FROM journal j WHERE j.business_key='settle:'||cs.session_id)`);
+  assert.equal(cooperativeMismatches.rowCount, 0);
+  await assert.rejects(
+    () => restored.query("UPDATE cooperative_pools SET policy=policy"),
+    { code: "42501" },
+  );
+  await assert.rejects(
+    () => restored.query("DELETE FROM cooperative_settlements"),
+    { code: "42501" },
+  );
   const report = {
     evidence_type: "ISOLATED_POSTGRES_RESTORE",
     source_comparison: "same exported PostgreSQL snapshot as pg_dump",
@@ -184,6 +208,8 @@ try {
     journal_entries: after.rows[0].n,
     balance_sum: "0",
     projection_mismatches: 0,
+    cooperative_settlement_mismatches: 0,
+    runtime_cooperative_policy_and_history_writes_denied: true,
     runtime_balance_write_denied: true,
     availability_contracts: leases.rows[0].n,
     availability_escrow_mismatches: 0,

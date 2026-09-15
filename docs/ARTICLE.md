@@ -1,5 +1,8 @@
 # NETWORK AI: cooperative inference for models beyond one computer
 
+> Implementation update: the [v0.6 cooperative guide](implementation/COOPERATIVE_FUNDS.md) documents the private executable cycle from existing credits to funded complete-route readiness, verified consumption and another funded window. It includes the real one-host 32B result and the remaining economic/public-network gates. The research and candidate policies below retain their evidence classifications.
+
+
 **Concept, direction, and authorship:** [Dev-Encrypted](https://github.com/Dev-Encrypted)
 
 **English edition:** September 14, 2026

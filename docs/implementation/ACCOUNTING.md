@@ -17,7 +17,7 @@ Rates and charges use micro-units. The hold is conservative and can exceed typic
 
 A completed receipt needs valid positive usage, a completed stream, a finish reason, and counts within authorized limits. The node signs the receipt; control verifies identity, attempt and epoch. Counts are **reported by the inference engine**, without independent tokenization or cryptographic proof of computation.
 
-A valid charge cannot exceed the hold. The private experiment allocates 80% to the provider and 20% to the lab working account, subject to integer fee rounding. Unused held funds return to the consumer. These proportions have not been established as public-network economics.
+A valid charge cannot exceed the hold. Ordinary inference allocates 80% to the provider and 20% to the lab working account, subject to integer fee rounding. Unused held funds return to the consumer. These proportions have not been established as public-network economics.
 
 For a version 0.4 complete route, the same provider pool is divided among its immutable participants after every required receipt arrives. Adding stages does not multiply the token bill. Prefix rounding conserves every micro-unit, and the interface displays significant digits down to one micro-LAB_TU. The [route guide](COMPLETE_ROUTES.md#how-the-credits-are-divided) gives a measured 32B example and explains why signed stage observations are still a private trust assumption.
 
@@ -27,7 +27,15 @@ There is no automatic provider income merely for remaining online. Version 0.3 a
 
 Version 0.5 funds a complete route under one additional readiness budget. Prefix rounding assigns exact component maximums; each component earns `floor(maximum × credited_ms / window_ms)`. Their sum cannot exceed the held budget. Healthy components preserve their accepted entitlements when a peer fails, so component earnings and joint-route-ready time are recorded separately. The sponsor cannot reclaim other providers' accepted window early. Terminal closure returns the remaining escrow and releases every readiness domain claim. [Lifecycle, arithmetic and real 32B example](ROUTE_AVAILABILITY.md).
 
-Readiness reserve, payment and refund use `ROUTE_AVAILABILITY_RESERVE`, `ROUTE_AVAILABILITY_PAYMENT` and `ROUTE_AVAILABILITY_REFUND` journal kinds. They transfer existing LAB_TU without touching `LAB_ISSUER` or automatically spending `lab:working`. The underlying inference tariff and its separate provider payment remain unchanged. Common-fund recycling and an economically justified relationship between readiness and useful-work compensation are still required for the target cooperative economy.
+Readiness reserve, payment and refund use `ROUTE_AVAILABILITY_RESERVE`, `ROUTE_AVAILABILITY_PAYMENT` and `ROUTE_AVAILABILITY_REFUND` journal kinds. They transfer existing LAB_TU without touching `LAB_ISSUER` or automatically spending `lab:working`. The underlying inference tariff and its separate provider payment remain unchanged. These statements preserve v0.5 additional-readiness terms; the opt-in v0.6 contract below adds a separate compensation mode.
+
+## Version 0.6 cooperative mode
+
+New immutable essential plans own separate `COOP_WORKING`, `COOP_CORE_RESERVE` and `COOP_BURN` accounts. Explicit contributions debit existing member balances. Working funds contract complete routes; reserve funds require a recorded essential shortfall incident. Every provider accepts `READINESS_ONLY` compensation for pool sessions. Accepted sessions freeze the pool, policy and coverage window, and require the same complete execution/receipt evidence as ordinary sessions.
+
+Finalized consumption goes to the working floor, then reserve, then the working target, with excess sent to the nonspendable burn sink. The allocation, prior free balances and target values are recorded atomically with the original consumer charge. A full administrator-approved refund debits those exact original destinations and returns the original charge once. Insufficient free source funds reject the refund without issuing credits or disturbing escrow. Gross historical grants remain visible; the burn sink is excluded from spendable circulation. There are no asynchronous approved-but-unapplied reversals in this atomic private flow.
+
+[Formulas, state predicates, conservation example and real 32B cycle](COOPERATIVE_FUNDS.md) distinguish this implementation from the unqualified broader issuer/expansion policy. Accounting consistency alone does not validate prices or independent economic circulation.
 
 ## Database protections
 
