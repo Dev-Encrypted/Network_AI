@@ -1,5 +1,15 @@
 # Private-preview implementation and validation status
 
+## Version 0.14 explicit generation profiles
+
+An optional immutable generation profile binds the reviewed local adapter, exact UTF-8 chat-template fingerprint and thinking mode. The coordinator requires matching root/inference heartbeat terms before offering capacity. Root prepare and execute authorizations carry the quote's frozen profile; the node rejects a different local policy and rechecks the template immediately before a generation request. RPC stages retain their existing capabilities. The model catalog explains the selected mode. [Schema, operation, compatibility and trust limits](GENERATION_PROFILES.md).
+
+The new one-host CPU comparison accepted **5/8 cases with the default template and 6/8 with thinking explicitly disabled**. Both full campaigns still fail. The direct mode corrected the conversation and raw array, regressed JSON extraction formatting and reached the correct arithmetic number with prohibited extra text. All 16 requests completed and settled with three receipts each, no retained physical claims and no new grants. Total charges were 2,371,000 and 2,412,000 micro-LAB_TU respectively. This switch is not a general quality or cost improvement. [Every case and preserved failures](evidence/generation-policy-32b-v0.14.json).
+
+Fresh local validation passed **184 distinct automated cases**: 97 integration, 42 Node unit/socket, 22 Rust, 21 unchanged Python F0 and two browser regressions. Four additional catalog observations checked both modes at desktop and mobile widths. Build, type checking, formatting and targeted Rust Clippy passed. [Versioned validation and runtime restoration](validation-v0.14.json).
+
+The implementation preserves legacy offers and creates new identities for a changed generation mode. It adds no database migration, new physical admission capacity, grant or cash payment. The contributor source archive and original model/transport/guardian pins remain unchanged. The preceding versioned campaigns below remain historical records.
+
 ## Version 0.13.1 startup cancellation and functional qualification
 
 The source-tooling patch accepts boot/profile-bound stops before an observed runner exists, monitors cancellation during metadata initialization and prevents a cancelled reservation from starting the service child. It preserves the next boot and unrelated services. Seventeen real Windows contributor/service fixtures and 41 Node unit/socket cases passed locally. The application packages remain v0.13.0 and the contributor source archive remains v0.12.0; no native binary, model profile or migration changed. Existing service hosts load the patch on their next start. [Lifecycle details](SERVICE_SUPERVISION.md), [patch validation](validation-v0.13.1.json).

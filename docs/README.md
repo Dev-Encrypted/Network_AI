@@ -6,6 +6,8 @@ The [cooperative fund guide](implementation/COOPERATIVE_FUNDS.md) explains the i
 
 ## Reading paths
 
+The [generation profile guide](implementation/GENERATION_PROFILES.md) explains the v0.14 binding between a model's immutable offer, chat template, declared thinking mode, signed authorization and runtime. It includes upgrade instructions, cost implications and the limits of template verification.
+
 The [service supervision guide](implementation/SERVICE_SUPERVISION.md) explains Windows process ownership for the coordinator, gateway, interface, links and root-model launcher. Version 0.13 preserves the existing contributor profiles and adds durable launch reconciliation; operating-system service installation and reboot recovery remain separate work.
 
 The [0.13.1 functional qualification guide](implementation/MODEL_QUALIFICATION.md) separates an answer's correctness from successful execution and accounting. It covers a fixed corpus, actual streamed timings, byte/context limits and review of preserved CPU and CPU/CUDA evidence. The same source patch prevents a queued stop from starting new service work during metadata initialization.

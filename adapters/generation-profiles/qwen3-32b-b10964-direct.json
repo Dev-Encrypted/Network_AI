@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "adapter": "llama_cpp_b10964_jinja",
+  "chat_template_sha256": "57f1fd00f0013a2be96aa79b857391f27e23df5b5f847072b524c897e24d0361",
+  "thinking": "disabled"
+}

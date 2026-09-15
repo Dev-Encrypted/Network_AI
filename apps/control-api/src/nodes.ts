@@ -113,7 +113,9 @@ export class Nodes {
     const row = (
       await this.db.pool.query(
         `UPDATE nodes n SET last_seen=now(),inventory=$4,loaded_backend_models=$5,
-      state=CASE WHEN desired_state='PAUSED' THEN 'PAUSED' WHEN $6='READY' AND $5::jsonb ? (SELECT manifest->>'backend_model' FROM models WHERE id=n.model_id) THEN 'READY'
+      state=CASE WHEN desired_state='PAUSED' THEN 'PAUSED' WHEN $6='READY' AND $5::jsonb ? (SELECT manifest->>'backend_model' FROM models WHERE id=n.model_id)
+        AND (n.node_kind='RPC_STAGE' OR ($4::jsonb->'generation_profile') IS NOT DISTINCT FROM
+          (SELECT manifest->'generation_profile' FROM models WHERE id=n.model_id)) THEN 'READY'
         WHEN $6='READY' THEN 'VALIDATING' ELSE $6 END
       WHERE id=$1 AND epoch=$2 AND boot_id=$3 AND desired_state<>'REVOKED' RETURNING id,desired_state,state,epoch`,
         [

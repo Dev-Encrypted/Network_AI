@@ -1,0 +1,80 @@
+{
+  "version": "0.14.0-private-generation-preview",
+  "scope": "Private generation-policy contract and one-computer CPU comparison",
+  "local_automated": {
+    "integration": 97,
+    "node_unit_and_socket": 42,
+    "rust_workspace": 22,
+    "unchanged_python_f0": 21,
+    "browser_regression": 2,
+    "distinct_cases": 184,
+    "failures": 0,
+    "skipped": 0
+  },
+  "browser_catalog_observations": 4,
+  "local_commands": [
+    "pnpm build",
+    "pnpm test:integration",
+    "pnpm test:unit",
+    "cargo test --locked --jobs 4",
+    "cargo clippy --locked --target-dir .runtime/generation-build -p network-ai-node -p network-ai-runtime --all-targets --jobs 4 -- -D warnings",
+    "python -m unittest discover -s benchmarks/tests -v",
+    "python benchmarks/scripts/verify_repository.py",
+    "pnpm exec playwright test --grep \"mobile layout|browser proxy\""
+  ],
+  "implementation": {
+    "immutable_generation_profile": true,
+    "root_readiness_matches_offer": true,
+    "signed_root_capability_matches_local_configuration": true,
+    "backend_template_rechecked_before_inference": true,
+    "bounded_properties_response": true,
+    "stage_capability_scopes_preserved": true,
+    "legacy_offers_preserved": true
+  },
+  "comparison": {
+    "report": "evidence/generation-policy-32b-v0.14.json",
+    "scheduled_requests": 16,
+    "modes": [
+      {
+        "thinking": "template_default",
+        "accepted": 5,
+        "scheduled": 8,
+        "result": "FAIL"
+      },
+      {
+        "thinking": "disabled",
+        "accepted": 6,
+        "scheduled": 8,
+        "result": "FAIL"
+      }
+    ],
+    "completed_settled": 16,
+    "complete_receipt_sets": 16,
+    "retained_claims": 0,
+    "new_grants": 0
+  },
+  "runtime": {
+    "managed_services": 20,
+    "original_profiles": 4,
+    "private_configuration_fingerprints_preserved": 7,
+    "applied_migrations_checked_read_only": 10,
+    "served_ui_version": "0.14.0",
+    "comparison_recipes_stopped": true
+  },
+  "package_versions": {
+    "source_checkout": "0.14.0",
+    "application": "0.14.0",
+    "contributor_source_archive": "0.12.0"
+  },
+  "unchanged": {
+    "original_native_guardian_and_transport_pins": true,
+    "original_model_definitions_and_profiles": true,
+    "applied_migrations_001_through_010": true,
+    "original_F0_sources_and_evidence": true
+  },
+  "previous_validation": "validation-v0.13.1.json",
+  "previous_suites_not_relabelled_as_fresh": true,
+  "github_checks": "Exact-commit workflow results accompany the release",
+  "public_operation_approved": false,
+  "full_network_complete": false
+}

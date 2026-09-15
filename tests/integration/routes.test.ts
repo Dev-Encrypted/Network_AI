@@ -44,6 +44,7 @@ import {
   splitByBps,
   MAX_AMOUNT,
   formatTU,
+  type GenerationProfile,
 } from "../../packages/contracts/src/index.js";
 const { Pool } = createRequire(
   new URL("../../apps/control-api/package.json", import.meta.url),
@@ -130,7 +131,12 @@ async function ready(id: string) {
     [id, randomUUID()],
   );
 }
-async function fixture(t: TestContext, shared = false, qualified = true) {
+async function fixture(
+  t: TestContext,
+  shared = false,
+  qualified = true,
+  generation?: GenerationProfile,
+) {
   const root = await member(),
     buyer = await member();
   await fund(buyer);
@@ -157,6 +163,7 @@ async function fixture(t: TestContext, shared = false, qualified = true) {
     description:
       "Fabricated reports for transactional tests; no model is executed",
     trust_policy: "private_lab",
+    ...(generation ? { generation_profile: generation } : {}),
   };
   await market.publish(root, manifest);
   await market.qualify(admin, modelId, {
@@ -307,6 +314,128 @@ async function balance(user: User) {
       .balance,
   );
 }
+
+const generationProfile: GenerationProfile = {
+  schema_version: 1,
+  adapter: "llama_cpp_b10964_jinja",
+  chat_template_sha256: hash("Synthetic contract template; no hardware claim"),
+  thinking: "disabled",
+};
+async function generationHeartbeat(id: string, generation?: GenerationProfile) {
+  const identity = (
+    await db.pool.query("SELECT boot_id,epoch FROM nodes WHERE id=$1", [id])
+  ).rows[0];
+  return nodes.heartbeat(id, {
+    boot_id: identity.boot_id,
+    epoch: Number(identity.epoch),
+    state: "READY",
+    loaded_backend_models: ["route-test-engine"],
+    running_sessions: [],
+    inventory: {
+      os: "contract-test",
+      gpu_name: null,
+      memory_total_mib: null,
+      memory_free_mib: null,
+      physical_domain_hint: "Synthetic readiness fixture",
+      ...(generation ? { generation_profile: generation } : {}),
+    },
+  });
+}
+test("generation-bound roots cannot offer capacity with missing or mismatched policy; RPC stages remain template-agnostic", async (t) => {
+  const f = await fixture(t, false, true, generationProfile);
+  for (const profile of [
+    undefined,
+    { ...generationProfile, thinking: "template_default" as const },
+    { ...generationProfile, chat_template_sha256: hash("different template") },
+  ]) {
+    assert.equal(
+      (await generationHeartbeat(f.parts[0].nodeId, profile)).state,
+      "VALIDATING",
+    );
+    assert.equal(
+      (
+        await db.pool.query(
+          "SELECT count(*)::int AS n FROM ready_execution_offers WHERE model_id=$1",
+          [f.modelId],
+        )
+      ).rows[0].n,
+      0,
+    );
+  }
+  for (const p of f.parts.slice(1))
+    assert.equal((await generationHeartbeat(p.nodeId)).state, "READY");
+  assert.equal(
+    (await generationHeartbeat(f.parts[0].nodeId, generationProfile)).state,
+    "READY",
+  );
+  assert.equal(
+    (
+      await db.pool.query(
+        "SELECT count(*)::int AS n FROM ready_execution_offers WHERE model_id=$1",
+        [f.modelId],
+      )
+    ).rows[0].n,
+    1,
+  );
+  const legacy = await fixture(t);
+  assert.equal(
+    (await generationHeartbeat(legacy.parts[0].nodeId)).state,
+    "READY",
+  );
+  assert.equal(
+    (await generationHeartbeat(legacy.parts[0].nodeId, generationProfile))
+      .state,
+    "VALIDATING",
+  );
+});
+
+test("frozen generation terms follow root prepare and execution authorizations without extending stage capabilities", async (t) => {
+  const f = await fixture(t, false, true, generationProfile);
+  await generationHeartbeat(f.parts[0].nodeId, generationProfile);
+  const s = await job(f),
+    a = await sessions.admit(s.id);
+  assert.equal(a.state, "PREPARING");
+  const payload = (token: string) =>
+    JSON.parse(Buffer.from(token.split(".")[1]!, "base64url").toString());
+  const frozen = (
+    await db.pool.query(
+      "SELECT q.manifest FROM quotes q JOIN sessions s ON s.quote_id=q.id WHERE s.id=$1",
+      [s.id],
+    )
+  ).rows[0].manifest;
+  assert.deepEqual(frozen.generation_profile, generationProfile);
+  assert.deepEqual(payload(a.capability).generation_profile, generationProfile);
+  assert.equal(payload(a.capability).manifest_sha256, hash(canonical(frozen)));
+  for (const p of a.participants)
+    assert.deepEqual(
+      payload(p.capability).generation_profile,
+      p.role === "ROOT" ? generationProfile : undefined,
+    );
+  const execution = await sessions.authorize(s.id, {
+    prepare_id: f.parts[0].prepare,
+    participants: f.parts
+      .slice(1)
+      .map((p) => ({ node_id: p.nodeId, prepare_id: p.prepare })),
+  });
+  assert.deepEqual(
+    payload(execution.capability).generation_profile,
+    generationProfile,
+  );
+  for (const p of execution.participants!) {
+    assert.equal(payload(p.capability).generation_profile, undefined);
+    assert.equal(payload(p.finish_capability).generation_profile, undefined);
+    assert.equal(
+      payload(p.capability).manifest_sha256,
+      payload(a.capability).manifest_sha256,
+    );
+  }
+  await assert.rejects(() =>
+    owner.query(
+      "UPDATE models SET manifest=jsonb_set(manifest,'{generation_profile,thinking}','\"template_default\"') WHERE id=$1",
+      [f.modelId],
+    ),
+  );
+});
 
 test("route terms require every provider, reject edits and keep committed membership fixed", async (t) => {
   const f = await fixture(t, false, false);

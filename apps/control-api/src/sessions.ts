@@ -212,6 +212,10 @@ export class Sessions {
       max_output_tokens: quote.max_output_tokens,
       max_context_tokens: manifest.max_context_tokens,
       max_input_bytes: manifest.max_input_bytes,
+      ...(manifest.generation_profile &&
+      (scope === "prepare" || scope === "execute")
+        ? { generation_profile: manifest.generation_profile }
+        : {}),
       prepare_id: scope.endsWith("prepare") ? null : session.prepare_id,
       exp: Math.floor(new Date(session.execution_deadline).getTime() / 1000),
       ...(session.coverage_lease_id

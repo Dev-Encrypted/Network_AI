@@ -74,10 +74,13 @@ Route bodies and their lifecycle are detailed in the [complete-route guide](COMP
 | `input_rate_microtu`, `output_rate_microtu`, `rate_denominator` | Integer price fields |
 | `description` | Operator-provided profile explanation |
 | `execution_profile` | Optional immutable b10964 RPC profile: CPU/CUDA stage types, placement weights, observed buffer budgets and reserves, worker threads, context, batch, transport and one slot |
+| `generation_profile` | Optional immutable generation adapter, exact template SHA-256 and `disabled` / `template_default` thinking mode; checked in root readiness and signed authorization |
 
 Amount fields are decimal strings to preserve integer precision. A recorded hash is not independent proof that an unknown backend loaded the claimed model. Administrator qualification supplies the current private trust decision.
 
 The optional execution profile's context must match `max_context_tokens`. It is part of the canonical manifest hash, so a changed placement needs a new model identifier and fresh route consent. Migration 010 denies definition/hash updates and deletion to the application role while permitting qualification state and note updates; a trigger also protects definitions from ordinary owner-role writes. Existing model definitions are preserved. See the [device profile guide](HETEROGENEOUS_CONTRIBUTORS.md) for the exact recipe and memory limits.
+
+The optional generation profile is also part of that immutable hash. Root/inference heartbeats report it in `inventory.generation_profile`; the coordinator keeps missing or mismatched profiles in `VALIDATING`. Root prepare/execute capabilities carry the frozen profile, and the root checks both local equality and the backend's exact template before generation. RPC stages retain their existing scopes and full manifest binding. See [generation profiles](GENERATION_PROFILES.md) for the schema, compatibility rules and trusted-engine limitations. Client chat requests cannot override these offer terms.
 
 ## Inference endpoint
 

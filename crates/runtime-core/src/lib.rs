@@ -14,6 +14,8 @@ use std::{
     path::Path,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
+mod generation;
+pub use generation::GenerationProfile;
 
 #[derive(Clone, Deserialize)]
 pub struct Config {
@@ -32,6 +34,8 @@ pub struct Config {
     pub backend_api_key: String,
     pub backend_model: String,
     pub backend_kind: String,
+    #[serde(default)]
+    pub generation_profile: Option<GenerationProfile>,
     pub state_dir: String,
     pub web_origin: String,
 }
@@ -40,6 +44,13 @@ impl Config {
         let path = std::env::var("NETWORK_AI_CONFIG")?;
         let value: Self = serde_json::from_slice(&std::fs::read(path)?)?;
         anyhow::ensure!(value.mode == "private_lab", "Only private_lab is supported");
+        if let Some(profile) = &value.generation_profile {
+            profile.validate()?;
+            anyhow::ensure!(
+                value.backend_kind == "openai",
+                "Generation profile requires the explicit local OpenAI-compatible adapter"
+            );
+        }
         let url = reqwest::Url::parse(&value.backend_url)?;
         anyhow::ensure!(
             url.scheme() == "http"
@@ -214,6 +225,8 @@ pub struct Capability {
     pub max_output_tokens: u32,
     pub max_context_tokens: u32,
     pub max_input_bytes: usize,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub generation_profile: Option<GenerationProfile>,
     pub prepare_id: Option<String>,
     pub exp: u64,
 }
@@ -259,6 +272,9 @@ pub fn verify_cap(token: &str, public_key: &str) -> Result<Capability> {
         || cap.aud != "network-ai-node"
     {
         return Err(invalid());
+    }
+    if let Some(profile) = &cap.generation_profile {
+        profile.validate().map_err(|_| invalid())?;
     }
     Ok(cap)
 }

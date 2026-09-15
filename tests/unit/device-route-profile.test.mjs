@@ -3,6 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { validateDeviceRecipe } from "../../scripts/device-route-profile.mjs";
+import { generationProfileSchema } from "../../packages/contracts/dist/index.js";
 async function recipe() {
   const text = await readFile(
     new URL("../../examples/device-route.windows.json", import.meta.url),
@@ -69,4 +70,27 @@ test("the mixed recipe binds published placement while keeping payment shares in
     mutate(changed);
     assert.throws(() => validateDeviceRecipe(changed));
   }
+});
+
+test("a device recipe preserves explicit generation terms and rejects unreviewed backend options", async () => {
+  const value = await recipe();
+  const generation = {
+    schema_version: 1,
+    adapter: "llama_cpp_b10964_jinja",
+    thinking: "disabled",
+    chat_template_sha256: "a".repeat(64),
+  };
+  value.model.generation_profile = generation;
+  assert.deepEqual(
+    validateDeviceRecipe(value).model.generation_profile,
+    generation,
+  );
+  for (const changed of [
+    { ...generation, schema_version: 2 },
+    { ...generation, adapter: "arbitrary_engine" },
+    { ...generation, thinking: "auto" },
+    { ...generation, chat_template_sha256: "A".repeat(64) },
+    { ...generation, tools: [] },
+  ])
+    assert.equal(generationProfileSchema.safeParse(changed).success, false);
 });

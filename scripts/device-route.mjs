@@ -523,6 +523,9 @@ export async function installDeviceRoute(file) {
       backend_api_key: engineKey,
       backend_model: recipe.model.backend_model,
       backend_kind: "openai",
+      ...(recipe.model.generation_profile
+        ? { generation_profile: recipe.model.generation_profile }
+        : {}),
       state_dir: rootDir,
       web_origin: c.web_origin,
     });

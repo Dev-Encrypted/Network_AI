@@ -29,6 +29,8 @@ use std::{
 use tokio::sync::{Mutex, OwnedSemaphorePermit, Semaphore, mpsc};
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_util::sync::CancellationToken;
+#[cfg(test)]
+mod tests;
 
 struct Prepared {
     id: String,
@@ -95,6 +97,7 @@ impl App {
             || cap.epoch != self.epoch.load(Ordering::SeqCst)
             || cap.backend_model != self.config.backend_model
             || cap.scope != scope
+            || cap.generation_profile != self.config.generation_profile
         {
             return Err(Error(
                 StatusCode::UNAUTHORIZED,
@@ -105,6 +108,7 @@ impl App {
         Ok(cap)
     }
     async fn loaded(&self) -> anyhow::Result<Vec<String>> {
+        self.verify_generation_profile().await?;
         // LM Studio's OpenAI catalog also lists unloaded weights. Read actual loaded instances.
         let endpoint = if self.config.backend_kind == "lmstudio" {
             "/api/v1/models"
@@ -145,6 +149,28 @@ impl App {
         names.truncate(32);
         Ok(names)
     }
+    async fn verify_generation_profile(&self) -> anyhow::Result<()> {
+        let Some(profile) = &self.config.generation_profile else {
+            return Ok(());
+        };
+        let mut response = self
+            .http
+            .get(format!("{}/props", self.config.backend_url))
+            .bearer_auth(&self.config.backend_api_key)
+            .timeout(Duration::from_secs(4))
+            .send()
+            .await?
+            .error_for_status()?;
+        let mut bytes = Vec::new();
+        while let Some(chunk) = response.chunk().await? {
+            anyhow::ensure!(
+                bytes.len() + chunk.len() <= 1024 * 1024,
+                "Backend properties exceed the bounded profile response"
+            );
+            bytes.extend_from_slice(&chunk);
+        }
+        profile.verify_template(&serde_json::from_slice(&bytes)?)
+    }
     async fn heartbeat(&self) -> anyhow::Result<()> {
         self.prepared.lock().await.retain(|_, p| p.until >= now());
         let loaded = self.loaded().await.unwrap_or_default();
@@ -162,8 +188,12 @@ impl App {
         } else {
             Vec::new()
         };
+        let mut inventory = self.inventory.clone();
+        if let Some(profile) = &self.config.generation_profile {
+            inventory["generation_profile"] = serde_json::to_value(profile)?;
+        }
         let response=self.signed("/heartbeat",&json!({"boot_id":self.boot,"epoch":self.epoch.load(Ordering::SeqCst),
-            "state":if ready{"READY"}else{"VALIDATING"},"loaded_backend_models":advertised,"running_sessions":running,"inventory":self.inventory})).await?;
+            "state":if ready{"READY"}else{"VALIDATING"},"loaded_backend_models":advertised,"running_sessions":running,"inventory":inventory})).await?;
         self.ready.store(
             ready && response["desired_state"] == "READY" && response["state"] == "READY",
             Ordering::SeqCst,
@@ -316,12 +346,17 @@ async fn engine(
     tx: &mpsc::Sender<std::result::Result<Bytes, Infallible>>,
     meter: &mut Meter,
 ) -> anyhow::Result<()> {
+    // Recheck immediately before inference as well as during readiness. A
+    // changed template after admission must fail/refund through the normal path.
+    app.verify_generation_profile().await?;
     let mut request = serde_json::to_value(chat)?;
     request["model"] = json!(app.config.backend_model);
     request["stream"] = json!(true);
     request["stream_options"] = json!({"include_usage":true});
     // A local, explicit operator profile. This does not enable arbitrary extra client parameters.
-    if app.config.backend_kind == "lmstudio" {
+    if let Some(profile) = &app.config.generation_profile {
+        profile.apply(&mut request);
+    } else if app.config.backend_kind == "lmstudio" {
         request["chat_template_kwargs"] = json!({"enable_thinking":false});
     }
     let backend_request = app

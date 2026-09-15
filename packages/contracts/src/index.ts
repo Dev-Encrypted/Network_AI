@@ -55,6 +55,16 @@ export const executionProfileSchema = z
   })
   .strict();
 
+export const generationProfileSchema = z
+  .object({
+    schema_version: z.literal(1),
+    adapter: z.literal("llama_cpp_b10964_jinja"),
+    chat_template_sha256: sha256,
+    thinking: z.enum(["template_default", "disabled"]),
+  })
+  .strict();
+export type GenerationProfile = z.infer<typeof generationProfileSchema>;
+
 export const modelManifestSchema = z
   .object({
     schema_version: z.literal(1),
@@ -78,6 +88,7 @@ export const modelManifestSchema = z
     description: z.string().max(1000),
     trust_policy: z.literal("private_lab"),
     execution_profile: executionProfileSchema.optional(),
+    generation_profile: generationProfileSchema.optional(),
   })
   .strict()
   .refine(
@@ -168,6 +179,7 @@ export const heartbeatSchema = z
         memory_total_mib: z.number().int().nonnegative().nullable(),
         memory_free_mib: z.number().int().nonnegative().nullable(),
         physical_domain_hint: z.string().max(100),
+        generation_profile: generationProfileSchema.optional(),
       })
       .strict(),
   })

@@ -4,6 +4,7 @@ import { config, runtime, protectDirectory } from "./lab.mjs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { createRequire } from "node:module";
+import { generationProfileSchema } from "../packages/contracts/dist/index.js";
 const { z } = createRequire(
   new URL("../apps/control-api/package.json", import.meta.url),
 )("zod");
@@ -18,7 +19,7 @@ const args = Object.fromEntries(
 );
 if (!args["--invite-file"] || !args["--backend-model"] || !args["--port"])
   throw new Error(
-    "Use --invite-file PATH --backend-model MODEL --port 43104 [--backend-url http://127.0.0.1:1235] [--backend-kind lmstudio|openai]",
+    "Use --invite-file PATH --backend-model MODEL --port 43104 [--backend-url http://127.0.0.1:1235] [--backend-kind lmstudio|openai] [--generation-profile-file PATH]",
   );
 const invitation = z
   .object({
@@ -56,6 +57,17 @@ if (
 const kind = z
   .enum(["lmstudio", "openai"])
   .parse(args["--backend-kind"] ?? "lmstudio");
+const generation = args["--generation-profile-file"]
+  ? generationProfileSchema.parse(
+      JSON.parse(
+        await readFile(resolve(args["--generation-profile-file"]), "utf8"),
+      ),
+    )
+  : undefined;
+if (generation && kind !== "openai")
+  throw new Error(
+    "An explicit generation profile requires --backend-kind openai",
+  );
 // New invitations are portable. Legacy invitations still work in the coordinator checkout.
 const c = invitation.operator ?? (await config());
 const directory = args["--directory"]
@@ -81,6 +93,7 @@ const value = {
     : "",
   backend_model: args["--backend-model"],
   backend_kind: kind,
+  ...(generation ? { generation_profile: generation } : {}),
   state_dir: directory,
   web_origin: c.web_origin,
 };
